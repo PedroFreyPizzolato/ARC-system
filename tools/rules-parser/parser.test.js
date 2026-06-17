@@ -21,6 +21,12 @@ test('normalizeAction marca known=false para valor desconhecido', () => {
   assert.equal(normalizeAction('teleporte mágico').known, false);
 });
 
+test('normalizeAction tolera + sem espaços e ação com barra', () => {
+  assert.deepEqual(normalizeAction('reação+bônus'), { value: 'Reação+Bônus', known: true });
+  assert.deepEqual(normalizeAction('reação+movimento'), { value: 'Movimento+Reação', known: true });
+  assert.deepEqual(normalizeAction('padrão / completa'), { value: 'Padrão', known: true });
+});
+
 test('normalizeCost troca seta por + e preserva o resto', () => {
   assert.equal(normalizeCost('5S'), '5S');
   assert.equal(normalizeCost('1S -> 8S'), '1S+8S');
@@ -137,6 +143,34 @@ test('parseClasses emite warning para skill malformada dentro de classe', () => 
   const { warnings } = parseClasses(bad);
   assert.equal(warnings.length, 1);
   assert.match(warnings[0], /Combatente/);
+});
+
+const { parseSubattrs } = require('./parser');
+const { SAMPLE_SUBATTR } = require('./fixtures');
+
+test('parseSubattrs: extrai skills por subatributo (Corpo/Mente/Alma)', () => {
+  const { subattrs } = parseSubattrs(SAMPLE_SUBATTR);
+  assert.equal(subattrs.forca.length, 3);
+  assert.equal(subattrs.forca[0].name, 'Golpe Fortalecido');
+  assert.equal(subattrs.forca[1].action, 'Reação');
+  assert.equal(subattrs.vigor.length, 1);
+  assert.equal(subattrs.conexao.length, 1);
+  assert.equal(subattrs.conexao[0].name, 'Vínculo Astral');
+});
+
+test('parseSubattrs: marca lb e prefixa [LB] após "Limit break"', () => {
+  const { subattrs } = parseSubattrs(SAMPLE_SUBATTR);
+  const pf = subattrs.forca[2];
+  assert.equal(pf.name, 'Ponto Fraco');
+  assert.equal(pf.lb, true);
+  assert.ok(pf.desc.startsWith('[LB] '));
+  assert.equal(subattrs.forca[0].lb, undefined); // skill normal não tem lb
+});
+
+test('parseSubattrs: ignora texto narrativo da Alma e não cria subatributo fantasma', () => {
+  const { subattrs, warnings } = parseSubattrs(SAMPLE_SUBATTR);
+  assert.deepEqual(Object.keys(subattrs).sort(), ['conexao', 'forca', 'vigor']);
+  assert.equal(warnings.length, 0);
 });
 
 const { diffClasses } = require('./parser');

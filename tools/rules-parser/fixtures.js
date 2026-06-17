@@ -29,4 +29,25 @@ const SAMPLE = [
   N('Por 3 rodadas você fica imóvel e ganha 90% de redução.'),
 ];
 
-module.exports = { SAMPLE };
+// Recorte real da seção "# Atributos" (subatributos = parágrafos em negrito; skills em listas
+// com prefixo "Nível N —"; "Limit break" marca lb; a Alma tem texto narrativo a ignorar).
+const SAMPLE_SUBATTR = [
+  H1('Atributos'),
+  N('Nível 0 você começa com 0 pontos em todos os atributos e tem 1 ponto para distribuir'),
+  H2('Corpo'),
+  N('Força'),
+  N('Nível 1 — Golpe Fortalecido (passiva): você ganha +2 no dano e +1 no acerto'),
+  N('Nível 2 — Golpe Adicional (reação) [2S]: ataca novamente com desvantagem'),
+  N('Limit break'),
+  N('Nível 8 — Ponto Fraco (completa) [4S]: crítico automático +50% dano'),
+  N('Vigor'),
+  N('Nível 1 — Vitalidade Extra (passiva): +1d4 de vida por nível'),
+  H2('Alma'),
+  N('Mundo Astral'),
+  N('Você pode gastar uma ação completa para entrar no mundo astral, deixando o corpo no local.'),
+  N('1 - Por 2 rodadas o alvo se sente tonto, todos os testes com -4.'),
+  N('Conexão'),
+  N('Nível 1 — Vínculo Astral (passiva): ao errar um ataque, pode rerolar o teste'),
+];
+
+module.exports = { SAMPLE, SAMPLE_SUBATTR };

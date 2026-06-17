@@ -4,7 +4,7 @@
 //
 // Uso: node tools/rules-parser/verify-doc.js <caminho-do-doc-extraido.md>
 const fs = require('fs');
-const { parseClasses } = require('./parser');
+const { parseClasses, parseSubattrs } = require('./parser');
 
 const path = process.argv[2];
 if (!path) { console.error('uso: node verify-doc.js <arquivo.md>'); process.exit(1); }
@@ -35,5 +35,14 @@ for (const n of names) {
   const c = classes[n];
   console.log(`  - ${n} [${c.type}${c.natureza ? '/' + c.natureza : ''}] skills=${c.skills.length} ult=${c.ultimate ? c.ultimate.name : 'NENHUMA'}`);
 }
-console.log('\nAvisos:', warnings.length);
+console.log('\nAvisos (classes):', warnings.length);
 warnings.forEach((w) => console.log('  ' + w));
+
+const sub = parseSubattrs(paras);
+console.log('\nSubatributos extraídos:', Object.keys(sub.subattrs).length, '(esperado 8)');
+for (const k of Object.keys(sub.subattrs)) {
+  const lst = sub.subattrs[k];
+  console.log(`  - ${k}: ${lst.length} skills (${lst.filter((s) => s.lb).length} LB)`);
+}
+console.log('Avisos (subattr):', sub.warnings.length);
+sub.warnings.forEach((w) => console.log('  ' + w));

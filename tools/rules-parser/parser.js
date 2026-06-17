@@ -9,7 +9,8 @@ const ACTION_MAP = {
 
 function normalizeAction(raw) {
   if (!raw) return { value: 'Especial', known: false };
-  const base = String(raw).split('->')[0].toLowerCase().replace(/\s+/g, ' ').trim();
+  const base = String(raw).split('->')[0].split('/')[0]
+    .toLowerCase().replace(/\s*\+\s*/g, ' + ').replace(/\s+/g, ' ').trim();
   if (ACTION_MAP[base]) return { value: ACTION_MAP[base], known: true };
   return { value: String(raw).trim(), known: false };
 }
@@ -123,6 +124,45 @@ function parseClasses(paragraphs) {
   return { classes, warnings };
 }
 
+const SUBATTR_KEYS = ['forca', 'vigor', 'agilidade', 'habilidade', 'sincronia', 'intelecto', 'conexao', 'entendimento'];
+function _subKey(text) {
+  const t = String(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+  return SUBATTR_KEYS.indexOf(t) >= 0 ? t : null;
+}
+const NIVEL_RE = /^n[íi]vel\s+\d+\s*[—–-]\s*(.+)$/i;
+
+// Skills de subatributo: seção "# Atributos", subatributos como parágrafos (nome conhecido),
+// skills em listas com prefixo "Nível N —", "Limit break" marca lb.
+function parseSubattrs(paragraphs) {
+  const subattrs = {};
+  const warnings = [];
+  let inAttrs = false, currentSub = null, lbMode = false;
+  for (const p of paragraphs) {
+    const heading = p.heading || 'NORMAL';
+    const t = String(p.text || '').trim();
+    if (heading === 'HEADING1') { inAttrs = /^atributos$/i.test(t); currentSub = null; lbMode = false; continue; }
+    if (!inAttrs) continue;
+    if (heading === 'HEADING2') { currentSub = null; lbMode = false; continue; }
+    if (!t) continue;
+    const sub = _subKey(t);
+    if (sub) { currentSub = sub; lbMode = false; if (!subattrs[sub]) subattrs[sub] = []; continue; }
+    if (/^limit\s*break$/i.test(t)) { lbMode = true; continue; }
+    const m = t.match(NIVEL_RE);
+    if (m && currentSub) {
+      const sk = parseSkillLine(m[1]);
+      if (sk) {
+        const skill = { name: sk.name, action: sk.action, cost: sk.cost, desc: sk.desc };
+        if (lbMode) { skill.lb = true; skill.desc = '[LB] ' + skill.desc; }
+        if (!sk.actionKnown) warnings.push('Subatributo "' + currentSub + '": ação não reconhecida em "' + sk.name + '"');
+        subattrs[currentSub].push(skill);
+      } else {
+        warnings.push('Subatributo "' + currentSub + '": linha não reconhecida → "' + t.slice(0, 70) + '"');
+      }
+    }
+  }
+  return { subattrs: subattrs, warnings: warnings };
+}
+
 function _fmtSkill(s) {
   return s.name + ' (' + s.action + (s.cost ? ' ' + s.cost : '') + '): ' + (s.desc || '');
 }
@@ -171,4 +211,4 @@ function diffClasses(oldC, newC) {
   return { hasChanges: rows.length > 0, rows: rows };
 }
 
-module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses, diffClasses };
+module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses, diffClasses, parseSubattrs };
