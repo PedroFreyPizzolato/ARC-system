@@ -15,10 +15,16 @@ offline para os dados embutidos.
    *"O Google não verificou este app"* → **Avançado → Acessar (não seguro)**. É normal para
    um script pessoal seu.
 
-## 2. Regras do Firebase (uma vez)
+## 2. Regras do Firebase (uma vez) — OBRIGATÓRIO
+
+> ⚠️ **Verificado em 2026-06-16:** hoje a leitura anônima do banco retorna **401 Permission
+> denied** (tanto em `arc_rules` quanto em `arc_campaigns`). Isso indica regras restritivas —
+> provavelmente as regras de "modo de teste" do Firebase, que **expiram após ~30 dias**. Se for
+> isso, a **sincronização de fichas (GM↔jogador) também já parou de funcionar**. Ajustar as
+> regras abaixo conserta os dois de uma vez. Sem este passo, o loader do ARC não consegue ler.
 
 No [console do Firebase](https://console.firebase.google.com/) → projeto **intitulations** →
-**Realtime Database → Regras**, garanta que `arc_rules` seja legível (o ARC lê anônimo):
+**Realtime Database → Regras**, deixe assim (o ARC lê anônimo):
 
 ```json
 {
