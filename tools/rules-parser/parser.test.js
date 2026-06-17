@@ -62,3 +62,37 @@ test('parseSkillLine: descrição com dois-pontos interno fica intacta', () => {
 test('parseSkillLine: linha malformada (travessão, sem dois-pontos) retorna null', () => {
   assert.equal(parseSkillLine('Aceleração Tática – (5S) Próximo turno todas as ações dobradas'), null);
 });
+
+const { parseUltimateHeader } = require('./parser');
+
+test('ultimate com limite e ação explícita (sem custo)', () => {
+  const r = parseUltimateHeader('"Espírito Indomável" (1x por cena) (passiva):');
+  assert.equal(r.name, 'Espírito Indomável');
+  assert.equal(r.limit, '1x por cena');
+  assert.equal(r.action, 'Passiva');
+  assert.equal(r.cost, null);
+});
+
+test('ultimate com limite e custo em colchetes, ação implícita = Especial', () => {
+  const r = parseUltimateHeader('"Tempestade de Aço" (1x por luta) [20S]:');
+  assert.equal(r.name, 'Tempestade de Aço');
+  assert.equal(r.limit, '1x por luta');
+  assert.equal(r.cost, '20S');
+  assert.equal(r.action, 'Especial');
+});
+
+test('ultimate com custo em parênteses', () => {
+  const r = parseUltimateHeader('"Bastião" (1x por luta) (15S):');
+  assert.equal(r.cost, '15S');
+  assert.equal(r.limit, '1x por luta');
+});
+
+test('ultimate com custo multiplicador X*3S', () => {
+  const r = parseUltimateHeader('"Fim do Combate" (1x por missão) (X*3S):');
+  assert.equal(r.cost, 'X*3S');
+  assert.equal(r.limit, '1x por missão');
+});
+
+test('linha sem aspas não é ultimate', () => {
+  assert.equal(parseUltimateHeader('Foco no Alvo (passiva): +1 de dano'), null);
+});

@@ -36,4 +36,25 @@ function parseSkillLine(text) {
   };
 }
 
-module.exports = { normalizeAction, normalizeCost, parseSkillLine };
+const QUOTES = '"“”\'‘’';
+const NAME_RE = new RegExp('^\\s*[' + QUOTES + ']([^' + QUOTES + ']+)[' + QUOTES + ']');
+
+function parseUltimateHeader(text) {
+  const t = String(text || '').trim();
+  const nm = t.match(NAME_RE);
+  if (!nm) return null;
+  const name = nm[1].trim();
+  const rest = t.slice(nm[0].length);
+  const groups = (rest.match(/\(([^)]*)\)|\[([^\]]*)\]/g) || [])
+    .map(g => g.replace(/^[([]|[)\]]$/g, '').trim())
+    .filter(Boolean);
+  let limit = null, cost = null, action = null;
+  for (const g of groups) {
+    if (/por\s+(luta|cena|miss|rodada)|x\s*por|vez/i.test(g)) { limit = g; }
+    else if (/\d\s*s/i.test(g) || /x\s*\*/i.test(g)) { cost = normalizeCost(g); }
+    else { action = normalizeAction(g).value; }
+  }
+  return { name, action: action || 'Especial', cost: cost, limit: limit };
+}
+
+module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader };
