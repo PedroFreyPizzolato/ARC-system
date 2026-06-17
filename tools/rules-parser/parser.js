@@ -139,24 +139,28 @@ function parseSubattrs(paragraphs) {
   let inAttrs = false, currentSub = null, lbMode = false;
   for (const p of paragraphs) {
     const heading = p.heading || 'NORMAL';
-    const t = String(p.text || '').trim();
-    if (heading === 'HEADING1') { inAttrs = /^atributos$/i.test(t); currentSub = null; lbMode = false; continue; }
+    const full = String(p.text || '');
+    if (heading === 'HEADING1') { inAttrs = /^atributos$/i.test(full.trim()); currentSub = null; lbMode = false; continue; }
     if (!inAttrs) continue;
     if (heading === 'HEADING2') { currentSub = null; lbMode = false; continue; }
-    if (!t) continue;
-    const sub = _subKey(t);
-    if (sub) { currentSub = sub; lbMode = false; if (!subattrs[sub]) subattrs[sub] = []; continue; }
-    if (/^limit\s*break$/i.test(t)) { lbMode = true; continue; }
-    const m = t.match(NIVEL_RE);
-    if (m && currentSub) {
-      const sk = parseSkillLine(m[1]);
-      if (sk) {
-        const skill = { name: sk.name, action: sk.action, cost: sk.cost, desc: sk.desc };
-        if (lbMode) { skill.lb = true; skill.desc = '[LB] ' + skill.desc; }
-        if (!sk.actionKnown) warnings.push('Subatributo "' + currentSub + '": ação não reconhecida em "' + sk.name + '"');
-        subattrs[currentSub].push(skill);
-      } else {
-        warnings.push('Subatributo "' + currentSub + '": linha não reconhecida → "' + t.slice(0, 70) + '"');
+    // um item pode conter várias linhas (quebra de linha interna no Doc) — processa cada uma
+    for (const raw of full.split(/\r?\n/)) {
+      const t = raw.trim();
+      if (!t) continue;
+      const sub = _subKey(t);
+      if (sub) { currentSub = sub; lbMode = false; if (!subattrs[sub]) subattrs[sub] = []; continue; }
+      if (/^limit\s*break$/i.test(t)) { lbMode = true; continue; }
+      const m = t.match(NIVEL_RE);
+      if (m && currentSub) {
+        const sk = parseSkillLine(m[1]);
+        if (sk) {
+          const skill = { name: sk.name, action: sk.action, cost: sk.cost, desc: sk.desc };
+          if (lbMode) { skill.lb = true; skill.desc = '[LB] ' + skill.desc; }
+          if (!sk.actionKnown) warnings.push('Subatributo "' + currentSub + '": ação não reconhecida em "' + sk.name + '"');
+          subattrs[currentSub].push(skill);
+        } else {
+          warnings.push('Subatributo "' + currentSub + '": linha não reconhecida → "' + t.slice(0, 70) + '"');
+        }
       }
     }
   }

@@ -167,6 +167,19 @@ test('parseSubattrs: marca lb e prefixa [LB] após "Limit break"', () => {
   assert.equal(subattrs.forca[0].lb, undefined); // skill normal não tem lb
 });
 
+test('parseSubattrs: item com 2 skills na mesma string (quebra de linha interna) extrai ambas', () => {
+  const paras = [
+    { heading: 'HEADING1', text: 'Atributos' },
+    { heading: 'HEADING2', text: 'Corpo' },
+    { heading: 'NORMAL', text: 'Agilidade' },
+    { heading: 'NORMAL', text: 'Nível 2 — Passo Ágil (passiva): desloca +1\nNível 3 — Ímpeto (livre) [2S]: ação bônus' },
+  ];
+  const { subattrs } = parseSubattrs(paras);
+  assert.equal(subattrs.agilidade.length, 2);
+  assert.equal(subattrs.agilidade[0].name, 'Passo Ágil');
+  assert.equal(subattrs.agilidade[1].name, 'Ímpeto');
+});
+
 test('parseSubattrs: ignora texto narrativo da Alma e não cria subatributo fantasma', () => {
   const { subattrs, warnings } = parseSubattrs(SAMPLE_SUBATTR);
   assert.deepEqual(Object.keys(subattrs).sort(), ['conexao', 'forca', 'vigor']);
