@@ -34,4 +34,16 @@ custo é **`especial`** — troque se você souber a ação certa (ex.: `padrão
 3. Se tinha uma **ação** (ex.: `(passiva)`), mantenha `(passiva)`.
 4. Colocar **`:`** logo após o `)` (ou após o `]`), antes da descrição.
 
-Depois disso, **Ponte ARC → Pré-visualizar** deve mostrar **14 classes** e **0 avisos**.
+## Subatributos (V2) — 1 linha
+
+Uma skill de subatributo não tem `(ação)` entre parênteses (só o `[colchete]`):
+
+| Antes (no Doc, em **Mente → Habilidade → Limit break**) | Depois |
+|---|---|
+| **Grande Artífice [1x por arco]:** Você pode escolher 1 arma... | **Grande Artífice (especial) [1x por arco]:** Você pode escolher 1 arma... |
+
+(troque `especial` pela ação real, se houver.)
+
+---
+
+Depois disso, **Ponte ARC → Pré-visualizar** deve mostrar **14 classes**, **8 subatributos** e **0 avisos**.

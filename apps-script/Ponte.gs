@@ -1,8 +1,8 @@
 // ============================================================================
 // Ponte ARC — Google Apps Script
 // Cole este arquivo no editor de Apps Script do Doc "Sistema Intitulados"
-// (Extensões > Apps Script). Adiciona o menu "Ponte ARC" para pré-visualizar e
-// publicar as Classes no Firebase, de onde o ARC_System_V2.html lê.
+// (Extensões > Apps Script). Menu "Ponte ARC" para pré-visualizar e publicar
+// Classes + Habilidades de subatributo no Firebase, de onde o ARC lê.
 //
 // As funções puras abaixo são CÓPIA FIEL de tools/rules-parser/parser.js
 // (a fonte de verdade, coberta por testes). Se mudar uma, mude nas duas.
@@ -20,7 +20,8 @@ const ACTION_MAP = {
 
 function normalizeAction(raw) {
   if (!raw) return { value: 'Especial', known: false };
-  const base = String(raw).split('->')[0].toLowerCase().replace(/\s+/g, ' ').trim();
+  const base = String(raw).split('->')[0].split('/')[0]
+    .toLowerCase().replace(/\s*\+\s*/g, ' + ').replace(/\s+/g, ' ').trim();
   if (ACTION_MAP[base]) return { value: ACTION_MAP[base], known: true };
   return { value: String(raw).trim(), known: false };
 }
@@ -131,7 +132,46 @@ function parseClasses(paragraphs) {
       warnings.push('Classe "' + currentClass + '": linha não reconhecida → "' + t.slice(0, 70) + '"');
     }
   }
-  return { classes: classes, warnings: warnings };
+  return { classes, warnings };
+}
+
+const SUBATTR_KEYS = ['forca', 'vigor', 'agilidade', 'habilidade', 'sincronia', 'intelecto', 'conexao', 'entendimento'];
+function _subKey(text) {
+  const t = String(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+  return SUBATTR_KEYS.indexOf(t) >= 0 ? t : null;
+}
+const NIVEL_RE = /^n[íi]vel\s+\d+\s*[—–-]\s*(.+)$/i;
+
+// Skills de subatributo: seção "# Atributos", subatributos como parágrafos (nome conhecido),
+// skills em listas com prefixo "Nível N —", "Limit break" marca lb.
+function parseSubattrs(paragraphs) {
+  const subattrs = {};
+  const warnings = [];
+  let inAttrs = false, currentSub = null, lbMode = false;
+  for (const p of paragraphs) {
+    const heading = p.heading || 'NORMAL';
+    const t = String(p.text || '').trim();
+    if (heading === 'HEADING1') { inAttrs = /^atributos$/i.test(t); currentSub = null; lbMode = false; continue; }
+    if (!inAttrs) continue;
+    if (heading === 'HEADING2') { currentSub = null; lbMode = false; continue; }
+    if (!t) continue;
+    const sub = _subKey(t);
+    if (sub) { currentSub = sub; lbMode = false; if (!subattrs[sub]) subattrs[sub] = []; continue; }
+    if (/^limit\s*break$/i.test(t)) { lbMode = true; continue; }
+    const m = t.match(NIVEL_RE);
+    if (m && currentSub) {
+      const sk = parseSkillLine(m[1]);
+      if (sk) {
+        const skill = { name: sk.name, action: sk.action, cost: sk.cost, desc: sk.desc };
+        if (lbMode) { skill.lb = true; skill.desc = '[LB] ' + skill.desc; }
+        if (!sk.actionKnown) warnings.push('Subatributo "' + currentSub + '": ação não reconhecida em "' + sk.name + '"');
+        subattrs[currentSub].push(skill);
+      } else {
+        warnings.push('Subatributo "' + currentSub + '": linha não reconhecida → "' + t.slice(0, 70) + '"');
+      }
+    }
+  }
+  return { subattrs: subattrs, warnings: warnings };
 }
 
 function _fmtSkill(s) {
@@ -149,6 +189,8 @@ function _cmpFields(prefix, a, b, fields, rows) {
     if (av !== bv) rows.push({ path: prefix + ' › ' + f, type: 'modified', old: av || '—', new: bv || '—' });
   });
 }
+
+// Compara dois objetos `classes` (antigo vs novo) e devolve linhas de diff lado a lado.
 function diffClasses(oldC, newC) {
   oldC = oldC || {};
   newC = newC || {};
@@ -192,18 +234,88 @@ function _headingName(h) {
   return 'NORMAL';
 }
 
+// Inclui PARAGRAPH e LIST_ITEM (as skills de subatributo estão em listas), na ordem do Doc.
 function coletarParagrafos() {
-  return DocumentApp.getActiveDocument().getBody().getParagraphs()
-    .map(function (p) { return { heading: _headingName(p.getHeading()), text: p.getText() }; });
+  const body = DocumentApp.getActiveDocument().getBody();
+  const ET = DocumentApp.ElementType;
+  const out = [];
+  const n = body.getNumChildren();
+  for (let i = 0; i < n; i++) {
+    const el = body.getChild(i);
+    const type = el.getType();
+    let p = null;
+    if (type === ET.PARAGRAPH) p = el.asParagraph();
+    else if (type === ET.LIST_ITEM) p = el.asListItem();
+    if (p) out.push({ heading: _headingName(p.getHeading()), text: p.getText() });
+  }
+  return out;
 }
 
 function construirArcRules() {
-  const r = parseClasses(coletarParagrafos());
+  const paras = coletarParagrafos();
+  const c = parseClasses(paras);
+  const s = parseSubattrs(paras);
   return {
-    rules: { _version: 1, _updatedAt: new Date().getTime(), classes: r.classes },
-    warnings: r.warnings,
-    count: Object.keys(r.classes).length,
+    rules: { _version: 1, _updatedAt: new Date().getTime(), classes: c.classes, subattrs: s.subattrs },
+    warnings: c.warnings.concat(s.warnings),
+    countClasses: Object.keys(c.classes).length,
+    countSubattrs: Object.keys(s.subattrs).length,
   };
+}
+
+function buscarRegrasAtuais() {
+  try {
+    const r = UrlFetchApp.fetch(FB_RULES_URL, { muteHttpExceptions: true });
+    if (r.getResponseCode() !== 200) return {};
+    return JSON.parse(r.getContentText() || 'null') || {};
+  } catch (e) { return {}; }
+}
+
+// Envelopa subattrs {chave:[skills]} como {chave:{skills,ultimate}} para reusar diffClasses.
+function _envelope(subattrs) {
+  const o = {};
+  Object.keys(subattrs || {}).forEach(function (k) { o[k] = { skills: subattrs[k], ultimate: null }; });
+  return o;
+}
+
+function _esc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function _diffSection(titulo, diff) {
+  if (!diff.hasChanges) return '<div class="hd">' + titulo + '</div><div class="nochg">✓ Sem mudanças.</div>';
+  let rows = '';
+  diff.rows.forEach(function (r) {
+    rows += '<tr class="path"><td colspan="2">' + _esc(r.path) + ' <span class="tag ' + r.type + '">' + r.type + '</span></td></tr>';
+    if (r.type === 'modified') rows += '<tr><td class="old">' + _esc(r.old) + '</td><td class="new">' + _esc(r.new) + '</td></tr>';
+    else if (r.type === 'class-added' || r.type === 'skill-added') rows += '<tr><td class="muted">—</td><td class="new">' + _esc(r.new) + '</td></tr>';
+    else rows += '<tr><td class="old">' + _esc(r.old) + '</td><td class="muted">—</td></tr>';
+  });
+  return '<div class="hd">' + titulo + ' (' + diff.rows.length + ')</div>'
+    + '<table><tr><th>Atual (Firebase)</th><th>Novo (Doc)</th></tr>' + rows + '</table>';
+}
+
+function _previewHtml(out, diffCls, diffSub) {
+  let head = '<div class="hd">Classes: <b>' + out.countClasses + '</b> (esperado 14) · Subatributos: <b>' + out.countSubattrs + '</b> (esperado 8)</div>';
+  if (out.warnings.length) {
+    head += '<div class="warn">⚠️ ' + out.warnings.length + ' aviso(s):<ul>';
+    out.warnings.forEach(function (w) { head += '<li>' + _esc(w) + '</li>'; });
+    head += '</ul></div>';
+  } else { head += '<div class="ok">✓ Nenhum aviso de leitura.</div>'; }
+  const css = '<style>'
+    + 'body{font:13px/1.45 system-ui,Arial,sans-serif;margin:0;padding:12px;color:#24292e}'
+    + '.hd{font-weight:600;margin:12px 0 6px}'
+    + '.ok{color:#22863a;margin:6px 0}.warn{color:#9a6700;margin:6px 0}.warn ul{margin:4px 0 0 18px}'
+    + '.nochg{color:#22863a;padding:8px;background:#f0fff4;border:1px solid #bef5cb;border-radius:6px}'
+    + 'table{border-collapse:collapse;width:100%;table-layout:fixed}'
+    + 'th,td{border:1px solid #e1e4e8;padding:6px 8px;vertical-align:top;text-align:left;width:50%;word-wrap:break-word;white-space:pre-wrap}'
+    + 'th{background:#f6f8fa}.path td{background:#f6f8fa;font-weight:600}'
+    + '.old{background:#ffeef0}.new{background:#e6ffed}.muted{color:#999}'
+    + '.tag{font-weight:400;font-size:11px;color:#fff;border-radius:3px;padding:1px 5px;margin-left:6px}'
+    + '.tag.modified{background:#9a6700}.tag.skill-added,.tag.class-added{background:#22863a}'
+    + '.tag.skill-removed,.tag.class-removed{background:#d73a49}'
+    + '</style>';
+  return css + head + _diffSection('Classes', diffCls) + _diffSection('Subatributos', diffSub);
 }
 
 function onOpen() {
@@ -214,78 +326,25 @@ function onOpen() {
     .addToUi();
 }
 
-// Lê o que JÁ está publicado no Firebase (para comparar). Devolve {} em qualquer falha.
-function buscarRegrasAtuais() {
-  try {
-    const r = UrlFetchApp.fetch(FB_RULES_URL, { muteHttpExceptions: true });
-    if (r.getResponseCode() !== 200) return {};
-    const d = JSON.parse(r.getContentText() || 'null');
-    return (d && d.classes) ? d.classes : {};
-  } catch (e) { return {}; }
-}
-
-function _esc(s) {
-  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-function _previewHtml(out, diff) {
-  let head = '<div class="hd">Classes lidas: <b>' + out.count + '</b> (esperado 14)</div>';
-  if (out.warnings.length) {
-    head += '<div class="warn">⚠️ ' + out.warnings.length + ' aviso(s):<ul>';
-    out.warnings.forEach(function (w) { head += '<li>' + _esc(w) + '</li>'; });
-    head += '</ul></div>';
-  } else {
-    head += '<div class="ok">✓ Nenhum aviso de leitura.</div>';
-  }
-  let body;
-  if (!diff.hasChanges) {
-    body = '<div class="nochg">✓ Nenhuma mudança em relação ao que já está publicado no Firebase.</div>';
-  } else {
-    let rows = '';
-    diff.rows.forEach(function (r) {
-      rows += '<tr class="path"><td colspan="2">' + _esc(r.path) + ' <span class="tag ' + r.type + '">' + r.type + '</span></td></tr>';
-      if (r.type === 'modified') {
-        rows += '<tr><td class="old">' + _esc(r.old) + '</td><td class="new">' + _esc(r.new) + '</td></tr>';
-      } else if (r.type === 'class-added' || r.type === 'skill-added') {
-        rows += '<tr><td class="muted">—</td><td class="new">' + _esc(r.new) + '</td></tr>';
-      } else {
-        rows += '<tr><td class="old">' + _esc(r.old) + '</td><td class="muted">—</td></tr>';
-      }
-    });
-    body = '<div class="hd">Mudanças desde a última publicação (' + diff.rows.length + '):</div>'
-      + '<table><tr><th>Atual (Firebase)</th><th>Novo (Doc)</th></tr>' + rows + '</table>';
-  }
-  const css = '<style>'
-    + 'body{font:13px/1.45 system-ui,Arial,sans-serif;margin:0;padding:12px;color:#24292e}'
-    + '.hd{font-weight:600;margin:10px 0 6px}'
-    + '.ok{color:#22863a;margin:6px 0}.warn{color:#9a6700;margin:6px 0}.warn ul{margin:4px 0 0 18px}'
-    + '.nochg{color:#22863a;padding:10px;background:#f0fff4;border:1px solid #bef5cb;border-radius:6px}'
-    + 'table{border-collapse:collapse;width:100%;table-layout:fixed}'
-    + 'th,td{border:1px solid #e1e4e8;padding:6px 8px;vertical-align:top;text-align:left;width:50%;word-wrap:break-word;white-space:pre-wrap}'
-    + 'th{background:#f6f8fa}.path td{background:#f6f8fa;font-weight:600}'
-    + '.old{background:#ffeef0}.new{background:#e6ffed}.muted{color:#999}'
-    + '.tag{font-weight:400;font-size:11px;color:#fff;border-radius:3px;padding:1px 5px;margin-left:6px}'
-    + '.tag.modified{background:#9a6700}.tag.skill-added,.tag.class-added{background:#22863a}'
-    + '.tag.skill-removed,.tag.class-removed{background:#d73a49}'
-    + '</style>';
-  return css + head + body;
-}
-
 function mostrarPreview() {
   const out = construirArcRules();
-  const diff = diffClasses(buscarRegrasAtuais(), out.rules.classes);
-  const html = HtmlService.createHtmlOutput(_previewHtml(out, diff)).setWidth(840).setHeight(580);
+  const atual = buscarRegrasAtuais();
+  const diffCls = diffClasses(atual.classes, out.rules.classes);
+  const diffSub = diffClasses(_envelope(atual.subattrs), _envelope(out.rules.subattrs));
+  const html = HtmlService.createHtmlOutput(_previewHtml(out, diffCls, diffSub)).setWidth(860).setHeight(600);
   DocumentApp.getUi().showModalDialog(html, 'Preview — Ponte ARC');
 }
 
 function publicar() {
   const ui = DocumentApp.getUi();
   const out = construirArcRules();
-  const diff = diffClasses(buscarRegrasAtuais(), out.rules.classes);
-  const resumo = diff.hasChanges ? (diff.rows.length + ' mudança(s)') : 'nenhuma mudança';
+  const atual = buscarRegrasAtuais();
+  const nMud = diffClasses(atual.classes, out.rules.classes).rows.length
+    + diffClasses(_envelope(atual.subattrs), _envelope(out.rules.subattrs)).rows.length;
   const aviso = out.warnings.length ? ('\n\n⚠️ ' + out.warnings.length + ' aviso(s)! Veja o Preview antes.') : '';
   const resp = ui.alert('Publicar no Firebase',
-    'Enviar ' + out.count + ' classes (' + resumo + ') para o ARC?\nUse "Pré-visualizar" para ver o diff lado a lado.' + aviso,
+    'Enviar ' + out.countClasses + ' classes + ' + out.countSubattrs + ' subatributos (' + nMud + ' mudança(s)) para o ARC?'
+    + '\nUse "Pré-visualizar" para ver o diff lado a lado.' + aviso,
     ui.ButtonSet.OK_CANCEL);
   if (resp !== ui.Button.OK) return;
   const r = UrlFetchApp.fetch(FB_RULES_URL, {
