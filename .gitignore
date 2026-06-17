@@ -1,0 +1,6 @@
+# Claude
+/docs/*
+!/docs/superpowers/
+.remember
+node_modules/
+*.log

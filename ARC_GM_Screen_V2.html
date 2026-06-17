@@ -1,0 +1,2837 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARC — PAINEL DO MESTRE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --blue: #00d4ff;
+      --purple: #7c3aed;
+      --purple-b: #a855f7;
+      --gold: #f59e0b;
+      --red: #ef4444;
+      --green: #10b981;
+      --orange: #f97316;
+      --pink: #ec4899;
+      --teal: #14b8a6;
+      --bg: #020408;
+      --bd: rgba(0, 212, 255, 0.15);
+      --bd-b: rgba(0, 212, 255, 0.4);
+      --txt: #e0f7ff;
+      --txt-d: rgba(224, 247, 255, 0.45);
+      --txt-lbl: rgba(0, 212, 255, 0.7);
+      --fs: 14px;
+      --fs-sm: 12px;
+      --fs-xs: 11px;
+      --hh: 52px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--txt);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: var(--fs)
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: var(--fs)
+    }
+
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image: linear-gradient(rgba(0, 212, 255, 0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 212, 255, 0.018) 1px, transparent 1px);
+      background-size: 44px 44px;
+      pointer-events: none
+    }
+
+    .bg-glow {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse 60% 40% at 10% 10%, rgba(124, 58, 237, 0.06) 0%, transparent 60%), radial-gradient(ellipse 50% 50% at 90% 90%, rgba(239, 68, 68, 0.04) 0%, transparent 60%)
+    }
+
+    .scanline {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 212, 255, 0.005) 2px, rgba(0, 212, 255, 0.005) 4px)
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--hh);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+      background: rgba(2, 4, 8, 0.96);
+      backdrop-filter: blur(12px)
+    }
+
+    .hdr-left {
+      display: flex;
+      align-items: center;
+      gap: 14px
+    }
+
+    .hdr-logo {
+      font-family: 'Orbitron', monospace;
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--red);
+      letter-spacing: 4px;
+      text-shadow: 0 0 18px rgba(239, 68, 68, 0.5)
+    }
+
+    .hdr-tag {
+      padding: 4px 12px;
+      border: 1px solid rgba(0, 212, 255, 0.25);
+      color: var(--blue);
+      font-family: 'Orbitron', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      background: rgba(0, 212, 255, 0.04)
+    }
+
+    .hdr-online {
+      display: flex;
+      align-items: center;
+      gap: 5px
+    }
+
+    .hdr-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s infinite
+    }
+
+    .hdr-online-txt {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--green);
+      letter-spacing: 2px
+    }
+
+    .hdr-right {
+      display: flex;
+      gap: 7px;
+      align-items: center
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .4
+      }
+    }
+
+    .app-shell {
+      position: fixed;
+      top: var(--hh);
+      left: 0;
+      right: 0;
+      bottom: 38px;
+      z-index: 1;
+      display: flex;
+      overflow: hidden
+    }
+
+    .icon-bar {
+      width: 44px;
+      flex-shrink: 0;
+      background: rgba(2, 4, 8, 0.85);
+      border-right: 1px solid rgba(239, 68, 68, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6px 0;
+      gap: 2px
+    }
+
+    .ic-btn {
+      width: 40px;
+      height: 46px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--txt-d);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      transition: all .15s
+    }
+
+    .ic-btn:hover {
+      color: var(--txt);
+      border-color: rgba(0, 212, 255, .18);
+      background: rgba(0, 212, 255, .03)
+    }
+
+    .ic-btn.on {
+      color: var(--red);
+      border-color: rgba(239, 68, 68, .32);
+      background: rgba(239, 68, 68, .06)
+    }
+
+    .ic-sym {
+      font-size: 14px;
+      line-height: 1
+    }
+
+    .ic-lbl {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 7px;
+      letter-spacing: 1px
+    }
+
+    .list-panel {
+      width: 268px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--bd);
+      background: rgba(2, 4, 8, 0.55);
+      overflow: hidden
+    }
+
+    .list-panel.gone {
+      display: none
+    }
+
+    .lp-hdr {
+      padding: 9px 12px 7px;
+      border-bottom: 1px solid var(--bd);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0
+    }
+
+    .lp-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--blue)
+    }
+
+    .lp-count {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: var(--txt-d)
+    }
+
+    .lp-search-wrap {
+      padding: 7px 7px 3px;
+      flex-shrink: 0
+    }
+
+    .lp-search {
+      width: 100%;
+      background: rgba(0, 212, 255, 0.04);
+      border: 1px solid var(--bd);
+      color: var(--txt);
+      padding: 5px 9px;
+      font-size: 11px;
+      font-family: 'Share Tech Mono', monospace;
+      outline: none;
+      letter-spacing: .5px
+    }
+
+    .lp-search:focus {
+      border-color: var(--blue)
+    }
+
+    .lp-search::placeholder {
+      color: var(--txt-d)
+    }
+
+    .lp-items {
+      flex: 1;
+      overflow-y: auto;
+      padding: 3px 7px
+    }
+
+    .lp-items::-webkit-scrollbar {
+      width: 3px
+    }
+
+    .lp-items::-webkit-scrollbar-thumb {
+      background: rgba(0, 212, 255, .12)
+    }
+
+    .lp-item {
+      padding: 8px 9px;
+      border: 1px solid transparent;
+      margin-bottom: 3px;
+      cursor: pointer;
+      transition: all .12s
+    }
+
+    .lp-item:hover {
+      background: rgba(0, 212, 255, .04);
+      border-color: var(--bd)
+    }
+
+    .lp-item.on {
+      background: rgba(239, 68, 68, .06);
+      border-color: rgba(239, 68, 68, .28)
+    }
+
+    .lp-item-name {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--txt);
+      line-height: 1.2;
+      margin-bottom: 3px
+    }
+
+    .lp-item-sub {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      flex-wrap: wrap
+    }
+
+    .lp-add {
+      margin: 6px 7px;
+      padding: 8px;
+      background: transparent;
+      border: 1px dashed rgba(239, 68, 68, .18);
+      color: rgba(239, 68, 68, .4);
+      font-family: 'Orbitron', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all .18s;
+      text-align: center;
+      flex-shrink: 0
+    }
+
+    .lp-add:hover {
+      border-color: var(--red);
+      color: var(--red)
+    }
+
+    .tg-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 9px;
+      border-bottom: 1px solid rgba(0, 212, 255, .06)
+    }
+
+    .tg-lbl {
+      font-family: 'Orbitron', monospace;
+      font-size: 8px;
+      letter-spacing: 2px
+    }
+
+    .tg-add {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, .12);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      padding: 2px 7px;
+      cursor: pointer;
+      transition: all .12s;
+      letter-spacing: 1px;
+      color: var(--txt-d)
+    }
+
+    .tg-add:hover {
+      border-color: var(--blue);
+      color: var(--blue)
+    }
+
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      min-width: 0
+    }
+
+    .main::-webkit-scrollbar {
+      width: 4px
+    }
+
+    .main::-webkit-scrollbar-thumb {
+      background: rgba(0, 212, 255, .1)
+    }
+
+    .dw {
+      padding: 20px 24px
+    }
+
+    .empty-main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 10px
+    }
+
+    .em-icon {
+      font-size: 44px;
+      color: rgba(0, 212, 255, .08)
+    }
+
+    .em-text {
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: rgba(0, 212, 255, .25)
+    }
+
+    .em-sub {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: var(--txt-d);
+      letter-spacing: 1px
+    }
+
+    .d-hdr {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 5px
+    }
+
+    .d-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--txt)
+    }
+
+    .d-badges {
+      display: flex;
+      gap: 5px;
+      margin-top: 5px;
+      flex-wrap: wrap
+    }
+
+    .d-sep {
+      height: 1px;
+      background: linear-gradient(90deg, rgba(239, 68, 68, .45), rgba(0, 212, 255, .2), transparent);
+      margin: 12px 0
+    }
+
+    .d-acts {
+      display: flex;
+      gap: 7px;
+      flex-shrink: 0;
+      align-items: flex-start
+    }
+
+    .sb {
+      font-family: 'Orbitron', monospace;
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--red);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      margin-top: 18px
+    }
+
+    .sb::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(239, 68, 68, .35), transparent)
+    }
+
+    .sb:first-child,
+    .sb.top {
+      margin-top: 0
+    }
+
+    .sb.blue {
+      color: var(--blue)
+    }
+
+    .sb.blue::after {
+      background: linear-gradient(90deg, rgba(0, 212, 255, .35), transparent)
+    }
+
+    .sb.gold {
+      color: var(--gold)
+    }
+
+    .sb.gold::after {
+      background: linear-gradient(90deg, rgba(245, 158, 11, .35), transparent)
+    }
+
+    .sb.purple {
+      color: var(--purple-b)
+    }
+
+    .sb.purple::after {
+      background: linear-gradient(90deg, rgba(168, 85, 247, .35), transparent)
+    }
+
+    .sb.green {
+      color: var(--green)
+    }
+
+    .sb.green::after {
+      background: linear-gradient(90deg, rgba(16, 185, 129, .35), transparent)
+    }
+
+    .sb.pink {
+      color: var(--pink)
+    }
+
+    .sb.pink::after {
+      background: linear-gradient(90deg, rgba(236, 72, 153, .35), transparent)
+    }
+
+    .sb.teal {
+      color: var(--teal)
+    }
+
+    .sb.teal::after {
+      background: linear-gradient(90deg, rgba(20, 184, 166, .35), transparent)
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px
+    }
+
+    .lbl {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: var(--txt-lbl);
+      letter-spacing: 1.5px
+    }
+
+    .inp {
+      background: rgba(0, 212, 255, 0.04);
+      border: 1px solid var(--bd);
+      color: var(--txt);
+      font-size: var(--fs);
+      padding: 6px 10px;
+      outline: none;
+      transition: all .18s;
+      width: 100%
+    }
+
+    .inp:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 8px rgba(0, 212, 255, .1);
+      background: rgba(0, 212, 255, .06)
+    }
+
+    select.inp option {
+      background: #0a0f1a;
+      color: var(--txt)
+    }
+
+    textarea.inp {
+      resize: vertical;
+      min-height: 55px;
+      line-height: 1.6
+    }
+
+    .g2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 11px
+    }
+
+    .g3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 11px
+    }
+
+    .g4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 9px
+    }
+
+    .mt4 {
+      margin-top: 4px
+    }
+
+    .mt8 {
+      margin-top: 8px
+    }
+
+    .mt12 {
+      margin-top: 12px
+    }
+
+    .mt16 {
+      margin-top: 16px
+    }
+
+    .mb4 {
+      margin-bottom: 4px
+    }
+
+    .mb8 {
+      margin-bottom: 8px
+    }
+
+    .mb12 {
+      margin-bottom: 12px
+    }
+
+    .attr-ctrl {
+      display: flex;
+      align-items: center;
+      gap: 5px
+    }
+
+    .attr-col {
+      padding: 8px 10px;
+      background: rgba(0, 212, 255, .02);
+      border: 1px solid var(--bd)
+    }
+
+    .c-btn {
+      width: 24px;
+      height: 24px;
+      background: transparent;
+      border: 1px solid var(--bd);
+      color: var(--txt-d);
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1;
+      transition: all .12s;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .c-btn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: rgba(0, 212, 255, .07)
+    }
+
+    .c-val {
+      font-family: 'Orbitron', monospace;
+      font-size: 17px;
+      font-weight: 700;
+      min-width: 26px;
+      text-align: center
+    }
+
+    .c-bon {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--txt-d);
+      min-width: 28px
+    }
+
+    .bar-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px
+    }
+
+    .bar-hdr {
+      display: flex;
+      justify-content: space-between;
+      align-items: center
+    }
+
+    .bar-lbl {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: var(--txt-lbl);
+      letter-spacing: 1px
+    }
+
+    .bar-inps {
+      display: flex;
+      gap: 4px;
+      align-items: center
+    }
+
+    .bar-inp {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--bd-b);
+      color: var(--txt);
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      width: 48px;
+      text-align: center;
+      outline: none;
+      padding: 1px 3px
+    }
+
+    .bar-sep {
+      color: var(--txt-d);
+      font-size: 11px
+    }
+
+    .bar-track {
+      height: 5px;
+      background: rgba(255, 255, 255, .05);
+      border-radius: 3px;
+      overflow: hidden
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .4s
+    }
+
+    .hp-f {
+      background: linear-gradient(90deg, #dc2626, #ef4444);
+      box-shadow: 0 0 5px rgba(239, 68, 68, .35)
+    }
+
+    .sta-f {
+      background: linear-gradient(90deg, #1d4ed8, #3b82f6);
+      box-shadow: 0 0 5px rgba(59, 130, 246, .35)
+    }
+
+    .san-f {
+      background: linear-gradient(90deg, #7c3aed, #a855f7);
+      box-shadow: 0 0 5px rgba(168, 85, 247, .35)
+    }
+
+    .coe-f {
+      background: linear-gradient(90deg, #f97316, #f59e0b);
+      box-shadow: 0 0 5px rgba(245, 158, 11, .35)
+    }
+
+    .computed {
+      background: rgba(0, 212, 255, 0.06);
+      border: 1px solid var(--bd);
+      color: var(--blue);
+      font-family: 'Orbitron', monospace;
+      font-size: 18px;
+      padding: 6px 10px;
+      text-align: center;
+      letter-spacing: 2px
+    }
+
+    .sk-card {
+      background: rgba(0, 212, 255, .02);
+      border: 1px solid var(--bd);
+      padding: 9px 11px;
+      margin-bottom: 5px;
+      transition: border-color .12s
+    }
+
+    .sk-card:hover {
+      border-color: rgba(0, 212, 255, .22)
+    }
+
+    .sk-hdr {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 5px
+    }
+
+    .sk-ni {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--bd);
+      color: var(--txt);
+      font-size: var(--fs);
+      font-weight: 700;
+      outline: none;
+      padding: 2px
+    }
+
+    .sk-ni:focus {
+      border-color: var(--blue)
+    }
+
+    .sk-meta {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      flex-shrink: 0
+    }
+
+    .act-sel {
+      background: rgba(0, 212, 255, .05);
+      border: 1px solid var(--bd);
+      color: var(--blue);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      padding: 2px 5px;
+      outline: none;
+      cursor: pointer
+    }
+
+    .act-sel option {
+      background: #0a0f1a;
+      color: var(--txt)
+    }
+
+    .cost-i {
+      background: transparent;
+      border: 1px solid rgba(245, 158, 11, .3);
+      color: var(--gold);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      padding: 2px 6px;
+      outline: none;
+      width: 58px;
+      text-align: center
+    }
+
+    .trow {
+      display: grid;
+      gap: 5px;
+      align-items: center;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(0, 212, 255, .04)
+    }
+
+    .thdr {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: var(--txt-d);
+      letter-spacing: 1px;
+      padding: 3px 0;
+      border-bottom: 1px solid var(--bd)
+    }
+
+    .wi {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(0, 212, 255, .12);
+      color: var(--txt);
+      font-size: var(--fs-sm);
+      padding: 2px 3px;
+      outline: none;
+      width: 100%;
+      transition: border-color .12s
+    }
+
+    .wi:focus {
+      border-color: var(--blue)
+    }
+
+    select.wi option {
+      background: #0a0f1a;
+      color: var(--txt)
+    }
+
+    .wrem {
+      background: transparent;
+      border: none;
+      color: rgba(239, 68, 68, .32);
+      cursor: pointer;
+      font-size: 13px;
+      transition: color .12s;
+      padding: 0 2px
+    }
+
+    .wrem:hover {
+      color: var(--red)
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px
+    }
+
+    .chip {
+      padding: 2px 7px;
+      border: 1px solid var(--bd);
+      background: transparent;
+      color: var(--txt-d);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 8px;
+      letter-spacing: .5px;
+      cursor: pointer;
+      transition: all .12s
+    }
+
+    .chip:hover {
+      border-color: rgba(0, 212, 255, .35);
+      color: var(--txt)
+    }
+
+    .chip.neg-on {
+      border-color: var(--red);
+      color: var(--red);
+      background: rgba(239, 68, 68, .07)
+    }
+
+    .chip.pos-on {
+      border-color: var(--green);
+      color: var(--green);
+      background: rgba(16, 185, 129, .07)
+    }
+
+    .bdg {
+      display: inline-block;
+      padding: 2px 7px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 8px;
+      letter-spacing: .5px;
+      border: 1px solid
+    }
+
+    .bdg-blue {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: rgba(0, 212, 255, .06)
+    }
+
+    .bdg-red {
+      border-color: var(--red);
+      color: var(--red);
+      background: rgba(239, 68, 68, .06)
+    }
+
+    .bdg-gold {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(245, 158, 11, .06)
+    }
+
+    .bdg-purple {
+      border-color: var(--purple-b);
+      color: var(--purple-b);
+      background: rgba(168, 85, 247, .06)
+    }
+
+    .bdg-green {
+      border-color: var(--green);
+      color: var(--green);
+      background: rgba(16, 185, 129, .06)
+    }
+
+    .bdg-pink {
+      border-color: var(--pink);
+      color: var(--pink);
+      background: rgba(236, 72, 153, .06)
+    }
+
+    .bdg-teal {
+      border-color: var(--teal);
+      color: var(--teal);
+      background: rgba(20, 184, 166, .06)
+    }
+
+    .btn {
+      padding: 6px 14px;
+      background: transparent;
+      border: 1px solid;
+      font-family: 'Orbitron', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all .15s;
+      clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%)
+    }
+
+    .btn-red {
+      border-color: var(--red);
+      color: var(--red)
+    }
+
+    .btn-red:hover {
+      background: rgba(239, 68, 68, .1)
+    }
+
+    .btn-blue {
+      border-color: var(--blue);
+      color: var(--blue)
+    }
+
+    .btn-blue:hover {
+      background: rgba(0, 212, 255, .1)
+    }
+
+    .btn-gold {
+      border-color: var(--gold);
+      color: var(--gold)
+    }
+
+    .btn-gold:hover {
+      background: rgba(245, 158, 11, .1)
+    }
+
+    .btn-green {
+      border-color: var(--green);
+      color: var(--green)
+    }
+
+    .btn-green:hover {
+      background: rgba(16, 185, 129, .1)
+    }
+
+    .btn-purple {
+      border-color: var(--purple-b);
+      color: var(--purple-b)
+    }
+
+    .btn-purple:hover {
+      background: rgba(168, 85, 247, .1)
+    }
+
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 8px;
+      letter-spacing: 1px
+    }
+
+    .btn-saved {
+      border-color: var(--green) !important;
+      color: var(--green) !important
+    }
+
+    .arc-cf-ov {
+      position: fixed;
+      inset: 0;
+      z-index: 600;
+      background: rgba(2, 4, 8, .78);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      animation: arcCfIn .15s ease-out
+    }
+
+    @keyframes arcCfIn {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    .arc-cf-box {
+      background: rgba(8, 12, 20, .97);
+      border: 1px solid rgba(239, 68, 68, .4);
+      box-shadow: 0 0 30px rgba(239, 68, 68, .15), 0 0 80px rgba(0, 0, 0, .6);
+      padding: 24px 26px 22px;
+      min-width: 340px;
+      max-width: 440px;
+      font-family: 'Rajdhani', sans-serif;
+      position: relative;
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%)
+    }
+
+    .arc-cf-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--red), rgba(239, 68, 68, .2), transparent)
+    }
+
+    .arc-cf-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--red);
+      margin-bottom: 10px;
+      opacity: .7
+    }
+
+    .arc-cf-msg {
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      letter-spacing: 1px;
+      color: var(--txt);
+      margin-bottom: 22px;
+      line-height: 1.5
+    }
+
+    .arc-cf-acts {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end
+    }
+
+    .dash {
+      width: 100%;
+      padding: 8px;
+      background: transparent;
+      border: 1px dashed rgba(0, 212, 255, .18);
+      color: rgba(0, 212, 255, .32);
+      font-family: 'Orbitron', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all .15s;
+      margin-top: 5px;
+      text-align: center
+    }
+
+    .dash:hover {
+      border-color: var(--blue);
+      color: var(--blue)
+    }
+
+    .dash.red {
+      border-color: rgba(239, 68, 68, .18) !important;
+      color: rgba(239, 68, 68, .32) !important
+    }
+
+    .dash.red:hover {
+      border-color: var(--red) !important;
+      color: var(--red) !important
+    }
+
+    .dash.gold {
+      border-color: rgba(245, 158, 11, .18) !important;
+      color: rgba(245, 158, 11, .32) !important
+    }
+
+    .dash.gold:hover {
+      border-color: var(--gold) !important;
+      color: var(--gold) !important
+    }
+
+    .dash.purple {
+      border-color: rgba(168, 85, 247, .18) !important;
+      color: rgba(168, 85, 247, .32) !important
+    }
+
+    .dash.purple:hover {
+      border-color: var(--purple-b) !important;
+      color: var(--purple-b) !important
+    }
+
+    .ph-btn {
+      padding: 4px 10px;
+      background: transparent;
+      border: 1px solid var(--bd);
+      color: var(--txt-d);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .ph-btn.on {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(245, 158, 11, .07)
+    }
+
+    .grace-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px
+    }
+
+    .gi {
+      border: 1px solid;
+      padding: 7px 3px;
+      text-align: center
+    }
+
+    .gi.v {
+      border-color: rgba(16, 185, 129, .2)
+    }
+
+    .gi.s {
+      border-color: rgba(239, 68, 68, .2)
+    }
+
+    .gi-name {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 7px;
+      letter-spacing: .5px;
+      margin-bottom: 3px;
+      color: var(--txt-d)
+    }
+
+    .gi-val {
+      font-family: 'Orbitron', monospace;
+      font-size: 16px;
+      font-weight: 700
+    }
+
+    .gi.v .gi-val {
+      color: var(--green)
+    }
+
+    .gi.s .gi-val {
+      color: var(--red)
+    }
+
+    .gi-ctrl {
+      display: flex;
+      justify-content: center;
+      gap: 3px;
+      margin-top: 3px
+    }
+
+    .g-btn {
+      width: 16px;
+      height: 16px;
+      background: transparent;
+      border: 1px solid var(--bd);
+      color: var(--txt-d);
+      cursor: pointer;
+      font-size: 11px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .1s
+    }
+
+    .g-btn:hover {
+      border-color: var(--blue);
+      color: var(--blue)
+    }
+
+    .pi-pip {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      border: 1px solid var(--bd);
+      transition: all .15s
+    }
+
+    .pi-pip.on {
+      background: var(--gold);
+      border-color: var(--gold);
+      box-shadow: 0 0 5px var(--gold)
+    }
+
+    .ap {
+      width: 12px;
+      height: 12px;
+      border: 1px solid rgba(0, 212, 255, .15);
+      background: transparent;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all .1s;
+      display: inline-block
+    }
+
+    .ap:hover {
+      border-color: rgba(0, 212, 255, .45)
+    }
+
+    .ap.ap-b.ap-on {
+      background: rgba(0, 212, 255, .28);
+      border-color: var(--blue);
+      box-shadow: 0 0 3px rgba(0, 212, 255, .2)
+    }
+
+    .ap.ap-p.ap-on {
+      background: rgba(168, 85, 247, .28);
+      border-color: var(--purple-b);
+      box-shadow: 0 0 3px rgba(168, 85, 247, .2)
+    }
+
+    .ap.ap-g.ap-on {
+      background: rgba(245, 158, 11, .28);
+      border-color: var(--gold);
+      box-shadow: 0 0 3px rgba(245, 158, 11, .2)
+    }
+
+    .init-row {
+      display: grid;
+      grid-template-columns: 44px 1fr 90px 60px 1fr 24px;
+      gap: 7px;
+      align-items: center;
+      padding: 6px 7px;
+      border-bottom: 1px solid rgba(0, 212, 255, .05);
+      transition: background .12s
+    }
+
+    .init-row:hover {
+      background: rgba(0, 212, 255, .02)
+    }
+
+    .init-row.cur {
+      background: rgba(239, 68, 68, .05);
+      border-color: rgba(239, 68, 68, .14)
+    }
+
+    .init-num {
+      font-family: 'Orbitron', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center
+    }
+
+    .hp-ei {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(239, 68, 68, .28);
+      color: var(--red);
+      font-family: 'Orbitron', monospace;
+      font-size: 12px;
+      width: 56px;
+      text-align: center;
+      outline: none
+    }
+
+    .round-d {
+      font-family: 'Orbitron', monospace;
+      font-size: 38px;
+      font-weight: 900;
+      color: var(--blue);
+      text-shadow: 0 0 18px rgba(0, 212, 255, .4);
+      line-height: 1
+    }
+
+    .notes-ta {
+      width: 100%;
+      background: rgba(0, 212, 255, .03);
+      border: 1px solid var(--bd);
+      color: var(--txt);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: var(--fs);
+      padding: 11px;
+      outline: none;
+      resize: vertical;
+      line-height: 1.8;
+      transition: border-color .18s
+    }
+
+    .notes-ta:focus {
+      border-color: var(--blue)
+    }
+
+    .player-card {
+      border: 1px solid var(--bd);
+      margin-bottom: 8px;
+      overflow: hidden;
+      transition: border-color .15s
+    }
+
+    .player-card:hover {
+      border-color: rgba(0, 212, 255, .22)
+    }
+
+    .player-hdr {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: background .12s;
+      user-select: none
+    }
+
+    .player-hdr:hover {
+      background: rgba(0, 212, 255, .03)
+    }
+
+    .ph-name {
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--blue);
+      flex: 0 0 auto;
+      min-width: 80px
+    }
+
+    .ph-meta {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: var(--txt-d);
+      letter-spacing: 1px;
+      flex: 1
+    }
+
+    .ph-stats {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0
+    }
+
+    .ph-hp {
+      font-family: 'Orbitron', monospace;
+      font-size: 12px;
+      color: var(--red)
+    }
+
+    .ph-san {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: var(--purple-b)
+    }
+
+    .ph-chevron {
+      font-size: 10px;
+      color: var(--txt-d);
+      transition: transform .18s
+    }
+
+    .player-card.open .ph-chevron {
+      transform: rotate(180deg)
+    }
+
+    .player-body {
+      display: none;
+      padding: 16px;
+      border-top: 1px solid var(--bd)
+    }
+
+    .player-card.open .player-body {
+      display: block
+    }
+
+    .sep {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--bd-b), transparent);
+      margin: 10px 0
+    }
+
+    .empty-l {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: var(--txt-d);
+      text-align: center;
+      padding: 10px;
+      letter-spacing: 1px
+    }
+
+    /* ── FIREBASE GM SYNC ── */
+    .gm-sync-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 300;
+      background: rgba(2, 4, 8, 0.97);
+      border-top: 1px solid rgba(239, 68, 68, .2);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 7px 16px;
+      backdrop-filter: blur(8px)
+    }
+
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    .sync-dot.off {
+      background: rgba(255, 255, 255, .15)
+    }
+
+    .sync-dot.connecting {
+      background: var(--gold);
+      box-shadow: 0 0 8px var(--gold);
+      animation: pulse 1s infinite
+    }
+
+    .sync-dot.on {
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s infinite
+    }
+
+    .sync-dot.err {
+      background: var(--red);
+      box-shadow: 0 0 8px var(--red)
+    }
+
+    .gm-sync-lbl {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: var(--txt-d);
+      letter-spacing: 1px;
+      flex: 1
+    }
+
+    .gm-sync-inp {
+      background: rgba(0, 212, 255, .04);
+      border: 1px solid var(--bd);
+      color: var(--txt);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      padding: 4px 10px;
+      outline: none;
+      width: 180px;
+      letter-spacing: 2px
+    }
+
+    .gm-sync-inp:focus {
+      border-color: var(--red)
+    }
+
+    .gm-sync-btn {
+      padding: 4px 12px;
+      background: transparent;
+      border: 1px solid var(--red);
+      color: var(--red);
+      font-family: 'Orbitron', monospace;
+      font-size: 8px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .gm-sync-btn:hover {
+      background: rgba(239, 68, 68, .1)
+    }
+
+    .gm-sync-btn.blue {
+      border-color: var(--blue);
+      color: var(--blue)
+    }
+
+    .gm-sync-btn.blue:hover {
+      background: rgba(0, 212, 255, .1)
+    }
+
+    .player-sync-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      background: rgba(16, 185, 129, .08);
+      border: 1px solid rgba(16, 185, 129, .3);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 8px;
+      color: var(--green);
+      letter-spacing: .5px
+    }
+
+    .player-sync-stale {
+      background: rgba(245, 158, 11, .08);
+      border-color: rgba(245, 158, 11, .3);
+      color: var(--gold)
+    }
+
+    /* Firebase modal (GM) */
+    .fb-modal-ov {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: rgba(2, 4, 8, .88);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px
+    }
+
+    .fb-modal {
+      background: rgba(8, 12, 20, .98);
+      border: 1px solid rgba(239, 68, 68, .35);
+      padding: 28px 32px;
+      max-width: 520px;
+      width: 100%;
+      clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+      position: relative
+    }
+
+    .fb-modal::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--red), rgba(239, 68, 68, .2), transparent)
+    }
+
+    .fb-modal-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--red);
+      margin-bottom: 12px;
+      opacity: .7
+    }
+
+    .fb-modal-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--txt);
+      margin-bottom: 6px;
+      letter-spacing: 1px
+    }
+
+    .fb-modal-sub {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--txt-d);
+      letter-spacing: .5px;
+      line-height: 1.7;
+      margin-bottom: 20px
+    }
+
+    .fb-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 14px
+    }
+
+    .fb-lbl {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: var(--txt-lbl);
+      letter-spacing: 1.5px
+    }
+
+    .fb-inp {
+      background: rgba(0, 212, 255, .04);
+      border: 1px solid var(--bd);
+      color: var(--txt);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      padding: 8px 12px;
+      outline: none;
+      width: 100%;
+      letter-spacing: .5px
+    }
+
+    .fb-inp:focus {
+      border-color: var(--red)
+    }
+
+    .fb-acts {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 20px
+    }
+
+    /* ── MARKDOWN PREVIEW (Notas Gerais) ── */
+    .md-view{font-family:'Rajdhani',sans-serif;font-size:14px;line-height:1.7;color:var(--txt);word-wrap:break-word}
+    .md-view h1,.md-view h2,.md-view h3,.md-view h4,.md-view h5,.md-view h6{font-family:'Orbitron',monospace;color:var(--blue);margin:16px 0 8px;line-height:1.3}
+    .md-view h1{font-size:22px;color:var(--red);border-bottom:1px solid rgba(239,68,68,.25);padding-bottom:5px}
+    .md-view h2{font-size:18px}.md-view h3{font-size:15px}.md-view h4,.md-view h5,.md-view h6{font-size:13px;color:var(--txt-lbl)}
+    .md-view p{margin:0 0 10px}
+    .md-view ul,.md-view ol{margin:0 0 10px 22px}.md-view li{margin:2px 0}
+    .md-view code{font-family:'Share Tech Mono',monospace;font-size:12px;background:rgba(0,212,255,.08);border:1px solid var(--bd);padding:1px 5px;color:var(--blue)}
+    .md-view a{color:var(--gold);text-decoration:underline}
+    .md-view blockquote{border-left:3px solid var(--bd-b);margin:0 0 10px;padding:5px 12px;color:var(--txt-d);background:rgba(0,212,255,.025)}
+    .md-view hr{border:none;border-top:1px solid var(--bd);margin:16px 0}
+    .md-view strong{color:#fff;font-weight:700}.md-view em{color:var(--txt)}.md-view del{color:var(--txt-d)}
+    .md-empty{color:var(--txt-d);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px}
+  </style>
+</head>
+
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+  <div class="scanline"></div>
+  <header>
+    <div class="hdr-left">
+      <div class="hdr-logo">ARC V1</div>
+      <div class="hdr-tag">✦ PAINEL DO MESTRE</div>
+      <div class="hdr-online">
+        <div class="hdr-dot"></div><span class="hdr-online-txt">ONLINE</span>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <button class="btn btn-gold btn-sm" onclick="exportData()">[ EXPORTAR ]</button>
+      <label class="btn btn-blue btn-sm" style="cursor:pointer">[ IMPORTAR ]<input type="file" accept=".json"
+          onchange="importData(event)" style="display:none"></label>
+      <button class="btn btn-red btn-sm" id="saveBtn" onclick="saveData()">[ SALVAR ]</button>
+    </div>
+  </header>
+  <div class="app-shell">
+    <nav class="icon-bar" id="iconBar"></nav>
+    <aside class="list-panel" id="listPanel"></aside>
+    <main class="main" id="mainContent"></main>
+  </div>
+  <script>
+
+    const SECS = [{ id: 'combat', sym: '⚔', lbl: 'CMB' }, { id: 'npc', sym: '◈', lbl: 'NPC' }, { id: 'conceito', sym: '✦', lbl: 'CONC' }, { id: 'artefato', sym: '◆', lbl: 'ART' }, { id: 'armas', sym: '⌖', lbl: 'ARM' }, { id: 'jogadores', sym: '◉', lbl: 'JOG' }, { id: 'mundo', sym: '⊕', lbl: 'MND' }, { id: 'notas', sym: '✎', lbl: 'NOTAS' }];
+    const NO_LIST = ['combat', 'npc', 'mundo'];
+    const WCATS = ['Arma Branca', 'Arma de Fogo', 'Energia', 'Explosivo', 'Improvisada', 'Pesada', 'Arremesso'];
+    const WTYPES = ['Normal', 'Verdadeiro', 'Absoluto'];
+    const WRANKS = ['—', 'C', 'B', 'A', 'S', 'SS'];
+    const ISLOTS = ['Braço', 'Perna', 'Cabeça', 'Olho', 'Tronco', 'Coluna', 'Pele', 'Mão', 'Outro'];
+    const ICATS = ['Cibernético', 'Biológico', 'Nano', 'Místico', 'Híbrido', 'Experimental'];
+    const ACTS = ['Passiva', 'Padrão', 'Bônus', 'Movimento', 'Reação', 'Livre', 'Completa', 'Fala', 'Padrão+Bônus', 'Padrão+Movimento', 'Reação+Bônus', 'Especial'];
+    const SNEG = ['Morrendo', 'Terreno Difícil', 'Quebrado', 'Amedrontado', 'Atordoado', 'Membro Quebrado', 'Imobilizado', 'Em Choque', 'Vulnerável', 'Exaustão', 'Exaustão Grave', 'Fraqueza', 'Derrubado', 'Desprotegido', 'Exposto', 'Suprimido', 'Cegueira'];
+    const SPOS = ['Fortificado', 'Acelerado', 'Focado', 'Imparável', 'Blindado', 'Energizado', 'Fortalecido', 'Protegido'];
+    const NATS = ['Brutamontes', 'Guerreiro', 'Atleta', 'Velocista'];
+    const VIRTUES = ['Diligência', 'Generosidade', 'Temperança', 'Paciência', 'Castidade', 'Caridade', 'Humildade'];
+    const SINS = ['Preguiça', 'Avareza', 'Gula', 'Ira', 'Luxúria', 'Inveja', 'Soberba'];
+    const TCONC = ['Primordial', 'Virtude', 'Pecado', 'Evoluído', 'Primitivo', 'Outro'];
+    const TIERS = ['divino', 'anciao', 'mitico', 'lendario'];
+    const TLBL = { divino: 'DIVINOS', anciao: 'ANCIÕES', mitico: 'MÍTICOS', lendario: 'LENDÁRIOS' };
+    const TCOL = { divino: 'gold', anciao: 'pink', mitico: 'purple', lendario: 'teal' };
+    const TBDG = { divino: 'bdg-gold', anciao: 'bdg-pink', mitico: 'bdg-purple', lendario: 'bdg-teal' };
+
+    const UI = { section: 'combat', npcId: null, cId: null, artId: null, artTier: 'divino', sessaoId: null, geral: false, playerOpen: {}, playerId: null, armCat: 'arma', armId: null, armPicker: null };
+    let S = { round: 1, cur: 0, combatants: [], combatNotes: '', npcs: [], conceitos: [], artefatos: { divino: [], anciao: [], mitico: [], lendario: [] }, players: [], faccoes: [], locais: [], secretNotes: '', sessoes: [], campaignNotes: '', armaLib: { armas: [], implantes: [] } };
+
+    function uid() { return Date.now() + Math.floor(Math.random() * 9999) }
+    function esc(s) { if (s === null || s === undefined) return ''; return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') }
+    function bon(v) { const b = Math.floor((v || 0) / 2); return (b >= 0 ? '+' : '') + b }
+    function pct(c, m) { return m > 0 ? Math.max(0, Math.min(100, (c / m) * 100)) : 0 }
+    function gv(id) { const e = document.getElementById(id); return e ? e.value : '' }
+    function st(id, v) { const e = document.getElementById(id); if (e) e.textContent = v }
+    function sw(id, w) { const e = document.getElementById(id); if (e) e.style.width = w + '%' }
+    function findNPC(id) { return S.npcs.find(x => x.id === id) }
+    function findC(id) { return S.conceitos.find(x => x.id === id) }
+    function findArt(tier, id) { return (S.artefatos[tier] || []).find(x => x.id === id) }
+    function findP(id) { return S.players.find(x => x.id === id) }
+    function findSessao(id) { return S.sessoes.find(x => x.id === id) }
+
+    function saveData() {
+      collectState(); localStorage.setItem('arc_gm_v2', JSON.stringify(S));
+      const b = document.getElementById('saveBtn');
+      b.textContent = '[ SALVO ✓ ]'; b.classList.add('btn-saved');
+      setTimeout(() => { b.textContent = '[ SALVAR ]'; b.classList.remove('btn-saved') }, 2000);
+    }
+    function exportData() {
+      collectState();
+      const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob); const a = document.createElement('a');
+      a.href = url; a.download = 'arc_gm_save.json'; document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+    function importData(e) {
+      const file = e.target.files[0]; if (!file) return;
+      const r = new FileReader();
+      r.onload = ev => { try { S = { ...S, ...JSON.parse(ev.target.result) }; localStorage.setItem('arc_gm_v2', JSON.stringify(S)); renderApp(); } catch (err) { console.error('Erro ao importar.', err); } e.target.value = ''; };
+      r.readAsText(file);
+    }
+    function collectState() {
+      const cn = document.getElementById('combatNotesTA'); if (cn) S.combatNotes = cn.value;
+      const sn = document.getElementById('secretNotesTA'); if (sn) S.secretNotes = sn.value;
+      const gn = document.getElementById('campaignNotesTA'); if (gn) S.campaignNotes = gn.value;
+    }
+    let _ast;
+    function autosave() { clearTimeout(_ast); _ast = setTimeout(() => { localStorage.setItem('arc_gm_v2', JSON.stringify(S)) }, 500) }
+
+    function init() {
+      const sv = localStorage.getItem('arc_gm_v2');
+      if (sv) { try { S = { ...S, ...JSON.parse(sv) } } catch (e) { } }
+      if (!S.armaLib) S.armaLib = { armas: [], implantes: [] };
+      if (!S.armaLib.armas) S.armaLib.armas = [];
+      if (!S.armaLib.implantes) S.armaLib.implantes = [];
+      if (!Array.isArray(S.catalogNpcs)) S.catalogNpcs = [];
+      renderApp();
+    }
+    function setSection(name) {
+      UI.section = name;
+      if (name === 'npc' && !UI.npcId && S.npcs.length > 0) UI.npcId = S.npcs[0].id;
+      if (name === 'conceito' && !UI.cId && S.conceitos.length > 0) UI.cId = S.conceitos[0].id;
+      if (name === 'jogadores' && !UI.playerId && S.players.length > 0) UI.playerId = S.players[0].id;
+      if (name === 'notas' && !UI.sessaoId && S.sessoes.length > 0) UI.sessaoId = S.sessoes[0].id;
+      if (name === 'armas' && !UI.armId) {
+        if (S.armaLib.armas.length > 0) { UI.armCat = 'arma'; UI.armId = S.armaLib.armas[0].id; }
+        else if (S.armaLib.implantes.length > 0) { UI.armCat = 'implante'; UI.armId = S.armaLib.implantes[0].id; }
+      }
+      renderApp();
+    }
+    function selNPC(id) { UI.npcId = id; renderLP(); renderMain() }
+    function selC(id) { UI.cId = id; renderLP(); renderMain() }
+    function selArt(tier, id) { UI.artTier = tier; UI.artId = id; renderLP(); renderMain() }
+    function selPlayer(id) { UI.playerId = id; renderLP(); renderMain() }
+    function selSessao(id) { UI.sessaoId = id; UI.geral = false; renderLP(); renderMain() }
+    function showGeral() { UI.geral = true; UI.sessaoId = null; renderLP(); renderMain() }
+    function selArm(cat, id) { UI.armCat = cat; UI.armId = id; renderLP(); renderMain() }
+    function findArma(id) { return (S.armaLib.armas || []).find(x => x.id === id) }
+    function findImp(id) { return (S.armaLib.implantes || []).find(x => x.id === id) }
+
+    function renderApp() { renderIcons(); renderLP(); renderMain() }
+    function renderIcons() {
+      const b = document.getElementById('iconBar'); if (!b) return;
+      b.innerHTML = SECS.map(s => `<button class="ic-btn ${UI.section === s.id ? 'on' : ''}" onclick="setSection('${s.id}')"><span class="ic-sym">${s.sym}</span><span class="ic-lbl">${s.lbl}</span></button>`).join('');
+    }
+    function renderLP() {
+      const p = document.getElementById('listPanel'); if (!p) return;
+      if (NO_LIST.includes(UI.section)) { p.classList.add('gone'); return }
+      p.classList.remove('gone');
+      if (UI.section === 'npc') p.innerHTML = lpNPC();
+      else if (UI.section === 'conceito') p.innerHTML = lpConceito();
+      else if (UI.section === 'artefato') p.innerHTML = lpArtefato();
+      else if (UI.section === 'jogadores') p.innerHTML = lpJogadores();
+      else if (UI.section === 'armas') p.innerHTML = lpArmas();
+      else if (UI.section === 'notas') p.innerHTML = lpNotas();
+      else p.innerHTML = '';
+    }
+    function renderMain() {
+      const m = document.getElementById('mainContent'); if (!m) return;
+      if (UI.section === 'combat') m.innerHTML = rCombat();
+      else if (UI.section === 'npc') { if (!m.querySelector('#npcCatalogFrame')) m.innerHTML = '<iframe id="npcCatalogFrame" src="ARC_NPC_Catalog_V2.html" title="Catálogo de NPCs" style="width:100%;height:100%;border:0;display:block;background:var(--bg)"></iframe>'; }
+      else if (UI.section === 'conceito') m.innerHTML = UI.cId && findC(UI.cId) ? rConceito(findC(UI.cId)) : emptyMain('✦', 'Selecione um Conceito');
+      else if (UI.section === 'artefato') m.innerHTML = UI.artId && findArt(UI.artTier, UI.artId) ? rArtefato(findArt(UI.artTier, UI.artId), UI.artTier) : emptyMain('◆', 'Selecione um Artefato');
+      else if (UI.section === 'jogadores') m.innerHTML = UI.playerId && findP(UI.playerId) ? rPlayer(findP(UI.playerId)) : emptyMain('◉', 'Selecione um Jogador');
+      else if (UI.section === 'mundo') m.innerHTML = rMundo();
+      else if (UI.section === 'armas') {
+        if (UI.armCat === 'arma' && UI.armId && findArma(UI.armId)) m.innerHTML = rArma(findArma(UI.armId));
+        else if (UI.armCat === 'implante' && UI.armId && findImp(UI.armId)) m.innerHTML = rImplante(findImp(UI.armId));
+        else m.innerHTML = emptyMain('⌖', 'Selecione ou crie um item');
+      }
+      else if (UI.section === 'notas') { if (UI.geral) m.innerHTML = rNotasGeral(); else if (UI.sessaoId && findSessao(UI.sessaoId)) m.innerHTML = rSessao(findSessao(UI.sessaoId)); else m.innerHTML = emptyMain('✎', 'Selecione uma Sessão'); }
+    }
+    function emptyMain(ic, txt) { return `<div class="empty-main"><div class="em-icon">${ic}</div><div class="em-text">${txt}</div><div class="em-sub">ou crie um novo</div></div>` }
+
+    function lpNPC() {
+      const items = S.npcs.map(n => `<div class="lp-item ${n.id === UI.npcId ? 'on' : ''}" onclick="selNPC(${n.id})"><div class="lp-item-name">${esc(n.name) || 'Sem Nome'}</div><div class="lp-item-sub"><span class="bdg bdg-blue" style="font-size:7px">NPC</span><span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--red)">♥ ${n.hpCur || n.hpMax || 20}/${n.hpMax || 20}</span>${n.rank ? `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--txt-d)">R${n.rank}</span>` : ''}</div></div>`).join('') || '<div class="empty-l">Nenhum NPC.</div>';
+      return `<div class="lp-hdr"><span class="lp-title">NPCs</span><span class="lp-count">${S.npcs.length} entrada${S.npcs.length !== 1 ? 's' : ''}</span></div><div class="lp-search-wrap"><input class="lp-search" placeholder="BUSCAR..." oninput="filterNPCs(this.value)"></div><button class="lp-add" onclick="addNPC()">+ NOVO NPC</button><div class="lp-items" id="npcListItems">${items}</div>`;
+    }
+    function filterNPCs(q) {
+      const w = document.getElementById('npcListItems'); if (!w) return;
+      const f = S.npcs.filter(n => (n.name || '').toLowerCase().includes(q.toLowerCase()));
+      w.innerHTML = f.map(n => `<div class="lp-item ${n.id === UI.npcId ? 'on' : ''}" onclick="selNPC(${n.id})"><div class="lp-item-name">${esc(n.name) || 'Sem Nome'}</div><div class="lp-item-sub"><span class="bdg bdg-blue" style="font-size:7px">NPC</span><span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--red)">♥ ${n.hpCur || n.hpMax || 20}/${n.hpMax || 20}</span></div></div>`).join('') || '<div class="empty-l">Nenhum resultado.</div>';
+    }
+    function lpConceito() {
+      const items = S.conceitos.map(c => `<div class="lp-item ${c.id === UI.cId ? 'on' : ''}" onclick="selC(${c.id})"><div class="lp-item-name">${esc(c.name) || 'Sem Nome'}</div><div class="lp-item-sub"><span class="bdg bdg-purple" style="font-size:7px">${c.tipo || '?'}</span><span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--gold)">${c.coeCur || 100}/${c.coeMax || 100}</span></div></div>`).join('') || '<div class="empty-l">Nenhum conceito.</div>';
+      return `<div class="lp-hdr"><span class="lp-title">CONCEITOS</span><span class="lp-count">${S.conceitos.length}</span></div><button class="lp-add" onclick="addConceito()">+ NOVO CONCEITO</button><div class="lp-items" style="flex:1">${items}</div>`;
+    }
+    function lpArtefato() {
+      let html = `<div class="lp-hdr"><span class="lp-title">ARTEFATOS</span></div><div class="lp-items" style="flex:1;padding:4px 5px">`;
+      TIERS.forEach(tier => {
+        const col = TCOL[tier]; const arr = S.artefatos[tier] || [];
+        html += `<div class="tg-hdr"><span class="tg-lbl" style="color:var(--${col})">${TLBL[tier]} (${arr.length})</span><button class="tg-add" onclick="addArt('${tier}')">+</button></div>`;
+        if (arr.length) html += arr.map(a => `<div class="lp-item ${a.id === UI.artId && UI.artTier === tier ? 'on' : ''}" onclick="selArt('${tier}',${a.id})" style="padding:6px 9px;margin-left:4px"><div class="lp-item-name" style="font-size:12px">${esc(a.name) || 'Sem Nome'}</div>${a.owner ? `<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--txt-d)">→ ${esc(a.owner)}</div>` : ''}</div>`).join('');
+        else html += '<div style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--txt-d);text-align:center;padding:5px 0">Nenhum.</div>';
+      });
+      html += `</div>`; return html;
+    }
+    function lpNotas() {
+      const items = S.sessoes.map(s => `<div class="lp-item ${s.id === UI.sessaoId && !UI.geral ? 'on' : ''}" onclick="selSessao(${s.id})"><div class="lp-item-name">${esc(s.title) || 'Sessão sem título'}</div><div class="lp-item-sub"><span class="bdg bdg-blue" style="font-size:7px">SESSÃO</span>${s.num != null ? `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--txt-d)">#${s.num}</span>` : ''}</div></div>`).join('') || '<div class="empty-l">Nenhuma sessão.</div>';
+      return `<div class="lp-hdr"><span class="lp-title">NOTAS DE SESSÃO</span><span class="lp-count">${S.sessoes.length}</span></div><button class="lp-add" onclick="addSessao()">+ NOVA SESSÃO</button><div class="lp-items" style="flex:1">${items}</div><div class="lp-item ${UI.geral ? 'on' : ''}" onclick="showGeral()" style="margin:4px 7px;border:1px solid var(--bd);background:rgba(0,212,255,.02)"><div class="lp-item-name" style="font-size:12px;color:var(--blue)">✎ NOTAS GERAIS</div></div>`;
+    }
+
+    function lpArmas() {
+      const armas = S.armaLib.armas || []; const imps = S.armaLib.implantes || [];
+      let html = `<div class="lp-hdr"><span class="lp-title">ARSENAL</span><span class="lp-count">${armas.length + imps.length}</span></div>`;
+      html += `<div class="lp-search-wrap"><input class="lp-search" placeholder="BUSCAR..." oninput="filterArm(this.value)"></div>`;
+      html += `<div class="lp-items" id="armListItems" style="flex:1;padding:4px 5px">`;
+      html += `<div class="tg-hdr"><span class="tg-lbl" style="color:var(--red)">ARMAS (${armas.length})</span><button class="tg-add" onclick="addArma()">+</button></div>`;
+      if (armas.length) {
+        html += armas.map(w => `<div class="lp-item ${UI.armCat === 'arma' && w.id === UI.armId ? 'on' : ''}" onclick="selArm('arma',${w.id})" style="padding:6px 9px;margin-left:4px">
+      <div class="lp-item-name" style="font-size:12px">${esc(w.name) || 'Sem Nome'}</div>
+      <div class="lp-item-sub">
+        ${w.cat ? `<span class="bdg bdg-red" style="font-size:7px">${esc(w.cat)}</span>` : ''}
+        <span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--gold)">${esc(w.dmg || '—')}</span>
+        ${w.type && w.type !== 'Normal' ? `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--purple-b)">${esc(w.type)}</span>` : ''}
+      </div>
+    </div>`).join('');
+      } else {
+        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--txt-d);text-align:center;padding:5px 0">Nenhuma arma.</div>`;
+      }
+      html += `<div class="tg-hdr" style="margin-top:7px"><span class="tg-lbl" style="color:var(--purple-b)">IMPLANTES (${imps.length})</span><button class="tg-add" onclick="addImplante()">+</button></div>`;
+      if (imps.length) {
+        html += imps.map(i => `<div class="lp-item ${UI.armCat === 'implante' && i.id === UI.armId ? 'on' : ''}" onclick="selArm('implante',${i.id})" style="padding:6px 9px;margin-left:4px">
+      <div class="lp-item-name" style="font-size:12px">${esc(i.name) || 'Sem Nome'}</div>
+      <div class="lp-item-sub">
+        ${i.slot ? `<span class="bdg bdg-purple" style="font-size:7px">${esc(i.slot)}</span>` : ''}
+        ${i.cat ? `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--teal)">${esc(i.cat)}</span>` : ''}
+      </div>
+    </div>`).join('');
+      } else {
+        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--txt-d);text-align:center;padding:5px 0">Nenhum implante.</div>`;
+      }
+      html += `</div>`;
+      return html;
+    }
+    function filterArm(q) {
+      q = (q || '').toLowerCase();
+      const w = document.getElementById('armListItems'); if (!w) return;
+      const armas = (S.armaLib.armas || []).filter(x => (x.name || '').toLowerCase().includes(q) || (x.cat || '').toLowerCase().includes(q));
+      const imps = (S.armaLib.implantes || []).filter(x => (x.name || '').toLowerCase().includes(q) || (x.cat || '').toLowerCase().includes(q) || (x.slot || '').toLowerCase().includes(q));
+      let html = `<div class="tg-hdr"><span class="tg-lbl" style="color:var(--red)">ARMAS (${armas.length})</span><button class="tg-add" onclick="addArma()">+</button></div>`;
+      html += armas.map(x => `<div class="lp-item ${UI.armCat === 'arma' && x.id === UI.armId ? 'on' : ''}" onclick="selArm('arma',${x.id})" style="padding:6px 9px;margin-left:4px"><div class="lp-item-name" style="font-size:12px">${esc(x.name) || '—'}</div></div>`).join('') || '<div style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--txt-d);text-align:center;padding:5px 0">—</div>';
+      html += `<div class="tg-hdr" style="margin-top:7px"><span class="tg-lbl" style="color:var(--purple-b)">IMPLANTES (${imps.length})</span><button class="tg-add" onclick="addImplante()">+</button></div>`;
+      html += imps.map(x => `<div class="lp-item ${UI.armCat === 'implante' && x.id === UI.armId ? 'on' : ''}" onclick="selArm('implante',${x.id})" style="padding:6px 9px;margin-left:4px"><div class="lp-item-name" style="font-size:12px">${esc(x.name) || '—'}</div></div>`).join('') || '<div style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--txt-d);text-align:center;padding:5px 0">—</div>';
+      w.innerHTML = html;
+    }
+
+    function addArma() {
+      const w = { id: uid(), name: 'Nova Arma', cat: 'Arma Branca', dmg: '1d6', type: 'Normal', rank: 'C', ataque: 'Corpo', alcance: 'Curto', mun: '', props: '', effect: '', desc: '' };
+      S.armaLib.armas.push(w); UI.section = 'armas'; UI.armCat = 'arma'; UI.armId = w.id; renderApp(); autosave();
+    }
+    function addImplante() {
+      const i = { id: uid(), name: 'Novo Implante', cat: 'Cibernético', slot: 'Braço', rank: 'C', cost: '', effect: '', drawback: '', desc: '' };
+      S.armaLib.implantes.push(i); UI.section = 'armas'; UI.armCat = 'implante'; UI.armId = i.id; renderApp(); autosave();
+    }
+    function delArma(id) { arcConfirm('Remover arma da biblioteca?').then(ok => { if (!ok) return; S.armaLib.armas = S.armaLib.armas.filter(w => w.id !== id); if (UI.armId === id) UI.armId = S.armaLib.armas.length ? S.armaLib.armas[0].id : null; renderApp(); autosave() }) }
+    function delImplante(id) { arcConfirm('Remover implante da biblioteca?').then(ok => { if (!ok) return; S.armaLib.implantes = S.armaLib.implantes.filter(w => w.id !== id); if (UI.armId === id) UI.armId = S.armaLib.implantes.length ? S.armaLib.implantes[0].id : null; renderApp(); autosave() }) }
+    function aWF(id, f, v) { const w = findArma(id); if (!w) return; w[f] = v; autosave() }
+    function aIF(id, f, v) { const i = findImp(id); if (!i) return; i[f] = v; autosave() }
+    function dupArma(id) { const w = findArma(id); if (!w) return; const c = { ...w, id: uid(), name: (w.name || '') + ' (cópia)' }; S.armaLib.armas.push(c); UI.armId = c.id; renderApp(); autosave(); }
+    function dupImp(id) { const i = findImp(id); if (!i) return; const c = { ...i, id: uid(), name: (i.name || '') + ' (cópia)' }; S.armaLib.implantes.push(c); UI.armId = c.id; renderApp(); autosave(); }
+
+    function rArma(w) {
+      if (!w) return emptyMain('⌖', 'Arma não encontrada');
+      const used = S.npcs.filter(n => (n.weapons || []).some(x => x.libId === w.id)).map(n => n.name);
+      return `<div class="dw">
+  <div class="d-hdr">
+    <div>
+      <input style="background:transparent;border:none;border-bottom:1px solid rgba(239,68,68,.25);color:var(--txt);font-family:'Orbitron',monospace;font-size:20px;font-weight:700;outline:none;padding:2px 0;min-width:240px" value="${esc(w.name)}" oninput="aWF(${w.id},'name',this.value)">
+      <div class="d-badges">
+        <span class="bdg bdg-red">${esc(w.cat || '—')}</span>
+        <span class="bdg bdg-gold">${esc(w.dmg || '—')}</span>
+        ${w.type && w.type !== 'Normal' ? `<span class="bdg bdg-purple">${esc(w.type)}</span>` : `<span class="bdg bdg-blue">${esc(w.type || 'Normal')}</span>`}
+        ${w.rank && w.rank !== '—' ? `<span class="bdg bdg-teal">RANK ${esc(w.rank)}</span>` : ''}
+      </div>
+    </div>
+    <div class="d-acts">
+      <button class="btn btn-blue btn-sm" onclick="openLibPicker('arma','npc')">▶ ATRIBUIR A NPC</button>
+      <button class="btn btn-gold btn-sm" onclick="dupArma(${w.id})">⎘ DUPLICAR</button>
+      <button class="btn btn-sm" style="border-color:rgba(239,68,68,.25);color:rgba(239,68,68,.45)" onclick="delArma(${w.id})">[ DELETAR ]</button>
+    </div>
+  </div>
+  <div class="d-sep"></div>
+  <div class="sb top">IDENTIDADE</div>
+  <div class="g3 mb8">
+    <div class="field"><span class="lbl">NOME</span><input class="inp" value="${esc(w.name)}" oninput="aWF(${w.id},'name',this.value)"></div>
+    <div class="field"><span class="lbl">CATEGORIA</span><select class="inp" onchange="aWF(${w.id},'cat',this.value)">${WCATS.map(c => `<option${c === w.cat ? ' selected' : ''}>${c}</option>`).join('')}</select></div>
+    <div class="field"><span class="lbl">RANK REQUERIDO</span><select class="inp" onchange="aWF(${w.id},'rank',this.value)">${WRANKS.map(r => `<option${r === w.rank ? ' selected' : ''}>${r}</option>`).join('')}</select></div>
+  </div>
+  <div class="sb">DANO & ATAQUE</div>
+  <div class="g4 mb8">
+    <div class="field"><span class="lbl">DANO</span><input class="inp" value="${esc(w.dmg || '')}" oninput="aWF(${w.id},'dmg',this.value)" placeholder="ex: 1d8+Corpo"></div>
+    <div class="field"><span class="lbl">TIPO</span><select class="inp" onchange="aWF(${w.id},'type',this.value)">${WTYPES.map(t => `<option${t === w.type ? ' selected' : ''}>${t}</option>`).join('')}</select></div>
+    <div class="field"><span class="lbl">ATQ. BASE</span><select class="inp" onchange="aWF(${w.id},'ataque',this.value)">${['Corpo', 'Mente', 'Alma', '—'].map(a => `<option${a === w.ataque ? ' selected' : ''}>${a}</option>`).join('')}</select></div>
+    <div class="field"><span class="lbl">ALCANCE</span><select class="inp" onchange="aWF(${w.id},'alcance',this.value)">${['Corpo a Corpo', 'Curto', 'Médio', 'Longo', 'Extremo'].map(a => `<option${a === w.alcance ? ' selected' : ''}>${a}</option>`).join('')}</select></div>
+  </div>
+  <div class="g2 mb12">
+    <div class="field"><span class="lbl">MUNIÇÃO / CARGA</span><input class="inp" value="${esc(w.mun || '')}" oninput="aWF(${w.id},'mun',this.value)" placeholder="ex: 8 balas, 3 cargas..."></div>
+    <div class="field"><span class="lbl">PROPRIEDADES</span><input class="inp" value="${esc(w.props || '')}" oninput="aWF(${w.id},'props',this.value)" placeholder="Duas mãos, Sutil, Pesada..."></div>
+  </div>
+  <div class="sb gold">EFEITO ESPECIAL</div>
+  <textarea class="notes-ta" style="min-height:70px;margin-bottom:12px" oninput="aWF(${w.id},'effect',this.value)" placeholder="Efeito ativo, crítico especial, status que aplica...">${esc(w.effect || '')}</textarea>
+  <div class="sb purple">DESCRIÇÃO / LORE</div>
+  <textarea class="notes-ta" style="min-height:80px;margin-bottom:12px" oninput="aWF(${w.id},'desc',this.value)" placeholder="Origem, aparência, história...">${esc(w.desc || '')}</textarea>
+  ${used.length ? `<div style="margin-top:14px;padding:9px 12px;background:rgba(0,212,255,.03);border:1px solid var(--bd)"><div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--blue);letter-spacing:1.5px;margin-bottom:4px">EM USO POR</div><div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d)">${used.map(esc).join(' · ')}</div></div>` : ''}
+  </div>`;
+    }
+
+    function rImplante(im) {
+      if (!im) return emptyMain('⌖', 'Implante não encontrado');
+      const used = S.npcs.filter(n => (n.implants || []).some(x => x.libId === im.id)).map(n => n.name);
+      return `<div class="dw">
+  <div class="d-hdr">
+    <div>
+      <input style="background:transparent;border:none;border-bottom:1px solid rgba(168,85,247,.3);color:var(--txt);font-family:'Orbitron',monospace;font-size:20px;font-weight:700;outline:none;padding:2px 0;min-width:240px" value="${esc(im.name)}" oninput="aIF(${im.id},'name',this.value)">
+      <div class="d-badges">
+        <span class="bdg bdg-purple">${esc(im.cat || '—')}</span>
+        <span class="bdg bdg-teal">SLOT: ${esc(im.slot || '—')}</span>
+        ${im.rank && im.rank !== '—' ? `<span class="bdg bdg-gold">RANK ${esc(im.rank)}</span>` : ''}
+        ${im.cost ? `<span class="bdg bdg-red">${esc(im.cost)}</span>` : ''}
+      </div>
+    </div>
+    <div class="d-acts">
+      <button class="btn btn-blue btn-sm" onclick="openLibPicker('implante','npc')">▶ ATRIBUIR A NPC</button>
+      <button class="btn btn-gold btn-sm" onclick="dupImp(${im.id})">⎘ DUPLICAR</button>
+      <button class="btn btn-sm" style="border-color:rgba(239,68,68,.25);color:rgba(239,68,68,.45)" onclick="delImplante(${im.id})">[ DELETAR ]</button>
+    </div>
+  </div>
+  <div class="d-sep"></div>
+  <div class="sb purple top">IDENTIDADE</div>
+  <div class="g3 mb8">
+    <div class="field"><span class="lbl">NOME</span><input class="inp" value="${esc(im.name)}" oninput="aIF(${im.id},'name',this.value)"></div>
+    <div class="field"><span class="lbl">CATEGORIA</span><select class="inp" onchange="aIF(${im.id},'cat',this.value)">${ICATS.map(c => `<option${c === im.cat ? ' selected' : ''}>${c}</option>`).join('')}</select></div>
+    <div class="field"><span class="lbl">RANK</span><select class="inp" onchange="aIF(${im.id},'rank',this.value)">${WRANKS.map(r => `<option${r === im.rank ? ' selected' : ''}>${r}</option>`).join('')}</select></div>
+  </div>
+  <div class="g3 mb12">
+    <div class="field"><span class="lbl">SLOT CORPORAL</span><select class="inp" onchange="aIF(${im.id},'slot',this.value)">${ISLOTS.map(s => `<option${s === im.slot ? ' selected' : ''}>${s}</option>`).join('')}</select></div>
+    <div class="field"><span class="lbl">CUSTO DE ATIVAÇÃO</span><input class="inp" value="${esc(im.cost || '')}" oninput="aIF(${im.id},'cost',this.value)" placeholder="ex: 2S, 1 turno..."></div>
+    <div class="field"><span class="lbl">TIPO DE AÇÃO</span><select class="inp" onchange="aIF(${im.id},'action',this.value)"><option value="">—</option>${ACTS.map(a => `<option${a === im.action ? ' selected' : ''}>${a}</option>`).join('')}</select></div>
+  </div>
+  <div class="sb gold">EFEITO</div>
+  <textarea class="notes-ta" style="min-height:90px;margin-bottom:12px" oninput="aIF(${im.id},'effect',this.value)" placeholder="O que o implante faz mecanicamente...">${esc(im.effect || '')}</textarea>
+  <div class="sb">CONTRAPARTIDA / DRAWBACK</div>
+  <textarea class="notes-ta" style="min-height:60px;margin-bottom:12px" oninput="aIF(${im.id},'drawback',this.value)" placeholder="Penalidade, risco, condição de falha...">${esc(im.drawback || '')}</textarea>
+  <div class="sb purple">DESCRIÇÃO / LORE</div>
+  <textarea class="notes-ta" style="min-height:70px;margin-bottom:12px" oninput="aIF(${im.id},'desc',this.value)" placeholder="Origem, fabricante, aparência...">${esc(im.desc || '')}</textarea>
+  ${used.length ? `<div style="margin-top:14px;padding:9px 12px;background:rgba(168,85,247,.03);border:1px solid rgba(168,85,247,.18)"><div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--purple-b);letter-spacing:1.5px;margin-bottom:4px">EM USO POR</div><div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d)">${used.map(esc).join(' · ')}</div></div>` : ''}
+  </div>`;
+    }
+
+    // ── PICKER MODAL para importar da biblioteca em uma ficha de NPC ──
+    function arcConfirm(msg) {
+      return new Promise(resolve => {
+        const wrap = document.createElement('div'); wrap.className = 'arc-cf-ov';
+        wrap.innerHTML = `<div class="arc-cf-box"><div class="arc-cf-tag">[ CONFIRMAR AÇÃO ]</div><div class="arc-cf-msg">${msg}</div><div class="arc-cf-acts"><button class="btn btn-sm" data-act="cancel" style="border-color:rgba(255,255,255,.2);color:var(--txt-d)">CANCELAR</button><button class="btn btn-red btn-sm" data-act="ok">CONFIRMAR</button></div></div>`;
+        function close(v) { wrap.remove(); document.removeEventListener('keydown', onKey); resolve(v) }
+        function onKey(e) { if (e.key === 'Escape') { e.preventDefault(); close(false) } else if (e.key === 'Enter') { e.preventDefault(); close(true) } }
+        wrap.addEventListener('click', e => {
+          if (e.target === wrap) return close(false);
+          const a = e.target.closest('[data-act]'); if (a) close(a.dataset.act === 'ok');
+        });
+        document.addEventListener('keydown', onKey);
+        document.body.appendChild(wrap);
+        setTimeout(() => { const b = wrap.querySelector('[data-act="ok"]'); if (b) b.focus() }, 20);
+      });
+    }
+    function openLibPicker(kind, targetNpcId) {
+      if (targetNpcId === 'npc') {
+        if (!S.npcs.length) { return; }
+        UI.armPicker = { kind, npcId: null };
+      } else {
+        UI.armPicker = { kind, npcId: targetNpcId };
+      }
+      renderPicker();
+    }
+    function closeLibPicker() { UI.armPicker = null; const m = document.getElementById('libPicker'); if (m) m.remove() }
+    function pickFromLib(libId) {
+      const pk = UI.armPicker; if (!pk || !pk.npcId) return;
+      const n = findNPC(pk.npcId); if (!n) return;
+      if (pk.kind === 'arma') {
+        const w = findArma(libId); if (!w) return;
+        n.weapons = n.weapons || [];
+        n.weapons.push({ libId: w.id, name: w.name, dmg: w.dmg, type: w.type || 'Normal' });
+      } else {
+        const im = findImp(libId); if (!im) return;
+        n.implants = n.implants || [];
+        n.implants.push({ libId: im.id, name: im.name, effect: im.effect || '' });
+      }
+      closeLibPicker(); autosave();
+      if (UI.section === 'npc' && UI.npcId === pk.npcId) renderMain();
+    }
+    function pickTargetNpc(npcId) { UI.armPicker.npcId = npcId; renderPicker(); }
+    function renderPicker() {
+      const old = document.getElementById('libPicker'); if (old) old.remove();
+      if (!UI.armPicker) return;
+      const pk = UI.armPicker;
+      const wrap = document.createElement('div'); wrap.id = 'libPicker';
+      wrap.style.cssText = 'position:fixed;inset:0;z-index:500;background:rgba(2,4,8,.82);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:30px';
+      let body = '';
+      if (!pk.npcId) {
+        body = `<div style="font-family:'Orbitron',monospace;font-size:11px;letter-spacing:3px;color:var(--blue);margin-bottom:14px">SELECIONE UM NPC DESTINO</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">
+      ${S.npcs.map(n => `<button class="lp-item" style="text-align:left;background:rgba(0,212,255,.03);border:1px solid var(--bd);cursor:pointer;padding:9px 12px" onclick="pickTargetNpc(${n.id})"><div class="lp-item-name">${esc(n.name)}</div><div class="lp-item-sub"><span class="bdg bdg-red" style="font-size:7px">NPC</span><span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--txt-d)">♥ ${n.hpCur || n.hpMax || 20}/${n.hpMax || 20}</span></div></button>`).join('')}
+    </div>`;
+      } else {
+        const arr = pk.kind === 'arma' ? (S.armaLib.armas || []) : (S.armaLib.implantes || []);
+        const n = findNPC(pk.npcId);
+        body = `<div style="font-family:'Orbitron',monospace;font-size:11px;letter-spacing:3px;color:var(--blue);margin-bottom:14px">ESCOLHA ${pk.kind === 'arma' ? 'UMA ARMA' : 'UM IMPLANTE'} → ${esc(n ? n.name : '?')}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;max-height:60vh;overflow-y:auto;padding-right:6px">
+      ${arr.length ? arr.map(x => `<button style="text-align:left;background:rgba(0,212,255,.03);border:1px solid var(--bd);cursor:pointer;padding:10px 12px;color:var(--txt);font-family:inherit;font-size:13px" onclick="pickFromLib(${x.id})">
+        <div style="font-weight:700;margin-bottom:4px">${esc(x.name)}</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+        ${pk.kind === 'arma' ? `<span class="bdg bdg-red" style="font-size:7px">${esc(x.cat || '—')}</span><span class="bdg bdg-gold" style="font-size:7px">${esc(x.dmg || '—')}</span>${x.type && x.type !== 'Normal' ? `<span class="bdg bdg-purple" style="font-size:7px">${esc(x.type)}</span>` : ''}` : `<span class="bdg bdg-purple" style="font-size:7px">${esc(x.slot || '—')}</span><span class="bdg bdg-teal" style="font-size:7px">${esc(x.cat || '—')}</span>`}
+        </div>
+      </button>`).join('') : '<div style="font-family:\'Share Tech Mono\',monospace;font-size:11px;color:var(--txt-d);grid-column:1/-1;text-align:center;padding:30px">Biblioteca vazia.</div>'}
+    </div>`;
+      }
+      wrap.innerHTML = `<div style="background:#020408;border:1px solid var(--bd-b);clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));padding:22px 26px;width:min(820px,100%);max-height:88vh;overflow:hidden;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div style="font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;color:var(--red)">[ IMPORTAR DA BIBLIOTECA ]</div>
+      <button class="btn btn-sm" style="border-color:rgba(255,255,255,.18);color:var(--txt-d)" onclick="closeLibPicker()">✕ FECHAR</button>
+    </div>
+    <div style="height:1px;background:linear-gradient(90deg,rgba(239,68,68,.4),rgba(0,212,255,.2),transparent);margin-bottom:14px"></div>
+    ${body}
+  </div>`;
+      document.body.appendChild(wrap);
+    }
+
+    function rCombat() {
+      const rows = S.combatants.length ? S.combatants.map((c, i) => `
+    <div class="init-row ${i === S.cur ? 'cur' : ''}">
+      <div class="init-num" style="color:${i === S.cur ? 'var(--red)' : 'var(--blue)'}">${c.init}</div>
+      <div style="font-weight:${i === S.cur ? 700 : 400};color:${i === S.cur ? 'var(--red)' : 'var(--txt)'};">${i === S.cur ? '▶ ' : ''}${esc(c.name)}</div>
+      <div style="display:flex;align-items:center;gap:3px"><input class="hp-ei" type="number" value="${c.hpCur}" onchange="updCHP(${c.id},this.value)" style="width:46px"><span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txt-d)">/${c.hpMax}</span></div>
+      <div style="font-family:'Orbitron',monospace;font-size:11px;color:var(--blue)">${c.ca}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:2px">${(c.flags || []).map(f => `<span class="bdg bdg-red" style="font-size:7px">${f}</span>`).join('')}</div>
+      <button class="wrem" onclick="remComb(${c.id})">✕</button>
+    </div>`).join('') : '<div class="empty-l" style="padding:16px">Adicione combatentes abaixo.</div>';
+      return `<div class="dw"><div class="g2" style="gap:16px">
+    <div>
+      <div class="sb top">RASTREADOR DE INICIATIVA</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div><div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txt-d);letter-spacing:1px;margin-bottom:2px">RODADA</div><div class="round-d">${S.round}</div></div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <button class="btn btn-red btn-sm" onclick="nextTurn()">▶ PRÓXIMO TURNO</button>
+          <button class="btn btn-gold btn-sm" onclick="nextRound()">⟳ PRÓXIMA RODADA</button>
+          <button class="btn btn-blue btn-sm" onclick="sortInit()">⬇ ORDENAR INIT</button>
+          <button class="btn btn-sm" style="border-color:rgba(255,255,255,.15);color:var(--txt-d)" onclick="resetCombat()">↺ RESET</button>
+        </div>
+      </div>
+      <div class="init-row thdr" style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--txt-d);letter-spacing:1px;padding-bottom:4px;border-bottom:1px solid var(--bd)">
+        <span>INIT</span><span>NOME</span><span>HP</span><span>CA</span><span>FLAGS</span><span></span>
+      </div>
+      <div id="initList">${rows}</div>
+      <div style="display:flex;gap:6px;margin-top:9px;flex-wrap:wrap">
+        <input class="inp" id="cName" placeholder="Nome" style="flex:2;min-width:100px">
+        <input class="inp" type="number" id="cInit" placeholder="Init" style="flex:0 0 58px">
+        <input class="inp" type="number" id="cHP" placeholder="HP" style="flex:0 0 58px">
+        <input class="inp" type="number" id="cCA" placeholder="CA" style="flex:0 0 52px">
+        <button class="btn btn-red btn-sm" onclick="addComb()">+</button>
+      </div>
+      <div class="sb mt16">NOTAS DE COMBATE</div>
+      <textarea class="notes-ta" id="combatNotesTA" style="min-height:100px" oninput="S.combatNotes=this.value;autosave()">${esc(S.combatNotes)}</textarea>
+    </div>
+    <div>
+      <div class="sb top">ROLAGEM RÁPIDA</div>
+      <div class="g2 mb8" style="gap:8px">
+        <div class="field"><span class="lbl">DADO</span><select class="inp" id="qDie"><option>d4</option><option>d6</option><option selected>d20</option><option>d8</option><option>d10</option><option>d12</option><option>d100</option></select></div>
+        <div class="field"><span class="lbl">QUANTIDADE</span><input class="inp" type="number" id="qQty" value="1" min="1" max="20"></div>
+        <div class="field"><span class="lbl">BÔNUS</span><input class="inp" type="number" id="qBonus" value="0"></div>
+        <div class="field"><span class="lbl">RESULTADO</span><div class="computed" id="qResult" style="font-size:26px">—</div></div>
+      </div>
+      <button class="btn btn-blue" style="width:100%;margin-bottom:5px" onclick="rollQ()">▶ ROLAR</button>
+      <div id="rollHist" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txt-d);max-height:110px;overflow-y:auto;padding:5px;background:rgba(0,0,0,.2);border:1px solid var(--bd)"></div>
+      <div class="sb mt16 gold">CHANCE (d100)</div>
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:6px">
+        <div class="field" style="flex:1"><span class="lbl">THRESHOLD (%)</span><input class="inp" type="number" id="chVal" value="20" min="1" max="100"></div>
+        <button class="btn btn-gold btn-sm" onclick="rollChance()">ROLAR</button>
+      </div>
+      <div style="font-family:'Orbitron',monospace;font-size:22px;text-align:center;letter-spacing:2px" id="chResult">—</div>
+    </div>
+  </div></div>`;
+    }
+    function addComb() {
+      const name = gv('cName').trim() || 'Combatente'; const init = parseInt(gv('cInit')) || 0; const hp = parseInt(gv('cHP')) || 20; const ca = parseInt(gv('cCA')) || 10;
+      S.combatants.push({ id: uid(), name, init, hpMax: hp, hpCur: hp, ca, flags: [] });
+      ['cName', 'cInit', 'cHP', 'cCA'].forEach(id => { const e = document.getElementById(id); if (e) e.value = '' });
+      renderMain(); autosave();
+    }
+    function remComb(id) { S.combatants = S.combatants.filter(c => c.id !== id); renderMain(); autosave() }
+    function sortInit() { S.combatants.sort((a, b) => b.init - a.init); S.cur = 0; renderMain(); autosave() }
+    function nextTurn() { if (!S.combatants.length) return; S.cur = (S.cur + 1) % S.combatants.length; renderMain(); autosave() }
+    function nextRound() { S.round++; S.cur = 0; renderMain(); autosave() }
+    function resetCombat() { arcConfirm('Resetar combate?').then(ok => { if (!ok) return; S.round = 1; S.cur = 0; S.combatants = []; renderMain(); autosave() }) }
+    function updCHP(id, v) { const c = S.combatants.find(x => x.id === id); if (!c) return; c.hpCur = Math.max(0, Math.min(c.hpMax, parseInt(v) || 0)); autosave() }
+    function rollQ() {
+      const die = parseInt(gv('qDie').replace('d', '')); const qty = Math.min(20, parseInt(gv('qQty')) || 1); const bonus = parseInt(gv('qBonus')) || 0;
+      let rolls = []; for (let i = 0; i < qty; i++)rolls.push(Math.floor(Math.random() * die) + 1);
+      const total = rolls.reduce((a, b) => a + b, 0) + bonus;
+      const r = document.getElementById('qResult'); if (r) r.textContent = total;
+      const h = document.getElementById('rollHist');
+      if (h) { h.innerHTML = `<div style="margin-bottom:2px;color:var(--blue)">${qty}d${die}${bonus ? '+' + bonus : ''}: [${rolls.join('+')}]=${total}</div>` + h.innerHTML; if (h.children.length > 10) h.removeChild(h.lastChild) }
+    }
+    function rollChance() {
+      const t = parseInt(gv('chVal')) || 20; const r = Math.floor(Math.random() * 100) + 1;
+      const el = document.getElementById('chResult');
+      if (el) { el.textContent = r + ' — ' + (r <= t ? 'SUCESSO' : 'FALHA'); el.style.color = r <= t ? 'var(--green)' : 'var(--red)' }
+    }
+
+    function addNPC() {
+      const n = { id: uid(), name: 'Novo NPC', natureza: '', rank: 'C', nivel: 1, role: '', faccao: '', hpCur: 20, hpMax: 20, staCur: 10, staMax: 10, san: 100, ca: 10, reducao: 0, mov: 8, corpo: 0, mente: 0, alma: 0, danoFisico: '1d6+Corpo', critMargin: 20, critMult: '2×', abilities: [], weapons: [], implants: [], statusNeg: {}, statusPos: {}, notes: '' };
+      S.npcs.push(n); UI.npcId = n.id; renderApp(); autosave();
+    }
+    function deleteNPC(id) { arcConfirm('Remover NPC?').then(ok => { if (!ok) return; S.npcs = S.npcs.filter(n => n.id !== id); if (UI.npcId === id) UI.npcId = S.npcs.length ? S.npcs[0].id : null; renderApp(); autosave() }) }
+    function nF(id, f, v) { const n = findNPC(id); if (!n) return; n[f] = v; autosave() }
+    function nNum(id, f, d) {
+      const n = findNPC(id); if (!n) return;
+      const max = f === 'nivel' ? 20 : f === 'critMargin' ? 20 : 10; const min = f === 'critMargin' ? 11 : 0;
+      n[f] = Math.max(min, Math.min(max, (n[f] || 0) + d)); autosave();
+      st(`nv_${f}_${id}`, n[f]);
+      if (['corpo', 'mente', 'alma'].includes(f)) { st(`nb_${f}_${id}`, bon(n[f])); if (f === 'mente') st(`ninit_${id}`, bon(Math.floor(n.mente / 2))) }
+    }
+    function nBar(id, f) {
+      const n = findNPC(id); if (!n) return;
+      const c = parseInt(document.getElementById(`nbc_${f}_${id}`)?.value) || 0;
+      const m = parseInt(document.getElementById(`nbm_${f}_${id}`)?.value) || 1;
+      n[f + 'Cur'] = c; n[f + 'Max'] = m; sw(`nbar_${f}_${id}`, pct(c, m)); autosave();
+    }
+    function nStatus(id, s, type) {
+      const n = findNPC(id); if (!n) return;
+      const k = type === 'neg' ? 'statusNeg' : 'statusPos'; if (!n[k]) n[k] = {}; n[k][s] = !n[k][s];
+      const el = document.getElementById(`nchip_${id}_${s}`);
+      if (el) el.classList.toggle(type === 'neg' ? 'neg-on' : 'pos-on', !!n[k][s]); autosave();
+    }
+    function addNPCAbil(id) { const n = findNPC(id); if (!n) return; n.abilities.push({ name: 'Nova Skill', action: 'Passiva', cost: '', desc: '' }); renderMain(); autosave() }
+    function remNPCAbil(id, i) { const n = findNPC(id); if (!n) return; n.abilities.splice(i, 1); renderMain(); autosave() }
+    function nAbF(id, i, f, v) { const n = findNPC(id); if (!n || !n.abilities[i]) return; n.abilities[i][f] = v; autosave() }
+    function addNPCW(id) { const n = findNPC(id); if (!n) return; n.weapons = n.weapons || []; n.weapons.push({ name: '', dmg: '1d6', type: 'Normal' }); renderMain(); autosave() }
+    function remNPCW(id, i) { const n = findNPC(id); if (!n) return; n.weapons.splice(i, 1); renderMain(); autosave() }
+    function nWF(id, i, f, v) { const n = findNPC(id); if (!n || !n.weapons[i]) return; n.weapons[i][f] = v; autosave() }
+    function addNPCI(id) { const n = findNPC(id); if (!n) return; n.implants = n.implants || []; n.implants.push({ name: '', effect: '' }); renderMain(); autosave() }
+    function remNPCI(id, i) { const n = findNPC(id); if (!n) return; n.implants.splice(i, 1); renderMain(); autosave() }
+    function nIF(id, i, f, v) { const n = findNPC(id); if (!n || !n.implants[i]) return; n.implants[i][f] = v; autosave() }
+    function addNPCToCombat(id) {
+      const n = findNPC(id); if (!n) return;
+      S.combatants.push({ id: uid(), name: n.name, init: Math.floor(Math.random() * 20) + 1 + Math.floor((n.mente || 0) / 2), hpMax: n.hpMax || 20, hpCur: n.hpCur || n.hpMax || 20, ca: n.ca || 10, flags: [] });
+      setSection('combat'); autosave();
+    }
+    function rNPC(n) {
+      if (!n) return emptyMain('◈', 'NPC não encontrado');
+      const attrs = [{ k: 'corpo', lbl: 'CORPO', col: 'var(--blue)' }, { k: 'mente', lbl: 'MENTE', col: 'var(--purple-b)' }, { k: 'alma', lbl: 'ALMA', col: 'var(--gold)' }];
+      return `<div class="dw">
+  <div class="d-hdr">
+    <div>
+      <input style="background:transparent;border:none;border-bottom:1px solid rgba(0,212,255,.2);color:var(--txt);font-family:'Orbitron',monospace;font-size:20px;font-weight:700;outline:none;padding:2px 0;min-width:200px" value="${esc(n.name)}" oninput="nF(${n.id},'name',this.value)">
+      <div class="d-badges"><span class="bdg bdg-blue">NV.${n.nivel || 1}</span><span class="bdg bdg-red">RANK ${n.rank || 'C'}</span>${n.natureza ? `<span class="bdg bdg-gold">${esc(n.natureza)}</span>` : ''}</div>
+    </div>
+    <div class="d-acts">
+      <button class="btn btn-red btn-sm" onclick="addNPCToCombat(${n.id})">▶ AO COMBATE</button>
+      <button class="btn btn-sm" style="border-color:rgba(239,68,68,.25);color:rgba(239,68,68,.45)" onclick="deleteNPC(${n.id})">[ DELETAR ]</button>
+    </div>
+  </div>
+  <div class="d-sep"></div>
+  <div class="sb top">IDENTIDADE</div>
+  <div class="g3 mb8">
+    <div class="field"><span class="lbl">NATUREZA</span><select class="inp" onchange="nF(${n.id},'natureza',this.value)"><option value="">—</option>${NATS.map(x => `<option${x === n.natureza ? ' selected' : ''}>${x}</option>`).join('')}</select></div>
+    <div class="field"><span class="lbl">NÍVEL</span><div class="attr-ctrl mt4"><button class="c-btn" onclick="nNum(${n.id},'nivel',-1)">−</button><span class="c-val" id="nv_nivel_${n.id}">${n.nivel || 1}</span><button class="c-btn" onclick="nNum(${n.id},'nivel',1)">+</button></div></div>
+    <div class="field"><span class="lbl">RANK</span><select class="inp" onchange="nF(${n.id},'rank',this.value)">${['C', 'B', 'A', 'S', '?'].map(r => `<option${r === n.rank ? ' selected' : ''}>${r}</option>`).join('')}</select></div>
+  </div>
+  <div class="g2 mb12">
+    <div class="field"><span class="lbl">PAPEL / FUNÇÃO</span><input class="inp" value="${esc(n.role || '')}" oninput="nF(${n.id},'role',this.value)" placeholder="ex: Chefe de Guarda"></div>
+    <div class="field"><span class="lbl">FACÇÃO</span><input class="inp" value="${esc(n.faccao || '')}" oninput="nF(${n.id},'faccao',this.value)" placeholder="ex: Reich Global"></div>
+  </div>
+  <div class="sb">STATUS VITAIS</div>
+  <div class="g3 mb12" style="gap:14px">
+    <div class="bar-wrap"><div class="bar-hdr"><span class="bar-lbl">PONTOS DE VIDA</span><div class="bar-inps"><input class="bar-inp" type="number" id="nbc_hp_${n.id}" value="${n.hpCur || 20}" oninput="nBar(${n.id},'hp')"><span class="bar-sep">/</span><input class="bar-inp" type="number" id="nbm_hp_${n.id}" value="${n.hpMax || 20}" oninput="nBar(${n.id},'hp')"></div></div><div class="bar-track"><div class="bar-fill hp-f" id="nbar_hp_${n.id}" style="width:${pct(n.hpCur || 20, n.hpMax || 20)}%"></div></div></div>
+    <div class="bar-wrap"><div class="bar-hdr"><span class="bar-lbl">STAMINA</span><div class="bar-inps"><input class="bar-inp" type="number" id="nbc_sta_${n.id}" value="${n.staCur || 10}" oninput="nBar(${n.id},'sta')"><span class="bar-sep">/</span><input class="bar-inp" type="number" id="nbm_sta_${n.id}" value="${n.staMax || 10}" oninput="nBar(${n.id},'sta')"></div></div><div class="bar-track"><div class="bar-fill sta-f" id="nbar_sta_${n.id}" style="width:${pct(n.staCur || 10, n.staMax || 10)}%"></div></div></div>
+    <div class="bar-wrap"><div class="bar-hdr"><span class="bar-lbl">SANIDADE</span><div class="bar-inps"><input class="bar-inp" type="number" id="nbc_san_${n.id}" value="${n.san || 100}" oninput="nBar(${n.id},'san')"><span class="bar-sep">/100</span></div></div><div class="bar-track"><div class="bar-fill san-f" id="nbar_san_${n.id}" style="width:${Math.min(100, n.san || 100)}%"></div></div></div>
+  </div>
+  <div class="g4 mb12">
+    <div class="field"><span class="lbl">CA</span><input class="inp" type="number" value="${n.ca || 10}" oninput="nF(${n.id},'ca',+this.value)"></div>
+    <div class="field"><span class="lbl">REDUÇÃO</span><input class="inp" type="number" value="${n.reducao || 0}" oninput="nF(${n.id},'reducao',+this.value)"></div>
+    <div class="field"><span class="lbl">MOVIMENTO (m)</span><input class="inp" type="number" value="${n.mov || 8}" oninput="nF(${n.id},'mov',+this.value)"></div>
+    <div class="field"><span class="lbl">INICIATIVA</span><div class="computed" id="ninit_${n.id}">${bon(Math.floor((n.mente || 0) / 2))}</div></div>
+  </div>
+  <div class="sb">ATRIBUTOS</div>
+  <div class="g3 mb12" style="gap:14px;align-items:start">${attrs.map(a => `<div class="attr-col"><div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:${a.col};letter-spacing:2px;margin-bottom:5px">${a.lbl}</div><div class="attr-ctrl"><button class="c-btn" onclick="nNum(${n.id},'${a.k}',-1)">−</button><span class="c-val" id="nv_${a.k}_${n.id}" style="color:${a.col}">${n[a.k] || 0}</span><button class="c-btn" onclick="nNum(${n.id},'${a.k}',1)">+</button><span class="c-bon" id="nb_${a.k}_${n.id}">${bon(n[a.k] || 0)}</span></div></div>`).join('')}</div>
+  <div class="g3 mb12 mt8">
+    <div class="field"><span class="lbl">DANO FÍSICO</span><input class="inp" value="${esc(n.danoFisico || '1d6+Corpo')}" oninput="nF(${n.id},'danoFisico',this.value)"></div>
+    <div class="field"><span class="lbl">MARGEM CRÍTICO</span><input class="inp" type="number" value="${n.critMargin || 20}" min="11" max="20" oninput="nF(${n.id},'critMargin',+this.value)"></div>
+    <div class="field"><span class="lbl">MULT. CRÍTICO</span><input class="inp" value="${esc(n.critMult || '2×')}" oninput="nF(${n.id},'critMult',this.value)"></div>
+  </div>
+  <div class="sb">SKILLS</div>
+  ${(n.abilities || []).length === 0 ? '<div class="empty-l">Nenhuma skill.</div>' : ''}
+  ${(n.abilities || []).map((a, ai) => `<div class="sk-card"><div class="sk-hdr"><input class="sk-ni" value="${esc(a.name || '')}" oninput="nAbF(${n.id},${ai},'name',this.value)" placeholder="Nome"><div class="sk-meta"><select class="act-sel" onchange="nAbF(${n.id},${ai},'action',this.value)">${ACTS.map(x => `<option${x === a.action ? ' selected' : ''}>${x}</option>`).join('')}</select><input class="cost-i" value="${esc(a.cost || '')}" placeholder="—S" oninput="nAbF(${n.id},${ai},'cost',this.value)"><button class="wrem" onclick="remNPCAbil(${n.id},${ai})">✕</button></div></div><textarea class="notes-ta" style="min-height:40px" oninput="nAbF(${n.id},${ai},'desc',this.value)" placeholder="Descrição...">${esc(a.desc || '')}</textarea></div>`).join('')}
+  <button class="dash" onclick="addNPCAbil(${n.id})">+ ADICIONAR SKILL</button>
+  <div class="g2 mt12">
+    <div>
+      <div class="sb top blue">ARMAS</div>
+      <div class="trow thdr" style="grid-template-columns:1fr 70px 70px 22px"><span>NOME</span><span>DANO</span><span>TIPO</span><span></span></div>
+      ${(n.weapons || []).map((w, wi) => `<div class="trow" style="grid-template-columns:1fr 70px 70px 22px"><input class="wi" value="${esc(w.name || '')}" oninput="nWF(${n.id},${wi},'name',this.value)" placeholder="Nome"><input class="wi" value="${esc(w.dmg || '')}" oninput="nWF(${n.id},${wi},'dmg',this.value)" placeholder="1d6"><select class="wi" onchange="nWF(${n.id},${wi},'type',this.value)" style="font-size:10px">${['Normal', 'Verdadeiro', 'Absoluto'].map(t => `<option${t === w.type ? ' selected' : ''}>${t}</option>`).join('')}</select><button class="wrem" onclick="remNPCW(${n.id},${wi})">✕</button></div>`).join('')}
+      <div style="display:flex;gap:5px"><button class="dash red" style="flex:1" onclick="addNPCW(${n.id})">+ ARMA</button><button class="dash" style="flex:1;border-color:rgba(0,212,255,.18);color:rgba(0,212,255,.45)" onclick="openLibPicker('arma',${n.id})">⌖ DA BIBLIOTECA</button></div>
+    </div>
+    <div>
+      <div class="sb top purple">IMPLANTES</div>
+      <div class="trow thdr" style="grid-template-columns:1fr 1fr 22px"><span>NOME</span><span>EFEITO</span><span></span></div>
+      ${(n.implants || []).map((im, ii) => `<div class="trow" style="grid-template-columns:1fr 1fr 22px"><input class="wi" value="${esc(im.name || '')}" oninput="nIF(${n.id},${ii},'name',this.value)" placeholder="Nome"><input class="wi" value="${esc(im.effect || '')}" oninput="nIF(${n.id},${ii},'effect',this.value)" placeholder="Efeito"><button class="wrem" onclick="remNPCI(${n.id},${ii})">✕</button></div>`).join('')}
+      <div style="display:flex;gap:5px"><button class="dash purple" style="flex:1" onclick="addNPCI(${n.id})">+ IMPLANTE</button><button class="dash" style="flex:1;border-color:rgba(0,212,255,.18);color:rgba(0,212,255,.45)" onclick="openLibPicker('implante',${n.id})">⌖ DA BIBLIOTECA</button></div>
+    </div>
+  </div>
+  <div class="sb mt16">STATUS ATIVOS</div>
+  <div class="lbl mb4" style="color:rgba(239,68,68,.55)">NEGATIVOS</div>
+  <div class="chips mb8">${SNEG.map(s => `<button id="nchip_${n.id}_${s}" class="chip ${(n.statusNeg || {})[s] ? 'neg-on' : ''}" onclick="nStatus(${n.id},'${s}','neg')">${s}</button>`).join('')}</div>
+  <div class="lbl mb4" style="color:rgba(16,185,129,.55)">POSITIVOS</div>
+  <div class="chips mb12">${SPOS.map(s => `<button id="nchip_${n.id}_${s}" class="chip ${(n.statusPos || {})[s] ? 'pos-on' : ''}" onclick="nStatus(${n.id},'${s}','pos')">${s}</button>`).join('')}</div>
+  <div class="sb">NOTAS DO MESTRE</div>
+  <textarea class="notes-ta" style="min-height:90px" oninput="nF(${n.id},'notes',this.value)" placeholder="Informações secretas, motivações...">${esc(n.notes || '')}</textarea>
+  </div>`;
+    }
+
+    function addConceito() {
+      const c = { id: uid(), name: 'Novo Conceito', tipo: 'Primordial', conceito: '', coeMax: 100, coeCur: 100, phase: 1, abilities: [], domain: '', domainType: '', domainDesc: '', notes: '' };
+      S.conceitos.push(c); UI.cId = c.id; renderApp(); autosave();
+    }
+    function deleteConceito(id) { arcConfirm('Remover conceito?').then(ok => { if (!ok) return; S.conceitos = S.conceitos.filter(c => c.id !== id); if (UI.cId === id) UI.cId = S.conceitos.length ? S.conceitos[0].id : null; renderApp(); autosave() }) }
+    function cF(id, f, v) { const c = findC(id); if (!c) return; c[f] = v; autosave() }
+    function cBar(id) {
+      const c = findC(id); if (!c) return;
+      const cur = parseInt(document.getElementById(`cbc_${id}`)?.value) || 0;
+      const max = parseInt(document.getElementById(`cbm_${id}`)?.value) || 100;
+      c.coeCur = cur; c.coeMax = max; sw(`cbar_${id}`, pct(cur, max)); autosave();
+    }
+    function setPhase(id, p) {
+      const c = findC(id); if (!c) return; c.phase = p;
+      document.querySelectorAll(`[data-cphase="${id}"]`).forEach((b, i) => b.classList.toggle('on', i + 1 === p));
+      autosave();
+    }
+    function addCAbil(id) { const c = findC(id); if (!c) return; c.abilities.push({ name: 'Nova Habilidade', action: 'Passiva', cost: '', phase: 0, desc: '' }); renderMain(); autosave() }
+    function remCAbil(id, i) { const c = findC(id); if (!c) return; c.abilities.splice(i, 1); renderMain(); autosave() }
+    function cAF(id, i, f, v) { const c = findC(id); if (!c || !c.abilities[i]) return; c.abilities[i][f] = v; autosave() }
+    function addCToCombat(id) {
+      const c = findC(id); if (!c) return;
+      S.combatants.push({ id: uid(), name: `[C] ${c.name}`, init: Math.floor(Math.random() * 20) + 10, hpMax: c.coeMax || 100, hpCur: c.coeCur || 100, ca: 15, flags: ['CONCEITO'] });
+      setSection('combat'); autosave();
+    }
+    function rConceito(c) {
+      if (!c) return emptyMain('✦', 'Conceito não encontrado');
+      return `<div class="dw">
+  <div class="d-hdr">
+    <div>
+      <input style="background:transparent;border:none;border-bottom:1px solid rgba(168,85,247,.25);color:var(--txt);font-family:'Orbitron',monospace;font-size:20px;font-weight:700;outline:none;padding:2px 0;min-width:200px" value="${esc(c.name)}" oninput="cF(${c.id},'name',this.value)">
+      <div class="d-badges"><span class="bdg bdg-purple">${c.tipo || 'Primordial'}</span>${c.conceito ? `<span class="bdg bdg-gold">${esc(c.conceito)}</span>` : ''}</div>
+    </div>
+    <div class="d-acts">
+      <button class="btn btn-red btn-sm" onclick="addCToCombat(${c.id})">▶ AO COMBATE</button>
+      <button class="btn btn-sm" style="border-color:rgba(239,68,68,.25);color:rgba(239,68,68,.45)" onclick="deleteConceito(${c.id})">[ DELETAR ]</button>
+    </div>
+  </div>
+  <div class="d-sep"></div>
+  <div class="g3 mb12">
+    <div class="field"><span class="lbl">NOME</span><input class="inp" value="${esc(c.name)}" oninput="cF(${c.id},'name',this.value)"></div>
+    <div class="field"><span class="lbl">TIPO</span><select class="inp" onchange="cF(${c.id},'tipo',this.value)">${TCONC.map(t => `<option${t === c.tipo ? ' selected' : ''}>${t}</option>`).join('')}</select></div>
+    <div class="field"><span class="lbl">CONCEITO</span><input class="inp" value="${esc(c.conceito || '')}" oninput="cF(${c.id},'conceito',this.value)" placeholder="ex: Tempo, Morte..."></div>
+  </div>
+  <div class="sb gold">COESÃO</div>
+  <div style="background:rgba(245,158,11,.04);border:1px solid rgba(245,158,11,.18);padding:12px;margin-bottom:12px">
+    <div class="bar-wrap"><div class="bar-hdr"><span class="bar-lbl" style="color:var(--gold)">COESÃO ATUAL</span><div class="bar-inps"><input class="bar-inp" type="number" id="cbc_${c.id}" value="${c.coeCur || 100}" oninput="cBar(${c.id})" style="color:var(--gold)"><span class="bar-sep">/</span><input class="bar-inp" type="number" id="cbm_${c.id}" value="${c.coeMax || 100}" oninput="cBar(${c.id})"></div></div><div class="bar-track" style="height:7px"><div class="bar-fill coe-f" id="cbar_${c.id}" style="width:${pct(c.coeCur || 100, c.coeMax || 100)}%"></div></div></div>
+  </div>
+  <div class="sb purple">FASE ATIVA</div>
+  <div style="display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap">
+    ${[{ n: 1, l: 'FASE 1', r: '100–66%' }, { n: 2, l: 'FASE 2', r: '65–33%' }, { n: 3, l: 'FASE 3', r: '32–1%' }, { n: 4, l: 'FINAL', r: '0%' }].map(p => `<button class="ph-btn ${c.phase === p.n ? 'on' : ''}" data-cphase="${c.id}" onclick="setPhase(${c.id},${p.n})">${p.l}<br><span style="font-size:7px;opacity:.6">${p.r}</span></button>`).join('')}
+  </div>
+  <div class="sb">HABILIDADES</div>
+  ${(c.abilities || []).length === 0 ? '<div class="empty-l">Nenhuma habilidade.</div>' : ''}
+  ${(c.abilities || []).map((a, ai) => `<div class="sk-card"><div class="sk-hdr"><input class="sk-ni" value="${esc(a.name || '')}" oninput="cAF(${c.id},${ai},'name',this.value)" placeholder="Nome"><div class="sk-meta"><select class="act-sel" onchange="cAF(${c.id},${ai},'action',this.value)">${ACTS.map(x => `<option${x === a.action ? ' selected' : ''}>${x}</option>`).join('')}</select><input class="cost-i" value="${esc(a.cost || '')}" placeholder="—S" oninput="cAF(${c.id},${ai},'cost',this.value)"><select class="act-sel" style="width:48px;font-size:8px" onchange="cAF(${c.id},${ai},'phase',+this.value)"><option value="0" ${a.phase === 0 ? 'selected' : ''}>Todas</option>${[1, 2, 3, 4].map(p => `<option value="${p}" ${a.phase === p ? 'selected' : ''}>F${p}</option>`).join('')}</select><button class="wrem" onclick="remCAbil(${c.id},${ai})">✕</button></div></div><textarea class="notes-ta" style="min-height:40px" oninput="cAF(${c.id},${ai},'desc',this.value)" placeholder="Descrição...">${esc(a.desc || '')}</textarea></div>`).join('')}
+  <button class="dash purple" onclick="addCAbil(${c.id})">+ ADICIONAR HABILIDADE</button>
+  <div class="sb gold mt16">DOMÍNIO</div>
+  <div class="g2 mb8">
+    <div class="field"><span class="lbl">NOME DO DOMÍNIO</span><input class="inp" value="${esc(c.domain || '')}" oninput="cF(${c.id},'domain',this.value)" placeholder="ex: O Buraco Negro..."></div>
+    <div class="field"><span class="lbl">TIPO</span><input class="inp" value="${esc(c.domainType || '')}" oninput="cF(${c.id},'domainType',this.value)" placeholder="Fixo / Móvel / Abstrato"></div>
+  </div>
+  <div class="field mb12"><span class="lbl">DESCRIÇÃO DO DOMÍNIO</span><textarea class="inp" style="min-height:60px" oninput="cF(${c.id},'domainDesc',this.value)">${esc(c.domainDesc || '')}</textarea></div>
+  <div class="sb">NOTAS</div>
+  <textarea class="notes-ta" style="min-height:80px" oninput="cF(${c.id},'notes',this.value)">${esc(c.notes || '')}</textarea>
+  </div>`;
+    }
+
+    function addArt(tier) {
+      if (!S.artefatos[tier]) S.artefatos[tier] = [];
+      const a = { id: uid(), name: 'Novo Artefato', owner: '', decifrado: false, notes: '' };
+      if (tier === 'divino') { a.conceito = ''; a.guardiao = ''; a.efeitoPassivo = ''; a.habEspecial = ''; }
+      else if (tier === 'anciao') { a.prereq = ''; a.evolucao = ''; a.efeito = ''; }
+      else if (tier === 'mitico') { a.lenda = ''; a.titulo = ''; a.tituloRank = 'C'; a.tituloSkills = []; a.efeito = ''; }
+      else if (tier === 'lendario') { a.efeito = ''; }
+      S.artefatos[tier].push(a); UI.artTier = tier; UI.artId = a.id; renderApp(); autosave();
+    }
+    function deleteArt(tier, id) { arcConfirm('Remover artefato?').then(ok => { if (!ok) return; S.artefatos[tier] = S.artefatos[tier].filter(a => a.id !== id); if (UI.artId === id) UI.artId = null; renderApp(); autosave() }) }
+    function aF(tier, id, f, v) { const a = findArt(tier, id); if (!a) return; a[f] = v; autosave() }
+    function addMSkill(tier, id) { const a = findArt(tier, id); if (!a) return; a.tituloSkills = a.tituloSkills || []; a.tituloSkills.push({ name: 'Nova Skill', action: 'Passiva', cost: '', desc: '' }); renderMain(); autosave() }
+    function remMSkill(tier, id, i) { const a = findArt(tier, id); if (!a) return; a.tituloSkills.splice(i, 1); renderMain(); autosave() }
+    function mSF(tier, id, i, f, v) { const a = findArt(tier, id); if (!a || !a.tituloSkills[i]) return; a.tituloSkills[i][f] = v; autosave() }
+    function rArtefato(a, tier) {
+      if (!a) return emptyMain('◆', 'Artefato não encontrado');
+      const col = TCOL[tier]; const tbdg = TBDG[tier];
+      let specific = '';
+      if (tier === 'divino') {
+        specific = `<div class="sb ${col} top">DETALHES DIVINOS</div>
+    <div class="g2 mb8"><div class="field"><span class="lbl">CONCEITO ASSOCIADO</span><input class="inp" value="${esc(a.conceito || '')}" oninput="aF('${tier}',${a.id},'conceito',this.value)" placeholder="ex: Realidade, Tempo..."></div><div class="field"><span class="lbl">GUARDIÃO (VIRTUDE / PECADO)</span><input class="inp" value="${esc(a.guardiao || '')}" oninput="aF('${tier}',${a.id},'guardiao',this.value)" placeholder="ex: Diligência"></div></div>
+    <div class="field mb8"><span class="lbl">EFEITO PASSIVO / COMBATE</span><textarea class="inp" style="min-height:70px" oninput="aF('${tier}',${a.id},'efeitoPassivo',this.value)">${esc(a.efeitoPassivo || '')}</textarea></div>
+    <div class="field mb8"><span class="lbl">HABILIDADE ESPECIAL</span><textarea class="inp" style="min-height:60px" oninput="aF('${tier}',${a.id},'habEspecial',this.value)">${esc(a.habEspecial || '')}</textarea></div>`;
+      } else if (tier === 'anciao') {
+        specific = `<div class="sb ${col} top">DETALHES ANCIÃO</div>
+    <div class="g2 mb8"><div class="field"><span class="lbl">PRÉ-REQUISITO (TÍTULO)</span><input class="inp" value="${esc(a.prereq || '')}" oninput="aF('${tier}',${a.id},'prereq',this.value)" placeholder="Título necessário para..."></div><div class="field"><span class="lbl">EVOLUÇÃO HABILITADA</span><input class="inp" value="${esc(a.evolucao || '')}" oninput="aF('${tier}',${a.id},'evolucao',this.value)" placeholder="Nome da evolução"></div></div>
+    <div class="field mb8"><span class="lbl">EFEITO</span><textarea class="inp" style="min-height:80px" oninput="aF('${tier}',${a.id},'efeito',this.value)">${esc(a.efeito || '')}</textarea></div>`;
+      } else if (tier === 'mitico') {
+        specific = `<div class="sb ${col} top">DETALHES MÍTICO</div>
+    <div class="g3 mb8"><div class="field"><span class="lbl">LENDA ASSOCIADA</span><input class="inp" value="${esc(a.lenda || '')}" oninput="aF('${tier}',${a.id},'lenda',this.value)" placeholder="Lenda de origem"></div><div class="field"><span class="lbl">TÍTULO CONCEDIDO</span><input class="inp" value="${esc(a.titulo || '')}" oninput="aF('${tier}',${a.id},'titulo',this.value)" placeholder="Nome do título"></div><div class="field"><span class="lbl">RANK DO TÍTULO</span><select class="inp" onchange="aF('${tier}',${a.id},'tituloRank',this.value)">${['C', 'B', 'A', 'S'].map(r => `<option${r === a.tituloRank ? ' selected' : ''}>${r}</option>`).join('')}</select></div></div>
+    <div class="field mb8"><span class="lbl">EFEITO BASE DO ARTEFATO</span><textarea class="inp" style="min-height:60px" oninput="aF('${tier}',${a.id},'efeito',this.value)">${esc(a.efeito || '')}</textarea></div>
+    <div class="sb purple">SKILLS DO TÍTULO</div>
+    ${(a.tituloSkills || []).map((sk, si) => `<div class="sk-card"><div class="sk-hdr"><input class="sk-ni" value="${esc(sk.name || '')}" oninput="mSF('${tier}',${a.id},${si},'name',this.value)" placeholder="Nome"><div class="sk-meta"><select class="act-sel" onchange="mSF('${tier}',${a.id},${si},'action',this.value)">${ACTS.map(x => `<option${x === sk.action ? ' selected' : ''}>${x}</option>`).join('')}</select><input class="cost-i" value="${esc(sk.cost || '')}" placeholder="—S" oninput="mSF('${tier}',${a.id},${si},'cost',this.value)"><button class="wrem" onclick="remMSkill('${tier}',${a.id},${si})">✕</button></div></div><textarea class="notes-ta" style="min-height:40px" oninput="mSF('${tier}',${a.id},${si},'desc',this.value)">${esc(sk.desc || '')}</textarea></div>`).join('')}
+    <button class="dash" onclick="addMSkill('${tier}',${a.id})">+ SKILL DO TÍTULO</button>`;
+      } else if (tier === 'lendario') {
+        specific = `<div class="sb teal top">EFEITO LENDÁRIO</div><textarea class="inp" style="min-height:100px" oninput="aF('${tier}',${a.id},'efeito',this.value)">${esc(a.efeito || '')}</textarea>`;
+      }
+      return `<div class="dw">
+  <div class="d-hdr">
+    <div>
+      <input style="background:transparent;border:none;border-bottom:1px solid rgba(0,212,255,.2);color:var(--txt);font-family:'Orbitron',monospace;font-size:20px;font-weight:700;outline:none;padding:2px 0;min-width:200px" value="${esc(a.name)}" oninput="aF('${tier}',${a.id},'name',this.value)">
+      <div class="d-badges"><span class="bdg ${tbdg}">${TLBL[tier]}</span>${a.owner ? `<span class="bdg bdg-blue">→ ${esc(a.owner)}</span>` : ''}</div>
+    </div>
+    <div class="d-acts"><button class="btn btn-sm" style="border-color:rgba(239,68,68,.25);color:rgba(239,68,68,.45)" onclick="deleteArt('${tier}',${a.id})">[ DELETAR ]</button></div>
+  </div>
+  <div class="d-sep"></div>
+  <div class="g2 mb8">
+    <div class="field"><span class="lbl">NOME</span><input class="inp" value="${esc(a.name)}" oninput="aF('${tier}',${a.id},'name',this.value)"></div>
+    <div class="field"><span class="lbl">PORTADOR ATUAL</span><input class="inp" value="${esc(a.owner || '')}" oninput="aF('${tier}',${a.id},'owner',this.value)" placeholder="Quem possui?"></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:7px;margin-bottom:12px">
+    <input type="checkbox" id="dec_${a.id}" ${a.decifrado ? 'checked' : ''} onchange="aF('${tier}',${a.id},'decifrado',this.checked)" style="accent-color:var(--${col});width:14px;height:14px">
+    <label for="dec_${a.id}" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txt-d);cursor:pointer;letter-spacing:1px">DECIFRADO / ATIVO</label>
+  </div>
+  ${specific}
+  <div class="sb mt12">NOTAS</div>
+  <textarea class="notes-ta" style="min-height:60px" oninput="aF('${tier}',${a.id},'notes',this.value)">${esc(a.notes || '')}</textarea>
+  </div>`;
+    }
+
+    function addPlayer() {
+      const p = { id: uid(), name: 'Novo Jogador', charName: '', nivel: 0, rank: 'C', natureza: '', hpCur: 10, hpMax: 10, staCur: 5, staMax: 5, san: 100, pi: 0, exposure: 0, crimes: 0, grace: {}, sin: {}, titles: '', notes: '', statusNeg: {}, attrs: { corpo: { forca: [], vigor: [], agilidade: [] }, mente: { habilidade: [], sincronia: [], intelecto: [] }, alma: { conexao: [], entendimento: [] } } };
+      S.players.push(p); UI.playerId = p.id; renderApp(); autosave();
+    }
+    function removePlayer(id) { arcConfirm('Remover jogador?').then(ok => { if (!ok) return; S.players = S.players.filter(p => p.id !== id); if (UI.playerId === id) UI.playerId = S.players.length ? S.players[0].id : null; renderApp(); autosave() }) }
+    function pF(id, f, v) { const p = findP(id); if (!p) return; p[f] = v; autosave() }
+    function pBar(id, f) {
+      const p = findP(id); if (!p) return;
+      const c = parseInt(document.getElementById(`pbc_${f}_${id}`)?.value) || 0;
+      const m = parseInt(document.getElementById(`pbm_${f}_${id}`)?.value) || 1;
+      p[f + 'Cur'] = c; p[f + 'Max'] = m; sw(`pbar_${f}_${id}`, pct(c, m)); autosave();
+    }
+    function changeGrace(id, v, d) { const p = findP(id); if (!p) return; if (!p.grace) p.grace = {}; p.grace[v] = Math.max(0, (p.grace[v] || 0) + d); autosave(); st(`gv_${id}_${v}`, p.grace[v]) }
+    function changeSin(id, s, d) { const p = findP(id); if (!p) return; if (!p.sin) p.sin = {}; p.sin[s] = Math.max(0, (p.sin[s] || 0) + d); autosave(); st(`sv_${id}_${s}`, p.sin[s]) }
+    function changePI(id, d) { const p = findP(id); if (!p) return; p.pi = Math.max(0, Math.min(3, (p.pi || 0) + d)); const w = document.getElementById(`pips_${id}`); if (w) w.innerHTML = [0, 1, 2].map(i => `<div class="pi-pip ${i < p.pi ? 'on' : ''}"></div>`).join(''); autosave() }
+    function pStatus(id, s) { const p = findP(id); if (!p) return; if (!p.statusNeg) p.statusNeg = {}; p.statusNeg[s] = !p.statusNeg[s]; const el = document.getElementById(`pchip_${id}_${s}`); if (el) el.classList.toggle('neg-on', !!p.statusNeg[s]); autosave() }
+    function addPlayerToCombat(id) {
+      const p = findP(id); if (!p) return;
+      S.combatants.push({ id: uid(), name: p.charName || p.name, init: Math.floor(Math.random() * 20) + 1, hpMax: p.hpMax || 10, hpCur: p.hpCur || p.hpMax || 10, ca: p.ca || 10, flags: ['PLAYER'] });
+      setSection('combat'); autosave();
+    }
+    function lpJogadores() {
+      const items = S.players.map(p => `<div class="lp-item ${p.id === UI.playerId ? 'on' : ''}" onclick="selPlayer(${p.id})"><div class="lp-item-name">${esc(p.name) || 'Sem Nome'}</div><div class="lp-item-sub"><span class="bdg bdg-blue" style="font-size:7px">PLAYER</span>${p.charName ? `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--txt-d)">${esc(p.charName)}</span>` : ''}<span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--red)">♥ ${p.hpCur || 0}/${p.hpMax || 10}</span></div></div>`).join('') || '<div class="empty-l">Nenhum jogador.</div>';
+      return `<div class="lp-hdr"><span class="lp-title">JOGADORES</span><span class="lp-count">${S.players.length} entrada${S.players.length !== 1 ? 's' : ''}</span></div><div class="lp-search-wrap"><input class="lp-search" placeholder="BUSCAR..." oninput="filterPlayers(this.value)"></div><button class="lp-add" onclick="addPlayer()">+ NOVO JOGADOR</button><div class="lp-items" id="playerListItems">${items}</div>`;
+    }
+    function filterPlayers(q) {
+      q = (q || '').toLowerCase();
+      const w = document.getElementById('playerListItems'); if (!w) return;
+      const f = S.players.filter(p => (p.name || '').toLowerCase().includes(q) || (p.charName || '').toLowerCase().includes(q));
+      w.innerHTML = f.map(p => `<div class="lp-item ${p.id === UI.playerId ? 'on' : ''}" onclick="selPlayer(${p.id})"><div class="lp-item-name">${esc(p.name) || '—'}</div><div class="lp-item-sub"><span class="bdg bdg-blue" style="font-size:7px">PLAYER</span>${p.charName ? `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--txt-d)">${esc(p.charName)}</span>` : ''}<span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--red)">♥ ${p.hpCur || 0}/${p.hpMax || 10}</span></div></div>`).join('') || '<div class="empty-l">Nenhum resultado.</div>';
+    }
+    function getAttrArr(p, attr, sub) {
+      const v = ((p.attrs || {})[attr] || {})[sub];
+      if (Array.isArray(v)) return v;
+      return [];
+    }
+    function makePips(pid, attr, sub, selected, max, cls) {
+      const s = new Set(selected);
+      return Array.from({ length: max }, (_, i) => {
+        const n = i + 1;
+        return `<div class="ap ${cls} ${s.has(n) ? 'ap-on' : ''}" onclick="pAttr(${pid},'${attr}','${sub}',${n})"></div>`;
+      }).join('');
+    }
+    function pAttr(pid, attr, sub, n) {
+      const p = findP(pid); if (!p) return;
+      if (!p.attrs) p.attrs = {}; if (!p.attrs[attr]) p.attrs[attr] = {};
+      let arr = p.attrs[attr][sub];
+      if (!Array.isArray(arr)) arr = [];
+      const idx = arr.indexOf(n);
+      if (idx >= 0) arr.splice(idx, 1); else arr.push(n);
+      p.attrs[attr][sub] = arr;
+      autosave();
+      const max = attr === 'alma' ? 7 : 10; const cls = attr === 'corpo' ? 'ap-b' : attr === 'mente' ? 'ap-p' : 'ap-g';
+      const el = document.getElementById(`apips_${pid}_${attr}_${sub}`);
+      if (el) el.innerHTML = makePips(pid, attr, sub, arr, max, cls);
+    }
+    function rPlayerAttrs(p) {
+      const ATTRS = [
+        { key: 'corpo', lbl: 'CORPO', col: 'var(--blue)', cls: 'ap-b', subs: [{ k: 'forca', lbl: 'FORÇA' }, { k: 'vigor', lbl: 'VIGOR' }, { k: 'agilidade', lbl: 'AGILIDADE' }], max: 10 },
+        { key: 'mente', lbl: 'MENTE', col: 'var(--purple-b)', cls: 'ap-p', subs: [{ k: 'habilidade', lbl: 'HABILIDADE' }, { k: 'sincronia', lbl: 'SINCRONIA' }, { k: 'intelecto', lbl: 'INTELECTO' }], max: 10 },
+        { key: 'alma', lbl: 'ALMA', col: 'var(--gold)', cls: 'ap-g', subs: [{ k: 'conexao', lbl: 'CONEXÃO' }, { k: 'entendimento', lbl: 'ENTENDIMENTO' }], max: 7 }
+      ];
+      let h = `<div class="sb">ATRIBUTOS</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">`;
+      ATTRS.forEach(attr => {
+        h += `<div style="border:1px solid rgba(0,212,255,.12);padding:11px 13px;background:rgba(0,212,255,.015)">`;
+        h += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${attr.col};letter-spacing:2.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(0,212,255,.08)">${attr.lbl}</div>`;
+        attr.subs.forEach(sub => {
+          const arr = getAttrArr(p, attr.key, sub.k);
+          h += `<div style="margin-bottom:10px">`;
+          h += `<div style="margin-bottom:4px"><span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--txt-d);letter-spacing:1px">${sub.lbl}</span></div>`;
+          h += `<div id="apips_${p.id}_${attr.key}_${sub.k}" style="display:flex;gap:2px;flex-wrap:wrap">${makePips(p.id, attr.key, sub.k, arr, attr.max, attr.cls)}</div>`;
+          h += `</div>`;
+        });
+        h += `</div>`;
+      });
+      h += `</div>`;
+      return h;
+    }
+    function rPlayer(p) {
+      if (!p) return emptyMain('◉', 'Jogador não encontrado');
+      return `<div class="dw">
+  <div class="d-hdr">
+    <div>
+      <input style="background:transparent;border:none;border-bottom:1px solid rgba(0,212,255,.25);color:var(--txt);font-family:'Orbitron',monospace;font-size:20px;font-weight:700;outline:none;padding:2px 0;min-width:240px" value="${esc(p.name || '')}" oninput="pF(${p.id},'name',this.value)" placeholder="Nome do Player">
+      <div class="d-badges">
+        <span class="bdg bdg-blue">PLAYER</span>
+        <span class="bdg bdg-red">NV.${p.nivel || 0}</span>
+        <span class="bdg bdg-gold">RANK ${p.rank || 'C'}</span>
+        ${p.charName ? `<span class="bdg bdg-purple">${esc(p.charName)}</span>` : ''}
+        ${p.natureza ? `<span class="bdg bdg-teal">${esc(p.natureza)}</span>` : ''}
+      </div>
+    </div>
+    <div class="d-acts">
+      <button class="btn btn-red btn-sm" onclick="addPlayerToCombat(${p.id})">▶ AO COMBATE</button>
+      <button class="btn btn-sm" style="border-color:rgba(239,68,68,.25);color:rgba(239,68,68,.45)" onclick="removePlayer(${p.id})">[ DELETAR ]</button>
+    </div>
+  </div>
+  <div class="d-sep"></div>
+  <div class="sb top">IDENTIDADE</div>
+  <div class="g4 mb8">
+    <div class="field"><span class="lbl">NOME PLAYER</span><input class="inp" value="${esc(p.name)}" oninput="pF(${p.id},'name',this.value)"></div>
+    <div class="field"><span class="lbl">PERSONAGEM</span><input class="inp" value="${esc(p.charName || '')}" oninput="pF(${p.id},'charName',this.value)"></div>
+    <div class="field"><span class="lbl">NÍVEL</span><input class="inp" type="number" value="${p.nivel || 0}" min="0" max="20" oninput="pF(${p.id},'nivel',+this.value)"></div>
+    <div class="field"><span class="lbl">RANK</span><select class="inp" onchange="pF(${p.id},'rank',this.value)">${['C', 'B', 'A', 'S'].map(r => `<option${r === p.rank ? ' selected' : ''}>${r}</option>`).join('')}</select></div>
+  </div>
+  <div class="g4 mb12">
+    <div class="field"><span class="lbl">NATUREZA</span><select class="inp" onchange="pF(${p.id},'natureza',this.value)"><option value="">—</option>${NATS.map(n => `<option${n === p.natureza ? ' selected' : ''}>${n}</option>`).join('')}</select></div>
+    <div class="field"><span class="lbl">EXPOSIÇÃO</span><input class="inp" type="number" value="${p.exposure || 0}" min="0" oninput="pF(${p.id},'exposure',+this.value)"></div>
+    <div class="field"><span class="lbl">CRIMES</span><input class="inp" type="number" value="${p.crimes || 0}" min="0" oninput="pF(${p.id},'crimes',+this.value)"></div>
+    <div class="field"><span class="lbl">INSPIRAÇÃO (PI)</span><div style="display:flex;align-items:center;gap:6px;margin-top:5px"><button class="c-btn" onclick="changePI(${p.id},-1)">−</button><div id="pips_${p.id}" style="display:flex;gap:4px;align-items:center">${[0, 1, 2].map(i => `<div class="pi-pip ${i < (p.pi || 0) ? 'on' : ''}"></div>`).join('')}</div><button class="c-btn" onclick="changePI(${p.id},1)">+</button></div></div>
+  </div>
+  <div class="sb">STATUS VITAIS</div>
+  <div class="g3 mb12" style="gap:10px">
+    <div class="bar-wrap"><div class="bar-hdr"><span class="bar-lbl">PONTOS DE VIDA</span><div class="bar-inps"><input class="bar-inp" type="number" id="pbc_hp_${p.id}" value="${p.hpCur || 10}" oninput="pBar(${p.id},'hp')"><span class="bar-sep">/</span><input class="bar-inp" type="number" id="pbm_hp_${p.id}" value="${p.hpMax || 10}" oninput="pBar(${p.id},'hp')"></div></div><div class="bar-track"><div class="bar-fill hp-f" id="pbar_hp_${p.id}" style="width:${pct(p.hpCur || 10, p.hpMax || 10)}%"></div></div></div>
+    <div class="bar-wrap"><div class="bar-hdr"><span class="bar-lbl">STAMINA</span><div class="bar-inps"><input class="bar-inp" type="number" id="pbc_sta_${p.id}" value="${p.staCur || 5}" oninput="pBar(${p.id},'sta')"><span class="bar-sep">/</span><input class="bar-inp" type="number" id="pbm_sta_${p.id}" value="${p.staMax || 5}" oninput="pBar(${p.id},'sta')"></div></div><div class="bar-track"><div class="bar-fill sta-f" id="pbar_sta_${p.id}" style="width:${pct(p.staCur || 5, p.staMax || 5)}%"></div></div></div>
+    <div class="bar-wrap"><div class="bar-hdr"><span class="bar-lbl">SANIDADE</span><div class="bar-inps"><input class="bar-inp" type="number" id="pbc_san_${p.id}" value="${p.san || 100}" oninput="pBar(${p.id},'san')"><span class="bar-sep">/100</span></div></div><div class="bar-track"><div class="bar-fill san-f" id="pbar_san_${p.id}" style="width:${Math.min(100, p.san || 100)}%"></div></div></div>
+  </div>
+  ${rPlayerAttrs(p)}
+  <div class="sb">STATUS ATIVOS</div>
+  <div class="chips mb12">${SNEG.map(s => `<button id="pchip_${p.id}_${s}" class="chip ${(p.statusNeg || {})[s] ? 'neg-on' : ''}" onclick="pStatus(${p.id},'${s}')">${s}</button>`).join('')}</div>
+  <div class="sb green">PONTOS DE GRAÇA (VIRTUDES)</div>
+  <div class="grace-grid mb12">${VIRTUES.map(v => `<div class="gi v"><div class="gi-name">${v.substring(0, 5).toUpperCase()}</div><div class="gi-val" id="gv_${p.id}_${v}">${(p.grace || {})[v] || 0}</div><div class="gi-ctrl"><button class="g-btn" onclick="changeGrace(${p.id},'${v}',-1)">−</button><button class="g-btn" onclick="changeGrace(${p.id},'${v}',1)">+</button></div></div>`).join('')}</div>
+  <div class="sb">PONTOS DE DESGRAÇA (PECADOS)</div>
+  <div class="grace-grid mb12">${SINS.map(s => `<div class="gi s"><div class="gi-name">${s.substring(0, 5).toUpperCase()}</div><div class="gi-val" id="sv_${p.id}_${s}">${(p.sin || {})[s] || 0}</div><div class="gi-ctrl"><button class="g-btn" onclick="changeSin(${p.id},'${s}',-1)">−</button><button class="g-btn" onclick="changeSin(${p.id},'${s}',1)">+</button></div></div>`).join('')}</div>
+  <div class="sb gold">TÍTULOS / INDIVIDUALIDADES</div>
+  <textarea class="notes-ta" style="min-height:60px;margin-bottom:12px" oninput="pF(${p.id},'titles',this.value)" placeholder="Títulos conquistados, traços únicos...">${esc(p.titles || '')}</textarea>
+  <div class="sb">NOTAS DO MESTRE</div>
+  <textarea class="notes-ta" style="min-height:80px;margin-bottom:12px" oninput="pF(${p.id},'notes',this.value)" placeholder="Informações secretas sobre o player, segredos do personagem...">${esc(p.notes || '')}</textarea>
+  </div>`;
+    }
+    function addFaccao() { S.faccoes.push({ id: uid(), name: '', rep: 0, relacao: '' }); renderMain(); autosave() }
+    function addLocal() { S.locais.push({ id: uid(), name: '', status: 'Ativo', desc: '' }); renderMain(); autosave() }
+    function remFaccao(id) { S.faccoes = S.faccoes.filter(f => f.id !== id); renderMain(); autosave() }
+    function remLocal(id) { S.locais = S.locais.filter(l => l.id !== id); renderMain(); autosave() }
+    function mF(arr, id, f, v) { const item = S[arr].find(x => x.id === id); if (!item) return; item[f] = v; autosave() }
+    function rMundo() {
+      return `<div class="dw"><div class="g2" style="gap:16px">
+  <div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div class="sb top" style="flex:1;margin-bottom:0">FACÇÕES</div><button class="btn btn-blue btn-sm" style="margin-left:10px" onclick="addFaccao()">+</button></div>
+    <div class="trow thdr" style="grid-template-columns:1fr 55px 1fr 22px"><span>NOME</span><span>REP</span><span>RELAÇÃO</span><span></span></div>
+    ${S.faccoes.map(f => `<div class="trow" style="grid-template-columns:1fr 55px 1fr 22px"><input class="wi" value="${esc(f.name || '')}" oninput="mF('faccoes',${f.id},'name',this.value)" placeholder="Facção"><input class="wi" type="number" value="${f.rep || 0}" oninput="mF('faccoes',${f.id},'rep',+this.value)" style="text-align:center"><input class="wi" value="${esc(f.relacao || '')}" oninput="mF('faccoes',${f.id},'relacao',this.value)" placeholder="Neutra, aliada..."><button class="wrem" onclick="remFaccao(${f.id})">✕</button></div>`).join('')}
+    ${!S.faccoes.length ? '<div class="empty-l">Nenhuma facção.</div>' : ''}
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;margin-bottom:10px"><div class="sb gold" style="flex:1;margin:0">LOCAIS</div><button class="btn btn-gold btn-sm" style="margin-left:10px" onclick="addLocal()">+</button></div>
+    <div class="trow thdr" style="grid-template-columns:1fr 80px 1fr 22px"><span>NOME</span><span>STATUS</span><span>DESCRIÇÃO</span><span></span></div>
+    ${S.locais.map(l => `<div class="trow" style="grid-template-columns:1fr 80px 1fr 22px"><input class="wi" value="${esc(l.name || '')}" oninput="mF('locais',${l.id},'name',this.value)" placeholder="Local"><select class="wi" onchange="mF('locais',${l.id},'status',this.value)" style="font-size:10px">${['Ativo', 'Destruído', 'Controlado', 'Neutro', 'Desconhecido'].map(s => `<option${s === l.status ? ' selected' : ''}>${s}</option>`).join('')}</select><input class="wi" value="${esc(l.desc || '')}" oninput="mF('locais',${l.id},'desc',this.value)" placeholder="Descrição"><button class="wrem" onclick="remLocal(${l.id})">✕</button></div>`).join('')}
+    ${!S.locais.length ? '<div class="empty-l">Nenhum local.</div>' : ''}
+  </div>
+  <div>
+    <div class="sb purple top">SEGREDOS DO MESTRE</div>
+    <textarea id="secretNotesTA" class="notes-ta" style="min-height:calc(100vh - 220px)" oninput="S.secretNotes=this.value;autosave()" placeholder="Twists, segredos, lore oculta, motivações reais...">${esc(S.secretNotes)}</textarea>
+  </div>
+  </div></div>`;
+    }
+
+    function addSessao() {
+      const s = { id: uid(), title: 'Sessão sem título', num: S.sessoes.length, data: '', players: '', aconteceu: '', combates: '', loot: '', ganchos: '', proxima: '' };
+      S.sessoes.push(s); UI.sessaoId = s.id; UI.geral = false; renderApp(); autosave();
+    }
+    function deleteSessao(id) { arcConfirm('Remover sessão?').then(ok => { if (!ok) return; S.sessoes = S.sessoes.filter(s => s.id !== id); if (UI.sessaoId === id) UI.sessaoId = S.sessoes.length ? S.sessoes[0].id : null; renderApp(); autosave() }) }
+    function sF(id, f, v) { const s = findSessao(id); if (!s) return; s[f] = v; autosave() }
+    function rSessao(s) {
+      if (!s) return emptyMain('✎', 'Sessão não encontrada');
+      return `<div class="dw">
+  <div class="d-hdr">
+    <div style="flex:1">
+      <input style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(0,212,255,.18);color:var(--txt);font-family:'Orbitron',monospace;font-size:22px;font-weight:700;outline:none;padding:2px 0" value="${esc(s.title || '')}" oninput="sF(${s.id},'title',this.value)" placeholder="Título da sessão">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d);letter-spacing:2px;margin-top:4px">— Sessão #${s.num != null ? s.num : '?'}</div>
+    </div>
+    <div class="d-acts"><button class="btn btn-sm" style="border-color:rgba(239,68,68,.25);color:rgba(239,68,68,.45)" onclick="deleteSessao(${s.id})">[ DELETAR ]</button></div>
+  </div>
+  <div class="d-sep"></div>
+  <div class="sb top">METADADOS</div>
+  <div class="g3 mb12">
+    <div class="field"><span class="lbl">DATA</span><input class="inp" value="${esc(s.data || '')}" oninput="sF(${s.id},'data',this.value)"></div>
+    <div class="field"><span class="lbl">SESSÃO Nº</span><input class="inp" type="number" value="${s.num || 0}" oninput="sF(${s.id},'num',+this.value)"></div>
+    <div class="field"><span class="lbl">PLAYERS PRESENTES</span><input class="inp" value="${esc(s.players || '')}" oninput="sF(${s.id},'players',this.value)" placeholder="Nomes dos players"></div>
+  </div>
+  <div class="sb blue">O QUE ACONTECEU</div>
+  <textarea class="notes-ta" style="min-height:160px" oninput="sF(${s.id},'aconteceu',this.value)" placeholder="Resumo detalhado da sessão...">${esc(s.aconteceu || '')}</textarea>
+  <div class="g2 mt12">
+    <div><div class="sb top">NPCs & COMBATES</div><textarea class="notes-ta" style="min-height:110px" oninput="sF(${s.id},'combates',this.value)" placeholder="Quem apareceu, confrontos...">${esc(s.combates || '')}</textarea></div>
+    <div><div class="sb gold top">LOOT & RECOMPENSAS</div><textarea class="notes-ta" style="min-height:110px" oninput="sF(${s.id},'loot',this.value)" placeholder="Itens, artefatos, informações...">${esc(s.loot || '')}</textarea></div>
+  </div>
+  <div class="g2 mt12">
+    <div><div class="sb top">GANCHOS ABERTOS</div><textarea class="notes-ta" style="min-height:110px" oninput="sF(${s.id},'ganchos',this.value)" placeholder="Fios narrativos em aberto...">${esc(s.ganchos || '')}</textarea></div>
+    <div><div class="sb green top">PLANO PRÓXIMA SESSÃO</div><textarea class="notes-ta" style="min-height:110px" oninput="sF(${s.id},'proxima',this.value)" placeholder="O que você planeja...">${esc(s.proxima || '')}</textarea></div>
+  </div>
+  </div>`;
+    }
+    let _notesPreview = false;
+    function toggleNotesPreview() { collectState(); _notesPreview = !_notesPreview; renderMain(); }
+    // Renderizador Markdown minimalista (inline, sem dependências) para as Notas Gerais
+    function mdToHtml(src) {
+      if (!src || !src.trim()) return '<div class="md-empty">— vazio —</div>';
+      const escH = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const inline = t => escH(t)
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/__([^_]+)__/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+        .replace(/~~([^~]+)~~/g, '<del>$1</del>')
+        .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+      const lines = src.replace(/\r\n/g, '\n').split('\n');
+      const out = []; let list = null, para = [];
+      const closePara = () => { if (para.length) { out.push('<p>' + para.map(inline).join('<br>') + '</p>'); para = []; } };
+      const closeList = () => { if (list) { out.push('</' + list + '>'); list = null; } };
+      for (const raw of lines) {
+        const line = raw.replace(/\s+$/, ''); let m;
+        if (!line.trim()) { closePara(); closeList(); continue; }
+        if (m = line.match(/^(#{1,6})\s+(.*)$/)) { closePara(); closeList(); const l = m[1].length; out.push('<h' + l + '>' + inline(m[2]) + '</h' + l + '>'); continue; }
+        if (/^(---|\*\*\*|___)\s*$/.test(line)) { closePara(); closeList(); out.push('<hr>'); continue; }
+        if (m = line.match(/^>\s?(.*)$/)) { closePara(); closeList(); out.push('<blockquote>' + inline(m[1]) + '</blockquote>'); continue; }
+        if (m = line.match(/^\s*[-*+]\s+(.*)$/)) { closePara(); if (list !== 'ul') { closeList(); out.push('<ul>'); list = 'ul'; } out.push('<li>' + inline(m[1]) + '</li>'); continue; }
+        if (m = line.match(/^\s*\d+\.\s+(.*)$/)) { closePara(); if (list !== 'ol') { closeList(); out.push('<ol>'); list = 'ol'; } out.push('<li>' + inline(m[1]) + '</li>'); continue; }
+        para.push(line);
+      }
+      closePara(); closeList();
+      return '<div class="md-view">' + out.join('') + '</div>';
+    }
+    function rNotasGeral() {
+      const hdr = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div class="sb top" style="margin:0;flex:1">NOTAS GERAIS DA CAMPANHA</div><button class="btn ${_notesPreview ? 'btn-gold' : 'btn-blue'} btn-sm" onclick="toggleNotesPreview()">${_notesPreview ? '✎ EDITAR' : '◳ VISUALIZAR'}</button></div>`;
+      const body = _notesPreview
+        ? `<div class="md-view" style="min-height:calc(100vh - 150px)">${mdToHtml(S.campaignNotes || '')}</div>`
+        : `<textarea id="campaignNotesTA" class="notes-ta" style="min-height:calc(100vh - 150px)" oninput="S.campaignNotes=this.value;autosave()" placeholder="Notas gerais, lore, arcos... (Markdown: # título, **negrito**, *itálico*, - lista, 1. lista, > citação, \`código\`, [link](url), ---)">${esc(S.campaignNotes)}</textarea>`;
+      return `<div class="dw">${hdr}${body}</div>`;
+    }
+
+    window.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveData() } });
+
+    // ── AUTO-FORMAT DE NOTAS: continuação de listas (- e 1.) ao apertar Enter ──
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      const ta = e.target;
+      if (!ta || ta.tagName !== 'TEXTAREA' || !ta.classList.contains('notes-ta')) return;
+      const txt = ta.value, pos = ta.selectionStart;
+      if (pos !== ta.selectionEnd) return;
+      const lineStart = txt.lastIndexOf('\n', pos - 1) + 1;
+      const line = txt.substring(lineStart, pos);
+      const bullet = line.match(/^(\s*)-\s(.+)/);
+      const numbered = line.match(/^(\s*)(\d+)\.\s(.+)/);
+      const emptyBullet = line.match(/^(\s*)-\s*$/);
+      const emptyNum = line.match(/^(\s*)\d+\.\s*$/);
+      let prefix = '';
+      if (emptyBullet || emptyNum) {
+        e.preventDefault();
+        ta.value = txt.substring(0, lineStart) + txt.substring(pos);
+        ta.setSelectionRange(lineStart, lineStart);
+        ta.dispatchEvent(new Event('input', { bubbles: true }));
+        return;
+      }
+      if (bullet) prefix = bullet[1] + '- ';
+      else if (numbered) prefix = numbered[1] + (+numbered[2] + 1) + '. ';
+      if (prefix) {
+        e.preventDefault();
+        ta.value = txt.substring(0, pos) + '\n' + prefix + txt.substring(pos);
+        const np = pos + 1 + prefix.length;
+        ta.setSelectionRange(np, np);
+        ta.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    });
+
+    window.addEventListener('load', init);
+
+    // ── PONTE NPC CATÁLOGO (iframe) ↔ GM SCREEN ──
+    // Os NPCs do Catálogo são persistidos dentro de S.catalogNpcs (arc_gm_v2),
+    // então o botão [ SALVAR ] / EXPORTAR do GM Screen é a única fonte de verdade.
+    window.addEventListener('message', e => {
+      const d = e.data; if (!d || typeof d !== 'object') return;
+      if (d.type === 'arc-npc-ready') {
+        if (e.source) e.source.postMessage({ type: 'arc-npc-load', npcs: S.catalogNpcs || [] }, '*');
+      } else if (d.type === 'arc-npc-save') {
+        S.catalogNpcs = Array.isArray(d.npcs) ? d.npcs : [];
+        autosave();
+      }
+    });
+
+    // ═══════════════════════════════════════════════════════════════
+    // FIREBASE GM SYNC — escuta players em tempo real
+    // ═══════════════════════════════════════════════════════════════
+    const GMF = { db: null, listener: null, roomCode: null, connected: false, players: {} };
+
+    function gmOpenConfig() {
+      const cfg = gmFbLoadConfig();
+      if (cfg) { ['apiKey', 'authDomain', 'databaseURL', 'projectId'].forEach(k => { const el = document.getElementById('gm_' + k); if (el) el.value = cfg[k] || ''; }); }
+      document.getElementById('fbGmModal').style.display = 'flex';
+    }
+    function gmFbLoadConfig() { const r = localStorage.getItem('arc_fb_config'); if (!r) return null; try { return JSON.parse(r); } catch (e) { return null; } }
+    function gmFbSaveConfig() {
+      const cfg = { apiKey: document.getElementById('gm_apiKey').value.trim(), authDomain: document.getElementById('gm_authDomain').value.trim(), databaseURL: document.getElementById('gm_databaseURL').value.trim(), projectId: document.getElementById('gm_projectId').value.trim() };
+      if (!cfg.apiKey || !cfg.databaseURL) { gmSetStatus('err', 'Preencha pelo menos API Key e Database URL.'); return; }
+      localStorage.setItem('arc_fb_config', JSON.stringify(cfg));
+      document.getElementById('fbGmModal').style.display = 'none';
+      gmSetStatus('connecting', 'INICIALIZANDO...');
+      gmLoadFirebase(cfg);
+    }
+
+    function loadScript(src) { return new Promise((res, rej) => { if (document.querySelector(`script[src="${src}"]`)) { res(); return; } const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
+
+    async function gmLoadFirebase(cfg) {
+      try {
+        await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+        await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js');
+        if (!window.firebase.apps.length) { window.firebase.initializeApp(cfg); }
+        GMF.db = window.firebase.database();
+        gmSetStatus('on', 'FIREBASE PRONTO — insira o código da campanha e clique em [ MONITORAR ]');
+      } catch (err) { gmSetStatus('err', 'ERRO: ' + err.message); }
+    }
+
+    function gmSyncConnect() {
+      const room = (document.getElementById('gmRoomInp').value || '').trim().toUpperCase();
+      const cfg = gmFbLoadConfig();
+      if (!cfg) {
+        gmSetStatus('err', 'Configure o Firebase primeiro → clique em [ CONFIGURAR ]');
+        document.getElementById('fbGmModal').style.display = 'flex';
+        return;
+      }
+      if (!room) {
+        gmSetStatus('err', 'Preencha o CÓDIGO DA CAMPANHA e clique em [ MONITORAR ]');
+        document.getElementById('gmRoomInp').focus();
+        return;
+      }
+      if (!GMF.db) {
+        gmLoadFirebase(cfg).then(() => setTimeout(() => gmDoListen(room), 1500));
+        return;
+      }
+      gmDoListen(room);
+    }
+
+    function gmDoListen(room) {
+      if (!GMF.db) { gmSetStatus('err', 'Firebase não inicializado.'); return; }
+      if (GMF.listener) { GMF.listener.off(); GMF.listener = null; }
+      GMF.roomCode = room; GMF.connected = true;
+      gmSetStatus('connecting', `AGUARDANDO PLAYERS → campanha: ${room}`);
+      document.getElementById('gmSyncStopBtn').style.display = '';
+      const ref = GMF.db.ref(`arc_campaigns/${room}/players`);
+      GMF.listener = ref;
+      ref.on('value', snapshot => {
+        const data = snapshot.val() || {};
+        GMF.players = data;
+        gmSetStatus('on', `ATIVO → ${room} | ${Object.keys(data).length} player(s) | ${new Date().toLocaleTimeString('pt-BR')}`);
+        gmMergePlayersToState(data);
+      }, err => { gmSetStatus('err', 'ERRO: ' + err.message); });
+      localStorage.setItem('arc_gm_sync_room', room);
+    }
+
+    function gmSyncDisconnect() {
+      if (GMF.listener) { GMF.listener.off(); GMF.listener = null; }
+      GMF.connected = false; GMF.roomCode = null;
+      gmSetStatus('off', 'GM SYNC OFFLINE');
+      document.getElementById('gmSyncStopBtn').style.display = 'none';
+      localStorage.removeItem('arc_gm_sync_room');
+    }
+
+    function gmSetStatus(state, msg) {
+      const dot = document.getElementById('gmSyncDot'); const lbl = document.getElementById('gmSyncLbl');
+      if (dot) dot.className = 'sync-dot ' + state; if (lbl) lbl.textContent = msg;
+    }
+
+    function gmMergePlayersToState(fbPlayers) {
+      // For each firebase player, find or create in S.players
+      Object.entries(fbPlayers).forEach(([pid, pd]) => {
+        if (!pd || !pd._lastSync) return;
+        let p = S.players.find(x => x._fbId === pid);
+        if (!p) {
+          // New player — create entry
+          p = { id: Date.now() + Math.random(), _fbId: pid, name: pd._playerName || pd.name || 'Player', charName: '', nivel: 0, rank: 'C', natureza: '', hpCur: 10, hpMax: 10, staCur: 5, staMax: 5, san: 100, pi: 0, exposure: 0, crimes: 0, grace: {}, sin: {}, titles: '', notes: '', statusNeg: {}, statusPos: {}, attrs: { corpo: { forca: [], vigor: [], agilidade: [] }, mente: { habilidade: [], sincronia: [], intelecto: [] }, alma: { conexao: [], entendimento: [] } } };
+          S.players.push(p);
+        }
+        // Merge fields
+        const merge = ['charName', 'nivel', 'rank', 'natureza', 'hpCur', 'hpMax', 'staCur', 'staMax', 'san', 'pi', 'statusNeg', 'statusPos', 'grace', 'sin', 'titles', 'attrs'];
+        merge.forEach(k => { if (pd[k] !== undefined) p[k] = pd[k]; });
+        p.name = pd._playerName || pd.name || p.name;
+        p._lastSync = pd._lastSync;
+        p._syncAge = Date.now() - pd._lastSync;
+      });
+      // Persist and re-render
+      autosave();
+      if (UI.section === 'jogadores') {
+        renderLP();
+        if (UI.playerId && findP(UI.playerId)) renderMain();
+      }
+    }
+
+    // Auto-reconnect GM
+    window.addEventListener('load', () => {
+      const savedRoom = localStorage.getItem('arc_gm_sync_room');
+      if (savedRoom) {
+        document.getElementById('gmRoomInp').value = savedRoom;
+        const cfg = gmFbLoadConfig();
+        if (cfg) {
+          ['apiKey', 'authDomain', 'databaseURL', 'projectId'].forEach(k => { const el = document.getElementById('gm_' + k); if (el) el.value = cfg[k] || ''; });
+          gmLoadFirebase(cfg).then(() => setTimeout(() => gmDoListen(savedRoom), 1800));
+        }
+      }
+    }, true);
+
+  </script>
+
+  <!-- GM FIREBASE SYNC BAR -->
+  <div class="gm-sync-bar" id="gmSyncBar">
+    <div class="sync-dot off" id="gmSyncDot"></div>
+    <span class="gm-sync-lbl" id="gmSyncLbl">GM SYNC OFFLINE</span>
+    <input class="gm-sync-inp" id="gmRoomInp" placeholder="CÓDIGO DA CAMPANHA" maxlength="20"
+      style="text-transform:uppercase">
+    <button class="gm-sync-btn" onclick="gmSyncConnect()">[ MONITORAR ]</button>
+    <button class="gm-sync-btn blue" id="gmSyncStopBtn" style="display:none" onclick="gmSyncDisconnect()">[ PARAR
+      ]</button>
+    <button class="gm-sync-btn blue" onclick="gmOpenConfig()">[ CONFIGURAR ]</button>
+  </div>
+
+  <!-- FIREBASE CONFIG MODAL (GM) -->
+  <div class="fb-modal-ov" id="fbGmModal" style="display:none">
+    <div class="fb-modal">
+      <div class="fb-modal-tag">[ CONFIGURAÇÃO FIREBASE — MESTRE ]</div>
+      <div class="fb-modal-title">Conectar ao Firebase</div>
+      <div class="fb-modal-sub">Use as <strong style="color:var(--red)">mesmas credenciais</strong> dos
+        players.<br>Acesse console.firebase.google.com → Configurações do Projeto → Seus apps → SDK de configuração.
+      </div>
+      <div class="fb-field"><span class="fb-lbl">API KEY</span><input class="fb-inp" id="gm_apiKey"
+          placeholder="AIzaSy..."></div>
+      <div class="fb-field"><span class="fb-lbl">AUTH DOMAIN</span><input class="fb-inp" id="gm_authDomain"
+          placeholder="seu-projeto.firebaseapp.com"></div>
+      <div class="fb-field"><span class="fb-lbl">DATABASE URL</span><input class="fb-inp" id="gm_databaseURL"
+          placeholder="https://seu-projeto-default-rtdb.firebaseio.com"></div>
+      <div class="fb-field"><span class="fb-lbl">PROJECT ID</span><input class="fb-inp" id="gm_projectId"
+          placeholder="seu-projeto"></div>
+      <div class="fb-acts">
+        <button class="gm-sync-btn blue"
+          onclick="document.getElementById('fbGmModal').style.display='none'">CANCELAR</button>
+        <button class="gm-sync-btn" onclick="gmFbSaveConfig()">[ SALVAR ]</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>
