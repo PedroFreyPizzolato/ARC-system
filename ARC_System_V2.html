@@ -2610,7 +2610,7 @@
       ]
     };
 
-    const CLASS_DATA = {
+    const CLASS_DATA_EMBEDDED = {
       'Sobrevivente': {
         type: 'geral', skills: [
           { name: 'Instinto de Preservação', action: 'Passiva', cost: null, desc: 'Após sofrer Dano Massivo pela 1ª vez na cena, resiste com 1 de vida sem destruir membro.' },
@@ -2739,6 +2739,30 @@
       }
     };
 
+    // ── Sincronização de regras (Classes) via Firebase, com fallback offline ──
+    let CLASS_DATA = CLASS_DATA_EMBEDDED;
+    const FB_RULES_URL = 'https://intitulations-default-rtdb.firebaseio.com/arc_rules.json';
+    function _isNonEmptyObj(o) { return o && typeof o === 'object' && Object.keys(o).length > 0; }
+    async function loadClassData() {
+      let remote = null;
+      try {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 4000);
+        const resp = await fetch(FB_RULES_URL + '?t=' + Date.now(), { signal: ctrl.signal });
+        clearTimeout(tid);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data && _isNonEmptyObj(data.classes)) {
+            remote = data.classes;
+            localStorage.setItem('arc_rules_cache', JSON.stringify(data.classes));
+          }
+        }
+      } catch (e) { /* offline / timeout: usa fallback embutido/cache */ }
+      let cached = null;
+      try { cached = JSON.parse(localStorage.getItem('arc_rules_cache') || 'null'); } catch (e) { }
+      CLASS_DATA = _isNonEmptyObj(remote) ? remote : (_isNonEmptyObj(cached) ? cached : CLASS_DATA_EMBEDDED);
+    }
+
     const SUBS_ALMA = ['conexao', 'entendimento'];
     const SUB_LABEL_ALMA = { conexao: 'Conexão', entendimento: 'Entendimento' };
 
@@ -2801,7 +2825,8 @@
     // ═══════════════════════════════════════════════════════════════
     // INIT & SAVE
     // ═══════════════════════════════════════════════════════════════
-    function init() {
+    async function init() {
+      await loadClassData();
       const saved = localStorage.getItem('arc_v1');
       if (saved) { try { S = { ...S, ...JSON.parse(saved) }; } catch (e) { } }
       buildPericiasTable();
