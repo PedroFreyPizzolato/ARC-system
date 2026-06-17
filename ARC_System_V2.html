@@ -2535,7 +2535,7 @@
       Velocista: { buff: 'Começa com 1 reação extra', debuff: 'Toma 2 de dano a mais de ataques', habUnica: { name: 'Tornado de Lâminas', action: 'Especial', cost: '15S', desc: 'Avança em direção a todos os inimigos na cena, ignorando restrições, e ataca todos com desvantagem. Se acertar todos, retorna e ataca novamente (½ dano). Ataques no avanço não gastam stamina.' }, hp: '10 + 2d6 + Corpo | Por nível: +5 + Corpo+Mente', sta: '5 + 3d6 + 3×Mente | Por nível: +2 + Mente | Rec: 4>6>10>15' }
     };
 
-    const SUBATTR_SKILLS = {
+    const SUBATTR_SKILLS_EMBEDDED = {
       forca: [
         { name: 'Golpe Fortalecido', action: 'Passiva', cost: null, desc: '+2 dano e +1 acerto de ataques desarmados.' },
         { name: 'Golpe Adicional', action: 'Reação', cost: '2S', desc: 'Ao golpear com ataque adjacente, ataca novamente com desvantagem causando Corpo×2 de dano.' },
@@ -2609,6 +2609,7 @@
         { name: 'Leitura Total', action: 'Passiva', cost: null, desc: '[LB] Após 2 rodadas: você e aliados sem ataques desprevenidos, vantagem, +4 acerto, +1× crítico.', lb: true }
       ]
     };
+    let SUBATTR_SKILLS = SUBATTR_SKILLS_EMBEDDED;
 
     const CLASS_DATA_EMBEDDED = {
       'Sobrevivente': {
@@ -2742,31 +2743,34 @@
     // ── Sincronização de regras (Classes) via Firebase, com fallback offline ──
     let CLASS_DATA = CLASS_DATA_EMBEDDED;
     const FB_RULES_URL = 'https://intitulations-default-rtdb.firebaseio.com/arc_rules.json';
+    const _SUB_CM = ['forca', 'vigor', 'agilidade', 'habilidade', 'sincronia', 'intelecto'];
+    const _SUB_ALMA = ['conexao', 'entendimento'];
     function _isNonEmptyObj(o) { return o && typeof o === 'object' && Object.keys(o).length > 0; }
-    async function loadClassData() {
-      let remote = null;
+    function _pick(obj, keys) { const o = {}; keys.forEach(k => { if (obj && obj[k]) o[k] = obj[k]; }); return o; }
+    async function loadRules() {
+      let data = null;
       try {
         const ctrl = new AbortController();
         const tid = setTimeout(() => ctrl.abort(), 4000);
         const resp = await fetch(FB_RULES_URL + '?t=' + Date.now(), { signal: ctrl.signal });
         clearTimeout(tid);
-        if (resp.ok) {
-          const data = await resp.json();
-          if (data && _isNonEmptyObj(data.classes)) {
-            remote = data.classes;
-            localStorage.setItem('arc_rules_cache', JSON.stringify(data.classes));
-          }
-        }
-      } catch (e) { /* offline / timeout: usa fallback embutido/cache */ }
-      let cached = null;
-      try { cached = JSON.parse(localStorage.getItem('arc_rules_cache') || 'null'); } catch (e) { }
-      CLASS_DATA = _isNonEmptyObj(remote) ? remote : (_isNonEmptyObj(cached) ? cached : CLASS_DATA_EMBEDDED);
+        if (resp.ok) { const d = await resp.json(); if (d) { data = d; localStorage.setItem('arc_rules_cache', JSON.stringify(d)); } }
+      } catch (e) { /* offline / timeout: usa cache/embutido */ }
+      // ponytail: cache guarda o objeto arc_rules inteiro; cache no formato V1 (só classes) cai no embedded e se atualiza na próxima carga online
+      if (!data) { try { data = JSON.parse(localStorage.getItem('arc_rules_cache') || 'null'); } catch (e) { } }
+      data = data || {};
+      if (_isNonEmptyObj(data.classes)) CLASS_DATA = data.classes;
+      if (_isNonEmptyObj(data.subattrs)) {
+        const cm = _pick(data.subattrs, _SUB_CM), al = _pick(data.subattrs, _SUB_ALMA);
+        if (_isNonEmptyObj(cm)) SUBATTR_SKILLS = cm;
+        if (_isNonEmptyObj(al)) SUBATTR_SKILLS_ALMA = al;
+      }
     }
 
     const SUBS_ALMA = ['conexao', 'entendimento'];
     const SUB_LABEL_ALMA = { conexao: 'Conexão', entendimento: 'Entendimento' };
 
-    const SUBATTR_SKILLS_ALMA = {
+    const SUBATTR_SKILLS_ALMA_EMBEDDED = {
       conexao: [
         { name: 'Vínculo Astral', action: 'Reação', cost: '1S', desc: 'Quando errar um ataque, pode usar essa habilidade para re-rolar o teste, limitado a 1 uso por cada 2 rodadas.' },
         { name: 'Custo Reduzido em Combo', action: 'Passiva', cost: null, desc: 'Seus custos de stamina enquanto mantiver os efeitos de combo são reduzidos em X (igual ao buff de acerto e dano recebido por combo), máx. 5.' },
@@ -2786,6 +2790,7 @@
         { name: 'Domínio Etéreo', action: 'Passiva', cost: null, desc: 'Você domina completamente o plano astral. Pode interagir livremente com qualquer alma, conhece a localização exata de todos os seres na cena e pode retornar ao corpo como ação livre.' }
       ]
     };
+    let SUBATTR_SKILLS_ALMA = SUBATTR_SKILLS_ALMA_EMBEDDED;
 
     const RANK_TITLE_LIMITS = { C: 4, B: 3, A: 2, S: 1 };
     const RANK_SKILL_COUNTS = { C: 1, B: 2, A: 3, S: 5 };
@@ -2826,7 +2831,7 @@
     // INIT & SAVE
     // ═══════════════════════════════════════════════════════════════
     async function init() {
-      await loadClassData();
+      await loadRules();
       const saved = localStorage.getItem('arc_v1');
       if (saved) { try { S = { ...S, ...JSON.parse(saved) }; } catch (e) { } }
       buildPericiasTable();
