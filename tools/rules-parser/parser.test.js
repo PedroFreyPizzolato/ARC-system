@@ -138,3 +138,45 @@ test('parseClasses emite warning para skill malformada dentro de classe', () => 
   assert.equal(warnings.length, 1);
   assert.match(warnings[0], /Combatente/);
 });
+
+const { diffClasses } = require('./parser');
+
+test('diffClasses: sem mudanças → hasChanges false', () => {
+  const c = { A: { type: 'geral', skills: [{ name: 'S1', action: 'Passiva', cost: null, desc: 'd' }], ultimate: { name: 'U', action: 'Especial', cost: '5S', limit: '1x', desc: 'u' } } };
+  const d = diffClasses(c, JSON.parse(JSON.stringify(c)));
+  assert.equal(d.hasChanges, false);
+  assert.equal(d.rows.length, 0);
+});
+
+test('diffClasses: descrição de skill alterada (antes → depois)', () => {
+  const a = { A: { type: 'geral', skills: [{ name: 'S1', action: 'Passiva', cost: null, desc: 'reduz 50%' }], ultimate: null } };
+  const b = { A: { type: 'geral', skills: [{ name: 'S1', action: 'Passiva', cost: null, desc: 'reduz 33%' }], ultimate: null } };
+  const d = diffClasses(a, b);
+  assert.equal(d.hasChanges, true);
+  const row = d.rows.find((r) => r.type === 'modified');
+  assert.match(row.path, /A › S1 › desc/);
+  assert.equal(row.old, 'reduz 50%');
+  assert.equal(row.new, 'reduz 33%');
+});
+
+test('diffClasses: skill adicionada e removida', () => {
+  const a = { A: { type: 'geral', skills: [{ name: 'Velha', action: 'Passiva', cost: null, desc: 'x' }], ultimate: null } };
+  const b = { A: { type: 'geral', skills: [{ name: 'Nova', action: 'Bônus', cost: '2S', desc: 'y' }], ultimate: null } };
+  const d = diffClasses(a, b);
+  assert.ok(d.rows.some((r) => r.type === 'skill-added' && /Nova/.test(r.path)));
+  assert.ok(d.rows.some((r) => r.type === 'skill-removed' && /Velha/.test(r.path)));
+});
+
+test('diffClasses: classe adicionada', () => {
+  const d = diffClasses({}, { Nova: { type: 'geral', skills: [], ultimate: null } });
+  assert.ok(d.rows.some((r) => r.type === 'class-added' && r.path === 'Nova'));
+});
+
+test('diffClasses: ultimate com custo alterado', () => {
+  const a = { A: { type: 'geral', skills: [], ultimate: { name: 'U', action: 'Especial', cost: '20S', limit: '1x', desc: 'u' } } };
+  const b = { A: { type: 'geral', skills: [], ultimate: { name: 'U', action: 'Especial', cost: '15S', limit: '1x', desc: 'u' } } };
+  const d = diffClasses(a, b);
+  const row = d.rows.find((r) => /ULT › cost/.test(r.path));
+  assert.equal(row.old, '20S');
+  assert.equal(row.new, '15S');
+});

@@ -133,6 +133,52 @@ function parseClasses(paragraphs) {
   }
   return { classes: classes, warnings: warnings };
 }
+
+function _fmtSkill(s) {
+  return s.name + ' (' + s.action + (s.cost ? ' ' + s.cost : '') + '): ' + (s.desc || '');
+}
+function _skillMap(list) {
+  const m = {};
+  (list || []).forEach(function (s) { m[s.name] = s; });
+  return m;
+}
+function _cmpFields(prefix, a, b, fields, rows) {
+  fields.forEach(function (f) {
+    const av = a[f] == null ? '' : String(a[f]);
+    const bv = b[f] == null ? '' : String(b[f]);
+    if (av !== bv) rows.push({ path: prefix + ' › ' + f, type: 'modified', old: av || '—', new: bv || '—' });
+  });
+}
+function diffClasses(oldC, newC) {
+  oldC = oldC || {};
+  newC = newC || {};
+  const rows = [];
+  Object.keys(oldC).forEach(function (n) {
+    if (!(n in newC)) rows.push({ path: n, type: 'class-removed', old: 'classe inteira', new: '' });
+  });
+  Object.keys(newC).forEach(function (n) {
+    if (!(n in oldC)) rows.push({ path: n, type: 'class-added', old: '', new: 'classe nova (' + ((newC[n].skills || []).length) + ' skills)' });
+  });
+  Object.keys(newC).forEach(function (n) {
+    if (!(n in oldC)) return;
+    const a = oldC[n], b = newC[n];
+    if ((a.type || '') !== (b.type || '')) rows.push({ path: n + ' › tipo', type: 'modified', old: a.type || '—', new: b.type || '—' });
+    if ((a.natureza || '') !== (b.natureza || '')) rows.push({ path: n + ' › natureza', type: 'modified', old: a.natureza || '—', new: b.natureza || '—' });
+    const om = _skillMap(a.skills), nm = _skillMap(b.skills);
+    Object.keys(om).forEach(function (name) {
+      if (!(name in nm)) rows.push({ path: n + ' › ' + name, type: 'skill-removed', old: _fmtSkill(om[name]), new: '' });
+    });
+    Object.keys(nm).forEach(function (name) {
+      if (!(name in om)) { rows.push({ path: n + ' › ' + name, type: 'skill-added', old: '', new: _fmtSkill(nm[name]) }); return; }
+      _cmpFields(n + ' › ' + name, om[name], nm[name], ['action', 'cost', 'desc'], rows);
+    });
+    const ao = a.ultimate, bo = b.ultimate;
+    if (!ao && bo) rows.push({ path: n + ' › ULT ' + bo.name, type: 'skill-added', old: '', new: _fmtSkill(bo) });
+    else if (ao && !bo) rows.push({ path: n + ' › ULT ' + ao.name, type: 'skill-removed', old: _fmtSkill(ao), new: '' });
+    else if (ao && bo) _cmpFields(n + ' › ULT', ao, bo, ['name', 'action', 'cost', 'limit', 'desc'], rows);
+  });
+  return { hasChanges: rows.length > 0, rows: rows };
+}
 // ---- FIM cópia de tools/rules-parser/parser.js ----
 
 // ---- Camada Google (I/O): lê o Doc, mostra preview, grava no Firebase ----
@@ -168,32 +214,79 @@ function onOpen() {
     .addToUi();
 }
 
+// Lê o que JÁ está publicado no Firebase (para comparar). Devolve {} em qualquer falha.
+function buscarRegrasAtuais() {
+  try {
+    const r = UrlFetchApp.fetch(FB_RULES_URL, { muteHttpExceptions: true });
+    if (r.getResponseCode() !== 200) return {};
+    const d = JSON.parse(r.getContentText() || 'null');
+    return (d && d.classes) ? d.classes : {};
+  } catch (e) { return {}; }
+}
+
+function _esc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function _previewHtml(out, diff) {
+  let head = '<div class="hd">Classes lidas: <b>' + out.count + '</b> (esperado 14)</div>';
+  if (out.warnings.length) {
+    head += '<div class="warn">⚠️ ' + out.warnings.length + ' aviso(s):<ul>';
+    out.warnings.forEach(function (w) { head += '<li>' + _esc(w) + '</li>'; });
+    head += '</ul></div>';
+  } else {
+    head += '<div class="ok">✓ Nenhum aviso de leitura.</div>';
+  }
+  let body;
+  if (!diff.hasChanges) {
+    body = '<div class="nochg">✓ Nenhuma mudança em relação ao que já está publicado no Firebase.</div>';
+  } else {
+    let rows = '';
+    diff.rows.forEach(function (r) {
+      rows += '<tr class="path"><td colspan="2">' + _esc(r.path) + ' <span class="tag ' + r.type + '">' + r.type + '</span></td></tr>';
+      if (r.type === 'modified') {
+        rows += '<tr><td class="old">' + _esc(r.old) + '</td><td class="new">' + _esc(r.new) + '</td></tr>';
+      } else if (r.type === 'class-added' || r.type === 'skill-added') {
+        rows += '<tr><td class="muted">—</td><td class="new">' + _esc(r.new) + '</td></tr>';
+      } else {
+        rows += '<tr><td class="old">' + _esc(r.old) + '</td><td class="muted">—</td></tr>';
+      }
+    });
+    body = '<div class="hd">Mudanças desde a última publicação (' + diff.rows.length + '):</div>'
+      + '<table><tr><th>Atual (Firebase)</th><th>Novo (Doc)</th></tr>' + rows + '</table>';
+  }
+  const css = '<style>'
+    + 'body{font:13px/1.45 system-ui,Arial,sans-serif;margin:0;padding:12px;color:#24292e}'
+    + '.hd{font-weight:600;margin:10px 0 6px}'
+    + '.ok{color:#22863a;margin:6px 0}.warn{color:#9a6700;margin:6px 0}.warn ul{margin:4px 0 0 18px}'
+    + '.nochg{color:#22863a;padding:10px;background:#f0fff4;border:1px solid #bef5cb;border-radius:6px}'
+    + 'table{border-collapse:collapse;width:100%;table-layout:fixed}'
+    + 'th,td{border:1px solid #e1e4e8;padding:6px 8px;vertical-align:top;text-align:left;width:50%;word-wrap:break-word;white-space:pre-wrap}'
+    + 'th{background:#f6f8fa}.path td{background:#f6f8fa;font-weight:600}'
+    + '.old{background:#ffeef0}.new{background:#e6ffed}.muted{color:#999}'
+    + '.tag{font-weight:400;font-size:11px;color:#fff;border-radius:3px;padding:1px 5px;margin-left:6px}'
+    + '.tag.modified{background:#9a6700}.tag.skill-added,.tag.class-added{background:#22863a}'
+    + '.tag.skill-removed,.tag.class-removed{background:#d73a49}'
+    + '</style>';
+  return css + head + body;
+}
+
 function mostrarPreview() {
   const out = construirArcRules();
-  const linhas = ['Classes lidas: ' + out.count + ' (esperado 14)', ''];
-  Object.keys(out.rules.classes).forEach(function (k) {
-    const c = out.rules.classes[k];
-    linhas.push('• ' + k + ' [' + c.type + (c.natureza ? '/' + c.natureza : '') + '] — ' +
-      c.skills.length + ' skills' + (c.ultimate ? ' + ultimate' : ' (SEM ULTIMATE)'));
-  });
-  if (out.warnings.length) {
-    linhas.push('', '⚠️ AVISOS (' + out.warnings.length + '):');
-    out.warnings.forEach(function (w) { linhas.push('  - ' + w); });
-  } else {
-    linhas.push('', '✓ Nenhum aviso.');
-  }
-  const safe = linhas.join('\n').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const html = HtmlService
-    .createHtmlOutput('<pre style="white-space:pre-wrap;font:13px monospace">' + safe + '</pre>')
-    .setWidth(640).setHeight(460);
+  const diff = diffClasses(buscarRegrasAtuais(), out.rules.classes);
+  const html = HtmlService.createHtmlOutput(_previewHtml(out, diff)).setWidth(840).setHeight(580);
   DocumentApp.getUi().showModalDialog(html, 'Preview — Ponte ARC');
 }
 
 function publicar() {
   const ui = DocumentApp.getUi();
   const out = construirArcRules();
+  const diff = diffClasses(buscarRegrasAtuais(), out.rules.classes);
+  const resumo = diff.hasChanges ? (diff.rows.length + ' mudança(s)') : 'nenhuma mudança';
   const aviso = out.warnings.length ? ('\n\n⚠️ ' + out.warnings.length + ' aviso(s)! Veja o Preview antes.') : '';
-  const resp = ui.alert('Publicar no Firebase', 'Enviar ' + out.count + ' classes para o ARC?' + aviso, ui.ButtonSet.OK_CANCEL);
+  const resp = ui.alert('Publicar no Firebase',
+    'Enviar ' + out.count + ' classes (' + resumo + ') para o ARC?\nUse "Pré-visualizar" para ver o diff lado a lado.' + aviso,
+    ui.ButtonSet.OK_CANCEL);
   if (resp !== ui.Button.OK) return;
   const r = UrlFetchApp.fetch(FB_RULES_URL, {
     method: 'put', contentType: 'application/json',

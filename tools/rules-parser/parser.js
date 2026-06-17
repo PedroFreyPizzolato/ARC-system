@@ -123,4 +123,52 @@ function parseClasses(paragraphs) {
   return { classes, warnings };
 }
 
-module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses };
+function _fmtSkill(s) {
+  return s.name + ' (' + s.action + (s.cost ? ' ' + s.cost : '') + '): ' + (s.desc || '');
+}
+function _skillMap(list) {
+  const m = {};
+  (list || []).forEach(function (s) { m[s.name] = s; });
+  return m;
+}
+function _cmpFields(prefix, a, b, fields, rows) {
+  fields.forEach(function (f) {
+    const av = a[f] == null ? '' : String(a[f]);
+    const bv = b[f] == null ? '' : String(b[f]);
+    if (av !== bv) rows.push({ path: prefix + ' › ' + f, type: 'modified', old: av || '—', new: bv || '—' });
+  });
+}
+
+// Compara dois objetos `classes` (antigo vs novo) e devolve linhas de diff lado a lado.
+function diffClasses(oldC, newC) {
+  oldC = oldC || {};
+  newC = newC || {};
+  const rows = [];
+  Object.keys(oldC).forEach(function (n) {
+    if (!(n in newC)) rows.push({ path: n, type: 'class-removed', old: 'classe inteira', new: '' });
+  });
+  Object.keys(newC).forEach(function (n) {
+    if (!(n in oldC)) rows.push({ path: n, type: 'class-added', old: '', new: 'classe nova (' + ((newC[n].skills || []).length) + ' skills)' });
+  });
+  Object.keys(newC).forEach(function (n) {
+    if (!(n in oldC)) return;
+    const a = oldC[n], b = newC[n];
+    if ((a.type || '') !== (b.type || '')) rows.push({ path: n + ' › tipo', type: 'modified', old: a.type || '—', new: b.type || '—' });
+    if ((a.natureza || '') !== (b.natureza || '')) rows.push({ path: n + ' › natureza', type: 'modified', old: a.natureza || '—', new: b.natureza || '—' });
+    const om = _skillMap(a.skills), nm = _skillMap(b.skills);
+    Object.keys(om).forEach(function (name) {
+      if (!(name in nm)) rows.push({ path: n + ' › ' + name, type: 'skill-removed', old: _fmtSkill(om[name]), new: '' });
+    });
+    Object.keys(nm).forEach(function (name) {
+      if (!(name in om)) { rows.push({ path: n + ' › ' + name, type: 'skill-added', old: '', new: _fmtSkill(nm[name]) }); return; }
+      _cmpFields(n + ' › ' + name, om[name], nm[name], ['action', 'cost', 'desc'], rows);
+    });
+    const ao = a.ultimate, bo = b.ultimate;
+    if (!ao && bo) rows.push({ path: n + ' › ULT ' + bo.name, type: 'skill-added', old: '', new: _fmtSkill(bo) });
+    else if (ao && !bo) rows.push({ path: n + ' › ULT ' + ao.name, type: 'skill-removed', old: _fmtSkill(ao), new: '' });
+    else if (ao && bo) _cmpFields(n + ' › ULT', ao, bo, ['name', 'action', 'cost', 'limit', 'desc'], rows);
+  });
+  return { hasChanges: rows.length > 0, rows: rows };
+}
+
+module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses, diffClasses };
