@@ -96,3 +96,45 @@ test('ultimate com custo multiplicador X*3S', () => {
 test('linha sem aspas não é ultimate', () => {
   assert.equal(parseUltimateHeader('Foco no Alvo (passiva): +1 de dano'), null);
 });
+
+const { parseClasses } = require('./parser');
+const { SAMPLE } = require('./fixtures');
+
+test('parseClasses extrai classe geral com 5 skills + ultimate', () => {
+  const { classes } = parseClasses(SAMPLE);
+  const s = classes['Sobrevivente'];
+  assert.equal(s.type, 'geral');
+  assert.equal(s.skills.length, 5);
+  assert.equal(s.skills[0].name, 'Instinto de Preservação');
+  assert.equal(s.ultimate.name, 'Espírito Indomável');
+  assert.equal(s.ultimate.limit, '1x por cena');
+  assert.equal(s.ultimate.action, 'Passiva');
+});
+
+test('parseClasses associa classe específica à natureza pai', () => {
+  const { classes } = parseClasses(SAMPLE);
+  const t = classes['Titã'];
+  assert.equal(t.type, 'especifica');
+  assert.equal(t.natureza, 'Brutamontes');
+  assert.equal(t.skills.length, 5);
+  assert.equal(t.skills[1].action, 'Movimento+Reação');
+  assert.equal(t.ultimate.name, 'Bastião');
+  assert.equal(t.ultimate.cost, '15S');
+});
+
+test('parseClasses ignora intro fora de classe e não cria classe fantasma', () => {
+  const { classes } = parseClasses(SAMPLE);
+  assert.deepEqual(Object.keys(classes).sort(), ['Sobrevivente', 'Titã'].sort());
+});
+
+test('parseClasses emite warning para skill malformada dentro de classe', () => {
+  const bad = [
+    { heading: 'HEADING1', text: 'Classes' },
+    { heading: 'HEADING3', text: 'Classes Gerais' },
+    { heading: 'HEADING2', text: 'Combatente' },
+    { heading: 'NORMAL', text: 'Foco Total (sei lá) faltou os dois-pontos aqui' },
+  ];
+  const { warnings } = parseClasses(bad);
+  assert.equal(warnings.length, 1);
+  assert.match(warnings[0], /Combatente/);
+});

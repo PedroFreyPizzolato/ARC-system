@@ -1,0 +1,39 @@
+// Ferramenta de verificação: roda o parser contra um Doc real exportado em markdown.
+// Converte o markdown (com **negrito**, \[escapes\]) em parágrafos {heading,text}
+// limpos — simulando o que Apps Script Paragraph.getText() devolve — e roda parseClasses.
+//
+// Uso: node tools/rules-parser/verify-doc.js <caminho-do-doc-extraido.md>
+const fs = require('fs');
+const { parseClasses } = require('./parser');
+
+const path = process.argv[2];
+if (!path) { console.error('uso: node verify-doc.js <arquivo.md>'); process.exit(1); }
+
+function clean(s) {
+  return s
+    .replace(/\*\*\*/g, '').replace(/\*\*/g, '')      // negrito/itálico markdown
+    .replace(/\\([[\]\-*"'>_])/g, '$1')               // desescapar \[ \] \- \* \" \' \> \_
+    .replace(/\\/g, '')
+    .trim();
+}
+
+const paras = [];
+for (const raw of fs.readFileSync(path, 'utf8').split(/\r?\n/)) {
+  const line = raw.replace(/\s+$/, '');
+  if (!line.trim()) continue;
+  let m;
+  if ((m = line.match(/^###\s+(.*)$/))) paras.push({ heading: 'HEADING3', text: clean(m[1]) });
+  else if ((m = line.match(/^##\s+(.*)$/))) paras.push({ heading: 'HEADING2', text: clean(m[1]) });
+  else if ((m = line.match(/^#\s+(.*)$/))) paras.push({ heading: 'HEADING1', text: clean(m[1]) });
+  else paras.push({ heading: 'NORMAL', text: clean(line.replace(/^\s*[-*]\s+/, '')) });
+}
+
+const { classes, warnings } = parseClasses(paras);
+const names = Object.keys(classes);
+console.log('Classes extraídas:', names.length);
+for (const n of names) {
+  const c = classes[n];
+  console.log(`  - ${n} [${c.type}${c.natureza ? '/' + c.natureza : ''}] skills=${c.skills.length} ult=${c.ultimate ? c.ultimate.name : 'NENHUMA'}`);
+}
+console.log('\nAvisos:', warnings.length);
+warnings.forEach((w) => console.log('  ' + w));

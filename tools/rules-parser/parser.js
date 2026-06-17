@@ -57,4 +57,70 @@ function parseUltimateHeader(text) {
   return { name, action: action || 'Especial', cost: cost, limit: limit };
 }
 
-module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader };
+const NATUREZAS = ['Brutamontes', 'Guerreiro', 'Atleta', 'Velocista'];
+
+function parseClasses(paragraphs) {
+  const classes = {};
+  const warnings = [];
+  let inClasses = false, mode = null, currentNatureza = null, currentClass = null, pendingUlt = null;
+
+  for (const p of paragraphs) {
+    const heading = p.heading || 'NORMAL';
+    const t = String(p.text || '').trim();
+
+    if (heading === 'HEADING1') {
+      inClasses = /^classes$/i.test(t);
+      mode = null; currentNatureza = null; currentClass = null; pendingUlt = null;
+      continue;
+    }
+    if (!inClasses) continue;
+
+    if (heading === 'HEADING3') {
+      if (/classes\s+gerais/i.test(t)) { mode = 'geral'; currentClass = null; pendingUlt = null; continue; }
+      if (/classes\s+espec/i.test(t)) { mode = 'especifica'; currentClass = null; pendingUlt = null; continue; }
+      if (mode === 'especifica' && t) {
+        currentClass = t;
+        classes[t] = { type: 'especifica', natureza: currentNatureza, skills: [], ultimate: null };
+        pendingUlt = null;
+      }
+      continue;
+    }
+
+    if (heading === 'HEADING2') {
+      if (mode === 'especifica' && NATUREZAS.indexOf(t) >= 0) {
+        currentNatureza = t; currentClass = null; pendingUlt = null; continue;
+      }
+      if (t) {
+        currentClass = t;
+        classes[t] = { type: 'geral', skills: [], ultimate: null };
+        pendingUlt = null;
+      }
+      continue;
+    }
+
+    // NORMAL
+    if (!t || !currentClass) continue;
+
+    if (pendingUlt) {
+      classes[currentClass].ultimate = Object.assign({}, pendingUlt, { desc: t });
+      pendingUlt = null;
+      continue;
+    }
+    if (/^\s*["“”'‘’]/.test(t)) {
+      const u = parseUltimateHeader(t);
+      if (u) { pendingUlt = u; continue; }
+    }
+    const sk = parseSkillLine(t);
+    if (sk) {
+      if (!sk.actionKnown) warnings.push('Classe "' + currentClass + '": ação não reconhecida em "' + sk.name + '" → "' + sk.action + '"');
+      classes[currentClass].skills.push({ name: sk.name, action: sk.action, cost: sk.cost, desc: sk.desc });
+      continue;
+    }
+    if (/^[^()]{1,80}\([^)]*\)/.test(t) || /–\s*\(/.test(t)) {
+      warnings.push('Classe "' + currentClass + '": linha não reconhecida → "' + t.slice(0, 70) + '"');
+    }
+  }
+  return { classes, warnings };
+}
+
+module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses };
