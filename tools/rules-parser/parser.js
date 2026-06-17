@@ -20,4 +20,20 @@ function normalizeCost(raw) {
   return s.length ? s : null;
 }
 
-module.exports = { normalizeAction, normalizeCost };
+const SKILL_RE = /^(.+?)\s*\(([^)]+)\)(?:\s*\[([^\]]+)\])?:\s*(.+)$/;
+
+function parseSkillLine(text) {
+  const t = String(text || '').trim();
+  const m = t.match(SKILL_RE);
+  if (!m) return null;
+  const act = normalizeAction(m[2]);
+  return {
+    name: m[1].trim(),
+    action: act.value,
+    actionKnown: act.known,
+    cost: normalizeCost(m[3]),
+    desc: m[4].trim(),
+  };
+}
+
+module.exports = { normalizeAction, normalizeCost, parseSkillLine };
