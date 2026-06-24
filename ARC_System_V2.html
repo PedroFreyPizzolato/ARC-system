@@ -2767,10 +2767,13 @@
       }
       if (data.status && _isNonEmptyObj(data.status.natures)) {
         Object.keys(data.status.natures).forEach(function (nat) {
-          if (NATURE_DATA[nat]) { // muta só hp/sta (const permite); mantém buff/debuff/habUnica embutidos
+          if (NATURE_DATA[nat]) { // const permite mutar propriedades
             const s = data.status.natures[nat];
             if (s.hp) NATURE_DATA[nat].hp = s.hp;
             if (s.sta) NATURE_DATA[nat].sta = s.sta;
+            if (s.buff) NATURE_DATA[nat].buff = s.buff;
+            if (s.debuff) NATURE_DATA[nat].debuff = s.debuff;
+            if (s.habUnica) NATURE_DATA[nat].habUnica = s.habUnica;
           }
         });
       }

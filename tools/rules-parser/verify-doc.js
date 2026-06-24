@@ -4,7 +4,7 @@
 //
 // Uso: node tools/rules-parser/verify-doc.js <caminho-do-doc-extraido.md>
 const fs = require('fs');
-const { parseClasses, parseSubattrs, parseStatus } = require('./parser');
+const { parseClasses, parseSubattrs, parseStatus, parseNatures } = require('./parser');
 
 const path = process.argv[2];
 if (!path) { console.error('uso: node verify-doc.js <arquivo.md>'); process.exit(1); }
@@ -54,3 +54,12 @@ for (const n of Object.keys(st.natures)) {
   console.log(`      hp:  ${st.natures[n].hp}`);
   console.log(`      sta: ${st.natures[n].sta}`);
 }
+
+const nt = parseNatures(paras);
+console.log('\nNaturezas (buff/debuff/hab. única):', Object.keys(nt.natures).length, '(esperado 4)');
+for (const n of Object.keys(nt.natures)) {
+  const x = nt.natures[n];
+  console.log(`  - ${n}: buff=${x.buff ? 'ok' : '—'} debuff=${x.debuff ? 'ok' : '—'} hab=${x.habUnica ? x.habUnica.name + ' (' + x.habUnica.action + '/' + x.habUnica.cost + ')' : '—'}`);
+}
+console.log('Avisos (naturezas):', nt.warnings.length);
+nt.warnings.forEach((w) => console.log('  ' + w));

@@ -260,4 +260,46 @@ function parseStatus(paragraphs) {
   return { natures: natures, warnings: warnings };
 }
 
-module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses, diffClasses, parseSubattrs, parseStatus };
+const NAT_BUFF_RE = /^buff\s*:\s*(.+)$/i;
+const NAT_DEBUFF_RE = /^debuff\s*:\s*(.+)$/i;
+const NAT_HAB_RE = /^habilidade\s*[úu]nica\s*:\s*(.*)$/i;
+
+// Buff/debuff/habilidade única por natureza (seção "# Naturezas").
+// Buff/debuff são strings; a habilidade única vem no formato de skill (Nome (ação) [custo]: desc).
+function parseNatures(paragraphs) {
+  const acc = {};
+  const warnings = [];
+  let inNat = false, currentNat = null, expectHab = false;
+  function ensure(n) { if (!acc[n]) acc[n] = {}; return acc[n]; }
+  function setHab(line) {
+    if (!currentNat) return;
+    const sk = parseSkillLine(line);
+    if (!sk) { warnings.push('Natureza "' + currentNat + '": habilidade única não reconhecida → "' + line.slice(0, 60) + '"'); return; }
+    if (!sk.actionKnown) warnings.push('Natureza "' + currentNat + '": ação não reconhecida na hab. única → "' + sk.action + '"');
+    ensure(currentNat).habUnica = { name: sk.name, action: sk.action, cost: sk.cost, desc: sk.desc };
+  }
+  for (const p of paragraphs) {
+    const heading = p.heading || 'NORMAL';
+    const full = String(p.text || '');
+    if (heading === 'HEADING1') { inNat = /^naturezas$/i.test(full.trim()); currentNat = null; expectHab = false; continue; }
+    if (!inNat) continue;
+    for (const raw of full.split(/\r?\n/)) {
+      const t = raw.trim();
+      if (!t) continue;
+      let m;
+      if ((m = t.match(NAT_BUFF_RE))) { if (currentNat) ensure(currentNat).buff = m[1].trim(); expectHab = false; continue; }
+      if ((m = t.match(NAT_DEBUFF_RE))) { if (currentNat) ensure(currentNat).debuff = m[1].trim(); expectHab = false; continue; }
+      if ((m = t.match(NAT_HAB_RE))) {
+        const rest = (m[1] || '').trim();
+        if (rest) { setHab(rest); expectHab = false; } else expectHab = true;
+        continue;
+      }
+      const nat = _natureKey(t);
+      if (nat) { currentNat = nat; expectHab = false; continue; }
+      if (expectHab) { setHab(t); expectHab = false; continue; }
+    }
+  }
+  return { natures: acc, warnings: warnings };
+}
+
+module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses, diffClasses, parseSubattrs, parseStatus, parseNatures };

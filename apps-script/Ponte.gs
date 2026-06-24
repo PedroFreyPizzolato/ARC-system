@@ -270,6 +270,48 @@ function parseStatus(paragraphs) {
   });
   return { natures: natures, warnings: warnings };
 }
+
+const NAT_BUFF_RE = /^buff\s*:\s*(.+)$/i;
+const NAT_DEBUFF_RE = /^debuff\s*:\s*(.+)$/i;
+const NAT_HAB_RE = /^habilidade\s*[úu]nica\s*:\s*(.*)$/i;
+
+// Buff/debuff/habilidade única por natureza (seção "# Naturezas").
+// Buff/debuff são strings; a habilidade única vem no formato de skill (Nome (ação) [custo]: desc).
+function parseNatures(paragraphs) {
+  const acc = {};
+  const warnings = [];
+  let inNat = false, currentNat = null, expectHab = false;
+  function ensure(n) { if (!acc[n]) acc[n] = {}; return acc[n]; }
+  function setHab(line) {
+    if (!currentNat) return;
+    const sk = parseSkillLine(line);
+    if (!sk) { warnings.push('Natureza "' + currentNat + '": habilidade única não reconhecida → "' + line.slice(0, 60) + '"'); return; }
+    if (!sk.actionKnown) warnings.push('Natureza "' + currentNat + '": ação não reconhecida na hab. única → "' + sk.action + '"');
+    ensure(currentNat).habUnica = { name: sk.name, action: sk.action, cost: sk.cost, desc: sk.desc };
+  }
+  for (const p of paragraphs) {
+    const heading = p.heading || 'NORMAL';
+    const full = String(p.text || '');
+    if (heading === 'HEADING1') { inNat = /^naturezas$/i.test(full.trim()); currentNat = null; expectHab = false; continue; }
+    if (!inNat) continue;
+    for (const raw of full.split(/\r?\n/)) {
+      const t = raw.trim();
+      if (!t) continue;
+      let m;
+      if ((m = t.match(NAT_BUFF_RE))) { if (currentNat) ensure(currentNat).buff = m[1].trim(); expectHab = false; continue; }
+      if ((m = t.match(NAT_DEBUFF_RE))) { if (currentNat) ensure(currentNat).debuff = m[1].trim(); expectHab = false; continue; }
+      if ((m = t.match(NAT_HAB_RE))) {
+        const rest = (m[1] || '').trim();
+        if (rest) { setHab(rest); expectHab = false; } else expectHab = true;
+        continue;
+      }
+      const nat = _natureKey(t);
+      if (nat) { currentNat = nat; expectHab = false; continue; }
+      if (expectHab) { setHab(t); expectHab = false; continue; }
+    }
+  }
+  return { natures: acc, warnings: warnings };
+}
 // ---- FIM cópia de tools/rules-parser/parser.js ----
 
 // ---- Camada Google (I/O): lê o Doc, mostra preview, grava no Firebase ----
@@ -305,9 +347,17 @@ function construirArcRules() {
   const c = parseClasses(paras);
   const s = parseSubattrs(paras);
   const st = parseStatus(paras);
+  const nt = parseNatures(paras);
+  // Mescla buff/debuff/habUnica (# Naturezas) no mesmo nó de cada natureza (hp/sta vêm de # Status).
+  Object.keys(nt.natures).forEach(function (n) {
+    const dst = st.natures[n] || (st.natures[n] = {}), src = nt.natures[n];
+    if (src.buff) dst.buff = src.buff;
+    if (src.debuff) dst.debuff = src.debuff;
+    if (src.habUnica) dst.habUnica = src.habUnica;
+  });
   return {
     rules: { _version: 1, _updatedAt: new Date().getTime(), classes: c.classes, subattrs: s.subattrs, status: { natures: st.natures } },
-    warnings: c.warnings.concat(s.warnings).concat(st.warnings),
+    warnings: c.warnings.concat(s.warnings).concat(st.warnings).concat(nt.warnings),
     countClasses: Object.keys(c.classes).length,
     countSubattrs: Object.keys(s.subattrs).length,
     countNatures: Object.keys(st.natures).length,
@@ -336,6 +386,9 @@ function _envStatus(natures) {
     const s = natures[n], skills = [];
     if (s.hp) skills.push({ name: 'Vida', action: '', cost: null, desc: s.hp });
     if (s.sta) skills.push({ name: 'Stamina', action: '', cost: null, desc: s.sta });
+    if (s.buff) skills.push({ name: 'Buff', action: '', cost: null, desc: s.buff });
+    if (s.debuff) skills.push({ name: 'Debuff', action: '', cost: null, desc: s.debuff });
+    if (s.habUnica) skills.push({ name: 'Hab. Única', action: s.habUnica.action, cost: s.habUnica.cost, desc: s.habUnica.name + ' — ' + s.habUnica.desc });
     o[n] = { skills: skills, ultimate: null };
   });
   return o;

@@ -240,3 +240,57 @@ test('diffClasses: ultimate com custo alterado', () => {
   assert.equal(row.old, '20S');
   assert.equal(row.new, '15S');
 });
+
+const { parseNatures } = require('./parser');
+const { SAMPLE_NATURES } = require('./fixtures');
+
+test('parseNatures extrai buff/debuff/habUnica por natureza', () => {
+  const { natures, warnings } = parseNatures(SAMPLE_NATURES);
+  assert.equal(warnings.length, 0);
+  assert.deepEqual(Object.keys(natures).sort(), ['Brutamontes', 'Guerreiro']);
+  const b = natures.Brutamontes;
+  assert.match(b.buff, /2 pontos de vida extra/);
+  assert.match(b.debuff, /CA é naturalmente menor/);
+  assert.deepEqual(b.habUnica, {
+    name: 'Avanço Brutal', action: 'Especial', cost: '4S',
+    desc: 'Você avança a mesma distância de seu movimento, atacando e empurrando todos na linha (inclui aliados), causando 2d6+(2*Corpo)',
+  });
+});
+
+test('parseNatures aceita hab. única na própria linha do rótulo (inline)', () => {
+  const { natures } = parseNatures(SAMPLE_NATURES);
+  assert.deepEqual(natures.Guerreiro.habUnica, {
+    name: 'Rajada de Golpes', action: 'Especial', cost: '5S',
+    desc: '1x por luta, por 2 rodadas, pode atacar uma vez a mais por ação padrão',
+  });
+});
+
+test('parseNatures ignora conteúdo fora da seção # Naturezas', () => {
+  const { natures } = parseNatures([
+    { heading: 'HEADING1', text: 'Classes' },
+    { heading: 'NORMAL', text: 'Buff: não deveria entrar' },
+  ]);
+  assert.deepEqual(natures, {});
+});
+
+test('parseNatures avisa quando a hab. única não está no formato de skill', () => {
+  const { warnings } = parseNatures([
+    { heading: 'HEADING1', text: 'Naturezas' },
+    { heading: 'NORMAL', text: 'Brutamontes' },
+    { heading: 'NORMAL', text: 'Habilidade única:' },
+    { heading: 'NORMAL', text: '(4S) sem nome nem ação' },
+  ]);
+  assert.ok(warnings.some((w) => /habilidade única não reconhecida/i.test(w)));
+});
+
+test('parseNatures: rótulo de hab. única vazio não engole a próxima natureza', () => {
+  const { natures } = parseNatures([
+    { heading: 'HEADING1', text: 'Naturezas' },
+    { heading: 'NORMAL', text: 'Brutamontes' },
+    { heading: 'NORMAL', text: 'Habilidade única:' },
+    { heading: 'NORMAL', text: 'Guerreiro' },
+    { heading: 'NORMAL', text: 'Buff: x' },
+  ]);
+  assert.equal(natures.Guerreiro.buff, 'x');
+  assert.ok(!natures.Brutamontes || !natures.Brutamontes.habUnica);
+});
