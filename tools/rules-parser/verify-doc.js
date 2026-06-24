@@ -4,7 +4,7 @@
 //
 // Uso: node tools/rules-parser/verify-doc.js <caminho-do-doc-extraido.md>
 const fs = require('fs');
-const { parseClasses, parseSubattrs } = require('./parser');
+const { parseClasses, parseSubattrs, parseStatus } = require('./parser');
 
 const path = process.argv[2];
 if (!path) { console.error('uso: node verify-doc.js <arquivo.md>'); process.exit(1); }
@@ -46,3 +46,11 @@ for (const k of Object.keys(sub.subattrs)) {
 }
 console.log('Avisos (subattr):', sub.warnings.length);
 sub.warnings.forEach((w) => console.log('  ' + w));
+
+const st = parseStatus(paras);
+console.log('\nStatus (naturezas com Vida/Stamina):', Object.keys(st.natures).length, '(esperado 4)');
+for (const n of Object.keys(st.natures)) {
+  console.log(`  - ${n}:`);
+  console.log(`      hp:  ${st.natures[n].hp}`);
+  console.log(`      sta: ${st.natures[n].sta}`);
+}

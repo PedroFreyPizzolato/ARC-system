@@ -50,4 +50,25 @@ const SAMPLE_SUBATTR = [
   N('Nível 1 — Vínculo Astral (passiva): ao errar um ataque, pode rerolar o teste'),
 ];
 
-module.exports = { SAMPLE, SAMPLE_SUBATTR };
+// Recorte da seção "# Status" (Vida/Stamina por natureza em bullets; nome "Brutamonte"
+// no singular; Sanidade fica fora do escopo).
+const SAMPLE_STATUS = [
+  H1('Status'),
+  N('Vida'),
+  N('Brutamonte'),
+  N('Nível 0: 10 + 5d4 + 5*Corpo'),
+  N('Por nível: 5 + 3*Corpo'),
+  N('Guerreiro'),
+  N('Nível 0: 10 + 3d8 + 3*Corpo'),
+  N('Por nível: 5 + 2*Corpo'),
+  N('Stamina'),
+  N('*Você naturalmente recupera um pouco da sua stamina no início de cada rodada*'),
+  N('Brutamonte'),
+  N('Nível 0: 5 + 3d6 + 3*Corpo'),
+  N('Por nível: 2 + Corpo'),
+  N('Recuperação: 5 > 7 > 10 > 15'),
+  N('Sanidade'),
+  N('100, podendo variar até entre 90 e 110 de acordo com a sua lore'),
+];
+
+module.exports = { SAMPLE, SAMPLE_SUBATTR, SAMPLE_STATUS };

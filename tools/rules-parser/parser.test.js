@@ -145,8 +145,21 @@ test('parseClasses emite warning para skill malformada dentro de classe', () => 
   assert.match(warnings[0], /Combatente/);
 });
 
-const { parseSubattrs } = require('./parser');
-const { SAMPLE_SUBATTR } = require('./fixtures');
+const { parseSubattrs, parseStatus } = require('./parser');
+const { SAMPLE_SUBATTR, SAMPLE_STATUS } = require('./fixtures');
+
+test('parseStatus: monta hp/sta por natureza (juntando os bullets)', () => {
+  const { natures } = parseStatus(SAMPLE_STATUS);
+  assert.equal(natures.Brutamontes.hp, '10 + 5d4 + 5*Corpo | Por nível: 5 + 3*Corpo');
+  assert.equal(natures.Brutamontes.sta, '5 + 3d6 + 3*Corpo | Por nível: 2 + Corpo | Rec: 5 > 7 > 10 > 15');
+  assert.equal(natures.Guerreiro.hp, '10 + 3d8 + 3*Corpo | Por nível: 5 + 2*Corpo');
+});
+
+test('parseStatus: mapeia "Brutamonte" → "Brutamontes" e ignora Sanidade/notas', () => {
+  const { natures } = parseStatus(SAMPLE_STATUS);
+  assert.deepEqual(Object.keys(natures).sort(), ['Brutamontes', 'Guerreiro']);
+  assert.equal(natures.Guerreiro.sta, undefined); // sem stamina no fixture pra Guerreiro
+});
 
 test('parseSubattrs: extrai skills por subatributo (Corpo/Mente/Alma)', () => {
   const { subattrs } = parseSubattrs(SAMPLE_SUBATTR);

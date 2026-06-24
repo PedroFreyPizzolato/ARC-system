@@ -215,4 +215,49 @@ function diffClasses(oldC, newC) {
   return { hasChanges: rows.length > 0, rows: rows };
 }
 
-module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses, diffClasses, parseSubattrs };
+const NATURE_NAMES = { 'brutamonte': 'Brutamontes', 'brutamontes': 'Brutamontes', 'guerreiro': 'Guerreiro', 'atleta': 'Atleta', 'velocista': 'Velocista' };
+function _natureKey(text) {
+  const t = String(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+  return NATURE_NAMES[t] || null;
+}
+const N0_RE = /^n[íi]vel\s*0\s*:\s*(.+)$/i;
+const PN_RE = /^por\s*n[íi]vel\s*:\s*(.+)$/i;
+const REC_RE = /^recupera[çc][ãa]o\s*:\s*(.+)$/i;
+
+// Vida/Stamina por natureza (seção "# Status") → strings hp/sta exibidas no ARC.
+function parseStatus(paragraphs) {
+  const acc = {};
+  const warnings = [];
+  let inStatus = false, mode = null, currentNat = null;
+  function ensure(n) { if (!acc[n]) acc[n] = {}; return acc[n]; }
+  for (const p of paragraphs) {
+    const heading = p.heading || 'NORMAL';
+    const full = String(p.text || '');
+    if (heading === 'HEADING1') { inStatus = /^status$/i.test(full.trim()); mode = null; currentNat = null; continue; }
+    if (!inStatus) continue;
+    for (const raw of full.split(/\r?\n/)) {
+      const t = raw.trim();
+      if (!t) continue;
+      if (/^vida$/i.test(t)) { mode = 'vida'; currentNat = null; continue; }
+      if (/^stamina$/i.test(t)) { mode = 'stamina'; currentNat = null; continue; }
+      if (/^sanidade$/i.test(t)) { mode = 'sanidade'; currentNat = null; continue; }
+      const nat = _natureKey(t);
+      if (nat) { currentNat = nat; continue; }
+      if (!currentNat || !mode || mode === 'sanidade') continue;
+      let m;
+      if ((m = t.match(N0_RE))) ensure(currentNat)[mode + '0'] = m[1].trim();
+      else if ((m = t.match(PN_RE))) ensure(currentNat)[mode + 'N'] = m[1].trim();
+      else if (mode === 'stamina' && (m = t.match(REC_RE))) ensure(currentNat).staR = m[1].trim();
+    }
+  }
+  const natures = {};
+  Object.keys(acc).forEach(function (n) {
+    const a = acc[n], o = {};
+    if (a.vida0) o.hp = a.vida0 + (a.vidaN ? ' | Por nível: ' + a.vidaN : '');
+    if (a.stamina0) o.sta = a.stamina0 + (a.staminaN ? ' | Por nível: ' + a.staminaN : '') + (a.staR ? ' | Rec: ' + a.staR : '');
+    if (o.hp || o.sta) natures[n] = o;
+  });
+  return { natures: natures, warnings: warnings };
+}
+
+module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses, diffClasses, parseSubattrs, parseStatus };
