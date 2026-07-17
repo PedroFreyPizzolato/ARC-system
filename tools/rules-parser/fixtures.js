@@ -78,12 +78,13 @@ const SAMPLE_NATURES = [
   N('Brutamontes'),
   N('Buff: Você ganha 2 pontos de vida extra por nível, que se tornam 5 a partir do nível 10'),
   N('Debuff: Sua CA é naturalmente menor por 2 pontos'),
-  N('Habilidade única:'),
-  N('Avanço Brutal (especial) [4S]: Você avança a mesma distância de seu movimento, atacando e empurrando todos na linha (inclui aliados), causando 2d6+(2*Corpo)'),
+  // Brutamontes: hab. única SEM rótulo "Habilidade única:" (formato real do Doc)
+  N('Avanço Brutal (padrão + movimento) [4S]: Você avança a mesma distância de seu movimento, atacando e empurrando todos na linha (inclui aliados), causando 2d6+(2*Corpo)'),
   N('Guerreiro'),
   N('Buff: Você começa usando armas adjacentes leves e médias, ignorando a restrição de Corpo'),
   N('Debuff: Você tem 1 desvantagem ao usar qualquer arma à distância'),
-  N('Habilidade única: Rajada de Golpes (especial) [5S]: 1x por luta, por 2 rodadas, pode atacar uma vez a mais por ação padrão'),
+  // Guerreiro: hab. única COM rótulo inline (compatibilidade)
+  N('Habilidade única: Rodada de Golpes (bônus) [5S]: 1x por luta, por 2 rodadas, pode atacar uma vez a mais por ação padrão'),
 ];
 
 module.exports = { SAMPLE, SAMPLE_SUBATTR, SAMPLE_STATUS, SAMPLE_NATURES };

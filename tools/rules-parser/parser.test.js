@@ -252,15 +252,15 @@ test('parseNatures extrai buff/debuff/habUnica por natureza', () => {
   assert.match(b.buff, /2 pontos de vida extra/);
   assert.match(b.debuff, /CA é naturalmente menor/);
   assert.deepEqual(b.habUnica, {
-    name: 'Avanço Brutal', action: 'Especial', cost: '4S',
+    name: 'Avanço Brutal', action: 'Padrão+Movimento', cost: '4S',
     desc: 'Você avança a mesma distância de seu movimento, atacando e empurrando todos na linha (inclui aliados), causando 2d6+(2*Corpo)',
   });
 });
 
-test('parseNatures aceita hab. única na própria linha do rótulo (inline)', () => {
+test('parseNatures aceita hab. única com rótulo inline (compatibilidade)', () => {
   const { natures } = parseNatures(SAMPLE_NATURES);
   assert.deepEqual(natures.Guerreiro.habUnica, {
-    name: 'Rajada de Golpes', action: 'Especial', cost: '5S',
+    name: 'Rodada de Golpes', action: 'Bônus', cost: '5S',
     desc: '1x por luta, por 2 rodadas, pode atacar uma vez a mais por ação padrão',
   });
 });
@@ -273,24 +273,26 @@ test('parseNatures ignora conteúdo fora da seção # Naturezas', () => {
   assert.deepEqual(natures, {});
 });
 
-test('parseNatures avisa quando a hab. única não está no formato de skill', () => {
+test('parseNatures avisa quando a natureza fica sem hab. única em formato de skill', () => {
   const { warnings } = parseNatures([
     { heading: 'HEADING1', text: 'Naturezas' },
     { heading: 'NORMAL', text: 'Brutamontes' },
-    { heading: 'NORMAL', text: 'Habilidade única:' },
+    { heading: 'NORMAL', text: 'Buff: x' },
     { heading: 'NORMAL', text: '(4S) sem nome nem ação' },
   ]);
   assert.ok(warnings.some((w) => /habilidade única não reconhecida/i.test(w)));
 });
 
-test('parseNatures: rótulo de hab. única vazio não engole a próxima natureza', () => {
+test('parseNatures: hab. única de uma natureza não vaza para a próxima', () => {
   const { natures } = parseNatures([
     { heading: 'HEADING1', text: 'Naturezas' },
     { heading: 'NORMAL', text: 'Brutamontes' },
-    { heading: 'NORMAL', text: 'Habilidade única:' },
+    { heading: 'NORMAL', text: 'Avanço (livre) [4S]: a' },
     { heading: 'NORMAL', text: 'Guerreiro' },
     { heading: 'NORMAL', text: 'Buff: x' },
+    { heading: 'NORMAL', text: 'Rajada (bônus) [5S]: b' },
   ]);
+  assert.equal(natures.Brutamontes.habUnica.name, 'Avanço');
   assert.equal(natures.Guerreiro.buff, 'x');
-  assert.ok(!natures.Brutamontes || !natures.Brutamontes.habUnica);
+  assert.equal(natures.Guerreiro.habUnica.name, 'Rajada');
 });
