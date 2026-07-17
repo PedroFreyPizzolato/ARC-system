@@ -20,15 +20,18 @@
       --green: #10b981;
       --orange: #f97316;
       --bg: #020408;
+      --bg-purple: #050009;
+      --bg-yellow: #271803;
       --bg-panel: rgba(0, 212, 255, 0.03);
       --bg-hover: rgba(0, 212, 255, 0.07);
       --bd: rgba(0, 212, 255, 0.15);
       --bd-b: rgba(0, 212, 255, 0.4);
       --txt: #e0f7ff;
+      --txt-nsd: rgba(224, 247, 255, 0.65);
       --txt-d: rgba(224, 247, 255, 0.45);
       --txt-lbl: rgba(0, 212, 255, 0.7);
       --fs: 15px;
-      --fs-sm: 12px;
+      --fs-sm: 13px;
       --fs-xs: 11px;
       --fs-lg: 17px;
       --fs-xl: 20px;
@@ -87,7 +90,7 @@
     .wrap {
       position: relative;
       z-index: 1;
-      max-width: 1500px;
+      max-width: 95%;
       margin: 0 auto;
       padding: 16px;
       padding-bottom: 56px
@@ -117,7 +120,7 @@
 
     .hdr-logo {
       font-family: 'Orbitron', monospace;
-      font-size: 18px;
+      font-size: 21px;
       font-weight: 900;
       letter-spacing: 4px;
       color: var(--blue);
@@ -226,7 +229,7 @@
 
     .btn-sm {
       padding: 5px 12px;
-      font-size: 10px;
+      font-size: 14px;
       letter-spacing: 1px
     }
 
@@ -237,7 +240,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 19px;
       clip-path: none;
       border-radius: 0
     }
@@ -256,7 +259,7 @@
       border: 1px solid var(--bd);
       color: var(--txt-d);
       font-family: 'Orbitron', monospace;
-      font-size: var(--fs-xs);
+      font-size: var(--fs);
       letter-spacing: 2px;
       cursor: pointer;
       transition: all .2s;
@@ -299,7 +302,7 @@
 
     .panel-title {
       font-family: 'Orbitron', monospace;
-      font-size: var(--fs-xs);
+      font-size: var(--fs-sm);
       letter-spacing: 3px;
       color: var(--blue);
       margin-bottom: 14px;
@@ -458,7 +461,7 @@
       border-bottom: 1px solid var(--bd-b);
       color: var(--txt);
       font-family: 'Orbitron', monospace;
-      font-size: 15px;
+      font-size: 18px;
       width: 58px;
       text-align: center;
       outline: none;
@@ -467,7 +470,7 @@
 
     .bar-sep {
       color: var(--txt-d);
-      font-size: 13px
+      font-size: 17px
     }
 
     .bar-track {
@@ -524,7 +527,7 @@
       border: 1px solid var(--bd);
       color: var(--txt-d);
       cursor: pointer;
-      font-size: 17px;
+      font-size: 20px;
       line-height: 1;
       transition: all .15s;
       display: flex;
@@ -567,7 +570,7 @@
 
     .c-val {
       font-family: 'Orbitron', monospace;
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 700;
       color: var(--blue);
       min-width: 30px;
@@ -599,7 +602,7 @@
 
     .pick-lv {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--txt-d);
       width: 28px;
       flex-shrink: 0
@@ -607,22 +610,61 @@
 
     .pick-btn {
       flex: 1;
+      position: relative;
       padding: 5px 4px;
       background: transparent;
       border: 1px solid rgba(0, 212, 255, .12);
       color: var(--txt-d);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       letter-spacing: .5px;
       cursor: pointer;
       transition: all .15s;
       text-align: center
     }
 
+    .pick-desc {
+      visibility: hidden;
+      opacity: 0;
+      width: 100%;
+      bottom: 120%;
+      left: 0;
+      margin-left: 0;
+
+      color: var(--txt-nsd);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      letter-spacing: .5px;
+      transition: all .25s;
+      text-align: center;
+      position: absolute;
+
+      display: flex;
+      flex-direction: column;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .desc-row {
+      text-align: left;
+      gap: 4px;
+      padding: 6px 4px
+    }
+
+    .pick-btn:hover .pick-desc {
+      visibility: visible;
+      opacity: 1;
+    }
+
     .pick-btn.cor {
       background: transparent;
       border-color: rgba(0, 212, 255, .12);
       color: var(--txt-d)
+    }
+
+    .pick-desc.cor {
+      background: var(--bg);
+      border: 1px solid rgba(0, 212, 255, .5);
     }
 
     .pick-btn.cor:hover {
@@ -655,6 +697,11 @@
       color: var(--txt-d)
     }
 
+    .pick-desc.men {
+      background: var(--bg-purple);
+      border: 1px solid rgba(168, 85, 247, .5);
+    }
+
     .pick-btn.men:hover {
       border-color: var(--purple-b);
       color: var(--txt)
@@ -685,12 +732,18 @@
       color: var(--txt-d)
     }
 
+    .pick-desc.alm {
+      background: var(--bg-yellow);
+      border: 1px solid rgba(245, 158, 11, .5);
+    }
+
     .pick-btn.alm:hover {
       border-color: var(--gold);
       color: var(--txt)
     }
 
     .pick-btn.alm.sel {
+      background: rgb(126, 82, 6);
       background: rgba(245, 158, 11, .12);
       border-color: var(--gold);
       color: var(--gold);
@@ -718,7 +771,7 @@
 
     .subder-item {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 11px;
+      font-size: 15px;
       color: var(--txt-d)
     }
 
@@ -800,7 +853,7 @@
       border: 1px solid var(--bd);
       color: var(--blue);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       padding: 3px 6px;
       outline: none;
       cursor: pointer;
@@ -817,7 +870,7 @@
       border: 1px solid rgba(245, 158, 11, .3);
       color: var(--gold);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       padding: 3px 7px;
       outline: none;
       width: 70px;
@@ -833,7 +886,7 @@
       display: inline-block;
       padding: 2px 8px;
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       letter-spacing: .5px;
       border: 1px solid
     }
@@ -886,7 +939,7 @@
 
     .per-row.hdr {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--txt-d);
       letter-spacing: 1px;
       padding-bottom: 5px
@@ -898,7 +951,7 @@
 
     .per-sub {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--txt-d)
     }
 
@@ -908,7 +961,7 @@
       border: none;
       border-bottom: 1px solid var(--bd);
       color: var(--txt);
-      font-size: 12px;
+      font-size: 16px;
       padding: 2px 4px;
       outline: none;
       text-align: center
@@ -923,7 +976,7 @@
 
     .per-bonus {
       font-family: 'Orbitron', monospace;
-      font-size: 13px;
+      font-size: 17px;
       color: var(--blue);
       text-align: center
     }
@@ -941,7 +994,7 @@
       background: transparent;
       color: var(--txt-d);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       letter-spacing: .5px;
       cursor: pointer;
       transition: all .2s
@@ -977,7 +1030,7 @@
 
     .dot-name {
       font-family: 'Orbitron', monospace;
-      font-size: 12px;
+      font-size: 16px;
       letter-spacing: 2px;
       color: var(--red)
     }
@@ -987,7 +1040,7 @@
       border: 1px solid rgba(255, 0, 0, .3);
       color: var(--red);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       padding: 2px 8px;
       cursor: pointer;
       letter-spacing: 1px
@@ -1072,7 +1125,7 @@
 
     .dot-lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       color: var(--txt-d);
       letter-spacing: 1px
     }
@@ -1130,7 +1183,7 @@
 
     .weapon-row.hdr {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--txt-d);
       letter-spacing: 1px
     }
@@ -1161,7 +1214,7 @@
       border: none;
       color: rgba(239, 68, 68, .4);
       cursor: pointer;
-      font-size: 16px;
+      font-size: 19px;
       transition: color .2s
     }
 
@@ -1182,7 +1235,7 @@
 
     .impl-lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--purple-b);
       letter-spacing: 1px;
       margin-bottom: 4px
@@ -1196,9 +1249,16 @@
       gap: 8px
     }
 
+    .death-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 25px
+    }
+
     .death-label {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       letter-spacing: 2px
     }
 
@@ -1233,7 +1293,7 @@
 
     .title-rank {
       font-family: 'Orbitron', monospace;
-      font-size: 10px;
+      font-size: 14px;
       letter-spacing: 3px;
       margin-bottom: 4px
     }
@@ -1256,7 +1316,7 @@
 
     .title-name {
       font-family: 'Orbitron', monospace;
-      font-size: 16px;
+      font-size: 19px;
       font-weight: 700;
       margin-bottom: 12px
     }
@@ -1399,7 +1459,7 @@
 
     .photo-placeholder {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--txt-d);
       letter-spacing: 1px;
       text-align: center;
@@ -1430,7 +1490,7 @@
 
     .info-key {
       font-family: 'Share Tech Mono', monospace;
-      font-size: var(--fs-xs);
+      font-size: var(--fs-sm);
       color: var(--txt-lbl);
       letter-spacing: 1px
     }
@@ -1460,7 +1520,7 @@
       border: 1px dashed rgba(0, 212, 255, .25);
       color: rgba(0, 212, 255, .4);
       font-family: 'Orbitron', monospace;
-      font-size: 10px;
+      font-size: 14px;
       letter-spacing: 2px;
       cursor: pointer;
       transition: all .2s;
@@ -1530,7 +1590,7 @@
       border: 1px solid var(--purple-b);
       color: var(--purple-b);
       font-family: 'Orbitron', monospace;
-      font-size: 11px;
+      font-size: 15px;
       letter-spacing: 2px;
       background: rgba(168, 85, 247, .06)
     }
@@ -1557,7 +1617,7 @@
 
     .action-display {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       padding: 2px 7px;
       border: 1px solid var(--blue);
       color: var(--blue);
@@ -1612,7 +1672,7 @@
 
     .sync-lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--txt-d);
       letter-spacing: 1px;
       flex: 1
@@ -1623,7 +1683,7 @@
       border: 1px solid var(--bd);
       color: var(--txt);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 11px;
+      font-size: 15px;
       padding: 4px 10px;
       outline: none;
       width: 200px;
@@ -1640,7 +1700,7 @@
       border: 1px solid var(--blue);
       color: var(--blue);
       font-family: 'Orbitron', monospace;
-      font-size: 9px;
+      font-size: 13px;
       letter-spacing: 2px;
       cursor: pointer;
       transition: all .15s
@@ -1661,7 +1721,7 @@
 
     .sync-pid {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       color: rgba(0, 212, 255, .4);
       letter-spacing: 1px
     }
@@ -1701,7 +1761,7 @@
 
     .fb-modal-tag {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       letter-spacing: 3px;
       color: var(--blue);
       margin-bottom: 12px;
@@ -1710,7 +1770,7 @@
 
     .fb-modal-title {
       font-family: 'Orbitron', monospace;
-      font-size: 16px;
+      font-size: 19px;
       font-weight: 700;
       color: var(--txt);
       margin-bottom: 6px;
@@ -1719,7 +1779,7 @@
 
     .fb-modal-sub {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--txt-d);
       letter-spacing: .5px;
       line-height: 1.7;
@@ -1735,7 +1795,7 @@
 
     .fb-lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       color: var(--txt-lbl);
       letter-spacing: 1.5px
     }
@@ -1745,7 +1805,7 @@
       border: 1px solid var(--bd);
       color: var(--txt);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 12px;
+      font-size: 16px;
       padding: 8px 12px;
       outline: none;
       width: 100%;
@@ -1785,7 +1845,7 @@
       <div class="hdr-right">
         <div style="display:flex;gap:6px;align-items:center">
           <div class="dot-online"></div>
-          <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--green)">ONLINE</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--green)">ONLINE</span>
         </div>
         <button class="btn btn-gold btn-sm" onclick="exportChar()" title="Baixar personagem como arquivo .json">[
           EXPORTAR ]</button>
@@ -1806,7 +1866,7 @@
 
     <!-- ═══════════════════════════════════════════════════════
      TAB: FICHA
-═══════════════════════════════════════════════════════ -->
+    ═══════════════════════════════════════════════════════ -->
     <div id="tab-ficha" class="tab-content active">
 
       <!-- SUMMARY BAR -->
@@ -1929,7 +1989,7 @@
             <div class="g3" style="gap:10px">
               <div class="field">
                 <span class="lbl">INICIATIVA</span>
-                <div class="computed" id="iniciativaDisp" style="font-size:16px">+0</div>
+                <div class="computed" id="iniciativaDisp" style="font-size:20px">+0</div>
               </div>
               <div class="field">
                 <span class="lbl">MOVIMENTO (m)</span>
@@ -1995,23 +2055,23 @@
                   <button class="c-btn" onclick="changePI(-1)">−</button>
                   <div style="display:flex;gap:8px" id="piDots"></div>
                   <button class="c-btn" onclick="changePI(1)">+</button>
-                  <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txt-d)">máx. 3</span>
                 </div>
+                <div class="sk-desc mt8">Máx. 3</div>
               </div>
               <div>
                 <div class="bar-hdr mb8">
                   <span class="lbl">NÍVEL DE COBERTURA</span>
-                  <span style="font-family:'Orbitron',monospace;font-size:11px;color:var(--gold);letter-spacing:2px"
-                    id="coberturaLabel">NENHUMA</span>
                 </div>
                 <div style="display:flex;align-items:center;gap:12px">
                   <button class="c-btn" onclick="changeCobertura(-1)">−</button>
                   <div style="display:flex;gap:8px" id="coberturaDots"></div>
                   <button class="c-btn" onclick="changeCobertura(1)">+</button>
+                  <span style="font-family:'Orbitron',monospace;font-size:15px;color:var(--gold);letter-spacing:2px"
+                    id="coberturaLabel">NENHUMA</span>
                 </div>
+                <div class="sk-desc mt8" id="coberturaDesc">Sem cobertura no momento.</div>
               </div>
             </div>
-            <div class="sk-desc mt8" id="coberturaDesc">Sem cobertura no momento.</div>
             <div class="sep"></div>
             <div class="g2" style="gap:14px">
               <div class="field">
@@ -2066,9 +2126,9 @@
                 <div class="attr-ctrl">
                   <button class="c-btn" onclick="changeFala(-1)">−</button>
                   <span class="c-val" id="falaVal">1</span>
-                  <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txt-d)">/</span>
+                  <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d)">/</span>
                   <input type="number" id="falaMax" value="1" min="0" oninput="autosave()"
-                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:13px;text-align:center;outline:none">
+                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:17px;text-align:center;outline:none">
                   <button class="c-btn btn-sm" onclick="resetFala()" title="Resetar">↺</button>
                 </div>
               </div>
@@ -2077,9 +2137,9 @@
                 <div class="attr-ctrl">
                   <button class="c-btn" onclick="changeCoringa(-1)">−</button>
                   <span class="c-val" id="coringaVal" style="color:var(--purple-b)">0</span>
-                  <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txt-d)">/</span>
+                  <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d)">/</span>
                   <input type="number" id="coringaMax" value="0" min="0" oninput="autosave()"
-                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:13px;text-align:center;outline:none">
+                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:17px;text-align:center;outline:none">
                   <button class="c-btn btn-sm" onclick="resetCoringa()" title="Resetar">↺</button>
                 </div>
               </div>
@@ -2091,30 +2151,42 @@
             <div class="panel-title">TESTES DE MORTE</div>
             <div class="g2" style="gap:20px">
               <div class="death-col">
-                <span class="death-label" style="color:var(--green)">SUCESSOS</span>
-                <button class="c-btn" onclick="changeDeath('suc',1)"
-                  style="width:36px;height:36px;font-size:20px">+</button>
-                <div class="death-num suc" id="deathSucVal">0</div>
-                <button class="c-btn" onclick="changeDeath('suc',-1)"
-                  style="width:36px;height:36px;font-size:20px">−</button>
+                <div class="death-row"><span class="death-label" style="color:var(--green)">SUCESSOS</span></div>
+                <div class="death-row">
+                  <div class="death-col">
+                    <button class="c-btn" onclick="changeDeath('suc',-1)"
+                      style="width:36px;height:36px;font-size:24px">-</button>
+                  </div>
+                  <div class="death-num suc" class="death-col" id="deathSucVal">0</div>
+                  <div class="death-col">
+                    <button class="c-btn" onclick="changeDeath('suc',1)"
+                      style="width:36px;height:36px;font-size:24px">+</button>
+                  </div>
+                </div>
               </div>
               <div class="death-col">
-                <span class="death-label" style="color:var(--red)">FALHAS</span>
-                <button class="c-btn" onclick="changeDeath('mort',1)"
-                  style="width:36px;height:36px;font-size:20px">+</button>
-                <div class="death-num mort" id="deathMortVal">0</div>
-                <button class="c-btn" onclick="changeDeath('mort',-1)"
-                  style="width:36px;height:36px;font-size:20px">−</button>
+                <div class="death-row"><span class="death-label" style="color:var(--red)">FALHAS</span></div>
+                <div class="death-row">
+                  <div class="death-col">
+                    <button class="c-btn" onclick="changeDeath('mort',-1)"
+                      style="width:36px;height:36px;font-size:24px">-</button>
+                  </div>
+                  <div class="death-num mort" class="death-col" id="deathMortVal">0</div>
+                  <div class="death-col">
+                    <button class="c-btn" onclick="changeDeath('mort',1)"
+                      style="width:36px;height:36px;font-size:24px">+</button>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="sep"></div>
+            <div class="sep" style="opacity:0"></div>
             <div class="lbl mb8">DEGRADAÇÃO CORPORAL</div>
             <div style="display:flex;gap:8px;align-items:center">
               <div class="degradpip" id="deg0" onclick="toggleDeg(0)"></div>
               <div class="degradpip" id="deg1" onclick="toggleDeg(1)"></div>
               <div class="degradpip" id="deg2" onclick="toggleDeg(2)"></div>
               <div class="degradpip" id="deg3" onclick="toggleDeg(3)"></div>
-              <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d);margin-left:6px"
+              <span style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);margin-left:6px"
                 id="degLabel">Nenhuma queda</span>
             </div>
           </div>
@@ -2173,7 +2245,6 @@
             <div id="dotExtrasWrap"></div>
             <button class="dashed-btn" onclick="addDotExtra()">+ ADICIONAR EFEITO</button>
           </div>
-
         </div>
       </div>
 
@@ -2185,9 +2256,9 @@
           <div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
               <div>
-                <div style="font-family:'Orbitron',monospace;font-size:16px;color:var(--blue);letter-spacing:2px">CORPO
+                <div style="font-family:'Orbitron',monospace;font-size:20px;color:var(--blue);letter-spacing:2px">CORPO
                 </div>
-                <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d)">Força · Vigor ·
+                <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d)">Força · Vigor ·
                   Agilidade</div>
               </div>
               <div class="attr-ctrl">
@@ -2204,9 +2275,9 @@
           <div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
               <div>
-                <div style="font-family:'Orbitron',monospace;font-size:16px;color:var(--purple-b);letter-spacing:2px">
+                <div style="font-family:'Orbitron',monospace;font-size:20px;color:var(--purple-b);letter-spacing:2px">
                   MENTE</div>
-                <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d)">Habilidade ·
+                <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d)">Habilidade ·
                   Sincronia · Intelecto</div>
               </div>
               <div class="attr-ctrl">
@@ -2225,12 +2296,12 @@
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
               <div>
                 <div
-                  style="font-family:'Orbitron',monospace;font-size:16px;color:var(--gold);letter-spacing:2px;display:flex;align-items:center;gap:10px">
+                  style="font-family:'Orbitron',monospace;font-size:20px;color:var(--gold);letter-spacing:2px;display:flex;align-items:center;gap:10px">
                   ALMA
                   <span
-                    style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold);border:1px solid rgba(245,158,11,.4);padding:2px 7px;letter-spacing:1px">DESBLOQUEADO</span>
+                    style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--gold);border:1px solid rgba(245,158,11,.4);padding:2px 7px;letter-spacing:1px">DESBLOQUEADO</span>
                 </div>
-                <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d)">Conexão ·
+                <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d)">Conexão ·
                   Entendimento</div>
               </div>
               <div class="attr-ctrl">
@@ -2248,9 +2319,9 @@
             style="grid-column:span 2;border-top:1px solid rgba(0,212,255,0.08);padding-top:14px">
             <div style="display:flex;align-items:center;gap:14px">
               <div
-                style="font-family:'Orbitron',monospace;font-size:16px;color:rgba(245,158,11,.25);letter-spacing:2px">
+                style="font-family:'Orbitron',monospace;font-size:20px;color:rgba(245,158,11,.25);letter-spacing:2px">
                 ALMA</div>
-              <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d);letter-spacing:1px">
+              <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);letter-spacing:1px">
                 Bloqueado — requer <span id="almaReqText" style="color:rgba(245,158,11,.5)">Corpo 7 e Mente 7</span>
               </div>
               <div style="flex:1;height:4px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden">
@@ -2324,7 +2395,7 @@
 
     <!-- ═══════════════════════════════════════════════════════
      TAB: PERSONAGEM
-═══════════════════════════════════════════════════════ -->
+    ═══════════════════════════════════════════════════════ -->
     <div id="tab-personagem" class="tab-content">
       <div class="g2" style="gap:14px">
         <!-- COL 1: Identity + Personality -->
@@ -2413,14 +2484,14 @@
 
     <!-- ═══════════════════════════════════════════════════════
      TAB: TÍTULOS
-═══════════════════════════════════════════════════════ -->
+    ═══════════════════════════════════════════════════════ -->
     <div id="tab-titulos" class="tab-content">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <div>
           <span class="lbl">RANK DO PERSONAGEM:</span>
           <span id="rankDisplay" class="rank-C"
-            style="font-family:'Orbitron',monospace;font-size:18px;margin-left:10px">C</span>
-          <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txt-d);margin-left:12px"
+            style="font-family:'Orbitron',monospace;font-size:22px;margin-left:10px">C</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d);margin-left:12px"
             id="titleCountDisp">0/4 títulos</span>
         </div>
         <button class="btn btn-gold btn-sm" onclick="addTitle()">+ ADICIONAR TÍTULO</button>
@@ -2432,7 +2503,7 @@
 
     <!-- ═══════════════════════════════════════════════════════
      TAB: CLASSES
-═══════════════════════════════════════════════════════ -->
+    ═══════════════════════════════════════════════════════ -->
     <div id="tab-classes" class="tab-content">
       <div class="g2" style="gap:14px">
         <!-- Classe Geral -->
@@ -2476,7 +2547,7 @@
 
     <!-- ═══════════════════════════════════════════════════════
      TAB: NOTAS
-═══════════════════════════════════════════════════════ -->
+    ═══════════════════════════════════════════════════════ -->
     <div id="tab-notas" class="tab-content">
       <div class="g2" style="gap:14px">
         <div class="col">
@@ -2495,7 +2566,7 @@
           <div class="panel" style="flex:1">
             <div class="panel-title">ANOTAÇÕES</div>
             <div
-              style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d);margin-bottom:8px;letter-spacing:1px">
+              style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);margin-bottom:8px;letter-spacing:1px">
               — lista de marcadores · 1. lista numerada (auto-formata ao pressionar Enter)
             </div>
             <textarea class="notes-ta" id="notesMain" oninput="autosave()"
@@ -3151,6 +3222,15 @@
       st('sanTier', label);
     }
 
+    // ponytail: guarded tooltip content; missing skill entry (LB alma levels, wrong dataset) → fallback instead of throw
+    function pickDescHtml(sk) {
+      if (!sk) return '<span class="desc-row">Sem habilidade</span>';
+      const cost = sk.cost ? ' [' + sk.cost + ']' : '';
+      return '<span class="desc-row" style="color: var(--txt); font-size: 15px; letter-spacing: 0.75px; padding-top: 8px; padding-bottom: 0; padding-left: 2%">' + sk.name + '</span>'
+        + '<span class="desc-row" style="color: var(--txt-d); font-size: 13px; border-bottom: 1px solid rgba(0, 212, 255, .25);">(' + sk.action + ')' + cost + '</span>'
+        + '<span class="desc-row">' + sk.desc + '</span>';
+    }
+
     function updateAttrPicks() {
       ['corpo', 'mente', 'alma'].forEach(attr => {
         const isAlma = attr === 'alma';
@@ -3167,11 +3247,13 @@
           html += `<div class="pick-row"><span class="pick-lv">${isLB ? 'LB' + (i - 6) : ('Nv.' + (i + 1))}</span>`;
           subs.forEach(s => {
             const sel = S[attr + 'Picks'][i] === s;
-            html += `<button class="pick-btn${isCorpo ? ' cor' : isAlma ? ' alm' : ' men'}${sel ? ' sel' : ''}${isLB ? ' lb' : ''}" onclick="setPick('${attr}',${i},'${s}')">${SUB_LABEL[s]}</button>`;
+            const cls = isCorpo ? ' cor' : isAlma ? ' alm' : ' men';
+            const sk = (isAlma ? SUBATTR_SKILLS_ALMA : SUBATTR_SKILLS)[s]?.[i];
+            html += `<button class="pick-btn${cls}${sel ? ' sel' : ''}${isLB ? ' lb' : ''}" onclick="setPick('${attr}',${i},'${s}')">${SUB_LABEL[s]}<span class="pick-desc${cls}">${pickDescHtml(sk)}</span></button>`;
           });
           html += `</div>`;
         }
-        container.innerHTML = html || '<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--txt-d);padding:4px">Aumente o atributo para distribuir pontos.</div>';
+        container.innerHTML = html || '<div style="font-family:\'Share Tech Mono\',monospace;font-size:14px;color:var(--txt-d);padding:4px">Aumente o atributo para distribuir pontos.</div>';
         const counts = {}; subs.forEach(s => counts[s] = 0);
         (S[attr + 'Picks'] || []).forEach(p => { if (p && counts[p] !== undefined) counts[p]++; });
         const dEl = document.getElementById(attr + '-derived');
@@ -3209,11 +3291,12 @@
             html += `<div class="pick-row"><span class="pick-lv">${isLB ? 'LB' + (i - 6) : ('Nv.' + (i + 1))}</span>`;
             SUBS_ALMA.forEach(s => {
               const sel = S.almaPicks[i] === s;
-              html += `<button class="pick-btn alm${sel ? ' sel' : ''}${isLB ? ' lb' : ''}" onclick="setPick('alma',${i},'${s}')">${SUB_LABEL_ALMA[s]}</button>`;
+              const sk = SUBATTR_SKILLS_ALMA[s]?.[i];
+              html += `<button class="pick-btn alm${sel ? ' sel' : ''}${isLB ? ' lb' : ''}" onclick="setPick('alma',${i},'${s}')">${SUB_LABEL_ALMA[s]}<span class="pick-desc alm">${pickDescHtml(sk)}</span></button>`;
             });
             html += `</div>`;
           }
-          almaCont.innerHTML = html || '<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:rgba(245,158,11,.4);padding:4px">Aumente Alma para distribuir pontos.</div>';
+          almaCont.innerHTML = html || '<div style="font-family:\'Share Tech Mono\',monospace;font-size:14px;color:rgba(245,158,11,.4);padding:4px">Aumente Alma para distribuir pontos.</div>';
         }
         const almaCounts = {}; SUBS_ALMA.forEach(s => almaCounts[s] = 0);
         (S.almaPicks || []).forEach(p => { if (p && almaCounts[p] !== undefined) almaCounts[p]++; });
@@ -3314,7 +3397,7 @@
     function buildDotStacks() { renderDotStacks('sangStacks', 0, 3, 'red'); renderDotStacks('queimStacks', 0, 2, 'red'); }
 
     function updateDegradacao() {
-      const labels = ['Nenhuma queda', '1ª — nada acontece', '2ª — vida capada em 25%', '3ª — perde membro permanente', '4ª — MORTE'];
+      const labels = ['Nenhuma queda', '1ª — nada acontece', '2ª — HP máximo -25%; recupera em descanso longo ou 2 sessões sem cair', '3ª — perde membro permanentemente', '4ª — MORTE'];
       let count = 0;
       S.degradacao.forEach((on, i) => {
         const el = document.getElementById('deg' + i); if (el) el.classList.toggle('on', !!on);
@@ -3465,8 +3548,8 @@
     <div class="sep"></div>
     ${renderSkillCard(nd.habUnica, true)}
     <div class="sep"></div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d);letter-spacing:1px">HP: ${nd.hp}</div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d);letter-spacing:1px;margin-top:4px">STA: ${nd.sta}</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);letter-spacing:1px">HP: ${nd.hp}</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);letter-spacing:1px;margin-top:4px">STA: ${nd.sta}</div>
   `;
     }
 
@@ -3492,7 +3575,7 @@
       if (!cls || !CLASS_DATA[cls]) { wrap.innerHTML = '<div class="empty-msg">Selecione uma classe.</div>'; return; }
       const data = CLASS_DATA[cls];
       wrap.innerHTML = data.skills.map(sk => renderSkillCard(sk)).join('') +
-        `<div class="sep"></div><div style="font-family:'Orbitron',monospace;font-size:10px;color:var(--gold);letter-spacing:2px;margin-bottom:8px">ULTIMATE — ${data.ultimate.limit || ''}</div>` +
+        `<div class="sep"></div><div style="font-family:'Orbitron',monospace;font-size:14px;color:var(--gold);letter-spacing:2px;margin-bottom:8px">ULTIMATE — ${data.ultimate.limit || ''}</div>` +
         renderSkillCard(data.ultimate, false, 'ultimate');
       S.classeGeralSel = cls;
       localStorage.setItem('arc_v1', JSON.stringify(S));
@@ -3504,7 +3587,7 @@
       if (!cls || !CLASS_DATA[cls]) { wrap.innerHTML = '<div class="empty-msg">Selecione uma classe específica.</div>'; return; }
       const data = CLASS_DATA[cls];
       wrap.innerHTML = data.skills.map(sk => renderSkillCard(sk)).join('') +
-        `<div class="sep"></div><div style="font-family:'Orbitron',monospace;font-size:10px;color:var(--gold);letter-spacing:2px;margin-bottom:8px">ULTIMATE — ${data.ultimate.limit || ''}</div>` +
+        `<div class="sep"></div><div style="font-family:'Orbitron',monospace;font-size:14px;color:var(--gold);letter-spacing:2px;margin-bottom:8px">ULTIMATE — ${data.ultimate.limit || ''}</div>` +
         renderSkillCard(data.ultimate, false, 'ultimate');
       S.classeEspSel = cls;
       localStorage.setItem('arc_v1', JSON.stringify(S));
@@ -3515,7 +3598,7 @@
       const actionOpts = ACTIONS_LIST.map(a => `<option${a === sk.action ? ' selected' : ''}>${a}</option>`).join('');
       return `<div class="skill-card${extraClass ? ' ' + extraClass : ''}">
     <div class="sk-header">
-      <span class="sk-name">${sk.name}${sk.lb ? '<span style="color:var(--gold);font-size:10px;margin-left:6px">[LIMIT BREAK]</span>' : ''}</span>
+      <span class="sk-name">${sk.name}${sk.lb ? '<span style="color:var(--gold);font-size:14px;margin-left:6px">[LIMIT BREAK]</span>' : ''}</span>
       <div class="sk-meta">
         <select class="action-sel" onchange="toggleCostField(this)">${actionOpts}</select>
         <input class="cost-inp" type="text" value="${sk.cost || ''}" placeholder="—S" ${isPassiva ? 'disabled' : ''} style="opacity:${isPassiva ? '.3' : '1'}">
@@ -3612,7 +3695,7 @@
         const labelName = isAlma ? SUB_LABEL_ALMA[sub] : SUB_LABEL[sub];
         const badgeColor = isAlma ? 'badge-gold' : isCorpo ? 'badge-blue' : 'badge-purple';
         html += `<div style="margin-bottom:4px">
-      <span class="badge ${badgeColor}" style="margin-bottom:6px;display:inline-block">${labelName} Nv.${level > 7 ? 'LB' + (level - 7) : level}</span>
+      <span class="badge ${badgeColor}" style="margin-bottom:6px;display:inline-block">${labelName} Nv.${level}</span>
       ${renderSkillCard(sk, true)}
     </div>`;
       });
@@ -3655,7 +3738,7 @@
       <input class="w-inp" data-f="name" value="${w.name}" oninput="autosave()" placeholder="Nome">
       <input class="w-inp" data-f="dmg" value="${w.dmg}" oninput="autosave()" placeholder="1d6">
       <input class="w-inp" data-f="crit" value="${w.crit || 20}" oninput="autosave()" placeholder="20">
-      <select class="w-inp" data-f="type" onchange="autosave()" style="font-size:12px">
+      <select class="w-inp" data-f="type" onchange="autosave()" style="font-size:16px">
         <option value="Normal"${(w.type || 'Normal') === 'Normal' ? ' selected' : ''}>Normal</option>
         <option value="Verdadeiro"${w.type === 'Verdadeiro' ? ' selected' : ''}>Verdadeiro</option>
         <option value="Absoluto"${w.type === 'Absoluto' ? ' selected' : ''}>Absoluto</option>
@@ -3834,18 +3917,18 @@
           <div class="title-rank rank-${t.rank}">RANK ${t.rank}</div>
           <div class="title-name">${t.name}</div>
         </div>
-        <button class="w-rem" onclick="S.titles.splice(${ti},1);renderTitles();autosave()" style="font-size:18px">✕</button>
+        <button class="w-rem" onclick="S.titles.splice(${ti},1);renderTitles();autosave()" style="font-size:22px">✕</button>
       </div>
       ${reqLevel ? `<div class="progress-wrap mb8">
-        <div style="display:flex;justify-content:space-between"><span class="lbl">PROMOÇÃO PARA RANK SUPERIOR</span><span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txt-d)">${playerLevel}/${reqLevel}</span></div>
+        <div style="display:flex;justify-content:space-between"><span class="lbl">PROMOÇÃO PARA RANK SUPERIOR</span><span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d)">${playerLevel}/${reqLevel}</span></div>
         <div class="progress-bar"><div class="progress-fill" style="width:${levelPct}%"></div></div>
-      </div>`: '<div style="font-size:11px;color:var(--gold);font-family:\'Share Tech Mono\',monospace;letter-spacing:1px;margin-bottom:10px">RANK MÁXIMO</div>'}
+      </div>`: '<div style="font-size:15px;color:var(--gold);font-family:\'Share Tech Mono\',monospace;letter-spacing:1px;margin-bottom:10px">RANK MÁXIMO</div>'}
       <div class="sep"></div>
       ${skills}
       <div class="sep"></div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:1px;margin-bottom:6px">MISSÕES DE RANK UP</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--gold);letter-spacing:1px;margin-bottom:6px">MISSÕES DE RANK UP</div>
       ${quests}
-      <button class="dashed-btn dashed-gold mt4" style="font-size:9px" onclick="S.titles[${ti}].quests.push({desc:'',total:0,cur:0});renderTitles();autosave()">+ MISSÃO</button>
+      <button class="dashed-btn dashed-gold mt4" style="font-size:13px" onclick="S.titles[${ti}].quests.push({desc:'',total:0,cur:0});renderTitles();autosave()">+ MISSÃO</button>
     </div>`;
       }).join('');
     }
@@ -3862,11 +3945,11 @@
     <div class="inv-card inv-entry">
       <div class="inv-grid">
         <input class="inp" data-f="name" value="${item.name}" oninput="autosave()" placeholder="Nome do item">
-        <select class="inp" data-f="type" onchange="autosave()" style="font-size:12px">
+        <select class="inp" data-f="type" onchange="autosave()" style="font-size:16px">
           ${['Arma', 'Utilizável', 'Armadura', 'Munição', 'Implante', 'Artefato', 'Outro'].map(t => `<option${item.type === t ? ' selected' : ''}>${t}</option>`).join('')}
         </select>
         <input class="inp" data-f="dmg" value="${item.dmg}" oninput="autosave()" placeholder="Dano">
-        <select class="inp" data-f="action" onchange="autosave()" style="font-size:12px">
+        <select class="inp" data-f="action" onchange="autosave()" style="font-size:16px">
           ${ACTIONS_LIST.map(a => `<option${item.action === a ? ' selected' : ''}>${a}</option>`).join('')}
         </select>
         <input class="inp" data-f="qty" value="${item.qty || 1}" oninput="autosave()" placeholder="Qtd" type="number" min="1">
@@ -3884,7 +3967,7 @@
       wrap.innerHTML = S.relations.map((r, i) => `
     <div class="relation-card rel-entry">
       <input class="inp" data-f="name" value="${r.name}" oninput="autosave()" placeholder="Nome">
-      <select class="inp" data-f="rel" onchange="autosave()" style="font-size:12px">
+      <select class="inp" data-f="rel" onchange="autosave()" style="font-size:16px">
         ${['Aliado', 'Neutro', 'Inimigo', 'Desconhecido', 'Rival', 'Mentor', 'Dependente'].map(t => `<option${r.rel === t ? ' selected' : ''}>${t}</option>`).join('')}
       </select>
       <input class="inp" data-f="desc" value="${r.desc}" oninput="autosave()" placeholder="Descrição">
@@ -3977,13 +4060,6 @@
       if (!raw) return null;
       try { return JSON.parse(raw); } catch (e) { return null; }
     }
-
-    /*
-    apiKey: "AIzaSyBczjpKaMPwxwnEZ74SbU4VHMZcs65wA84",
-    authDomain: "intitulations.firebaseapp.com",
-    databaseURL: "https://intitulations-default-rtdb.firebaseio.com",
-    projectId: "intitulations",
-    */
 
     function fbSaveConfig() {
       const cfg = {
