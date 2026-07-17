@@ -2678,7 +2678,7 @@
       Velocista: { buff: 'Começa com 1 reação extra', debuff: 'Toma 2 de dano a mais de ataques', habUnica: { name: 'Tornado de Lâminas', action: 'Especial', cost: '15S', desc: 'Avança em direção a todos os inimigos na cena, ignorando restrições, e ataca todos com desvantagem. Se acertar todos, retorna e ataca novamente (½ dano). Ataques no avanço não gastam stamina.' }, hp: '10 + 2d6 + Corpo | Por nível: +5 + Corpo+Mente', sta: '5 + 3d6 + 3×Mente | Por nível: +3 + 3×Mente | Rec: 4>6>10>15' }
     };
 
-    const SUBATTR_SKILLS = {
+    const SUBATTR_SKILLS_EMBEDDED = {
       forca: [
         { name: 'Golpe Fortalecido', action: 'Passiva', cost: null, desc: '+2 dano e +1 acerto de ataques desarmados.' },
         { name: 'Golpe Adicional', action: 'Reação', cost: '2S', desc: 'Ao golpear com ataque adjacente, ataca novamente com desvantagem causando Corpo×2 de dano.' },
@@ -2753,7 +2753,7 @@
       ]
     };
 
-    const CLASS_DATA = {
+    const CLASS_DATA_EMBEDDED = {
       'Sobrevivente': {
         type: 'geral', skills: [
           { name: 'Instinto de Preservação', action: 'Passiva', cost: null, desc: 'Após sofrer Dano Massivo pela 1ª vez na cena, resiste com 1 de vida sem destruir membro.' },
@@ -2885,7 +2885,7 @@
     const SUBS_ALMA = ['conexao', 'entendimento'];
     const SUB_LABEL_ALMA = { conexao: 'Conexão', entendimento: 'Entendimento' };
 
-    const SUBATTR_SKILLS_ALMA = {
+    const SUBATTR_SKILLS_ALMA_EMBEDDED = {
       conexao: [
         { name: 'Vínculo Astral', action: 'Reação', cost: '1S', desc: 'Quando errar um ataque, pode usar essa habilidade para re-rolar o teste, limitado a 1 uso por cada 2 rodadas.' },
         { name: 'Custo Reduzido em Combo', action: 'Passiva', cost: null, desc: 'Seus custos de stamina enquanto mantiver os efeitos de combo são reduzidos em X (igual ao buff de acerto e dano recebido por combo), máx. 5.' },
@@ -2941,9 +2941,52 @@
     };
 
     // ═══════════════════════════════════════════════════════════════
+    // SYNC: regras do Doc → Firebase → ARC (fallback embutido/cache)
+    // ═══════════════════════════════════════════════════════════════
+    let CLASS_DATA = CLASS_DATA_EMBEDDED;
+    let SUBATTR_SKILLS = SUBATTR_SKILLS_EMBEDDED;
+    let SUBATTR_SKILLS_ALMA = SUBATTR_SKILLS_ALMA_EMBEDDED;
+    const FB_RULES_URL = 'https://intitulations-default-rtdb.firebaseio.com/arc_rules.json';
+    const _SUB_CM = ['forca', 'vigor', 'agilidade', 'habilidade', 'sincronia', 'intelecto'];
+    const _SUB_ALMA = ['conexao', 'entendimento'];
+    function _isNonEmptyObj(o) { return o && typeof o === 'object' && Object.keys(o).length > 0; }
+    function _pick(obj, keys) { const o = {}; keys.forEach(k => { if (obj && obj[k]) o[k] = obj[k]; }); return o; }
+    async function loadRules() {
+      let data = null;
+      try {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 4000);
+        const resp = await fetch(FB_RULES_URL + '?t=' + Date.now(), { signal: ctrl.signal });
+        clearTimeout(tid);
+        if (resp.ok) { const d = await resp.json(); if (d) { data = d; localStorage.setItem('arc_rules_cache', JSON.stringify(d)); } }
+      } catch (e) { /* offline / timeout: usa cache/embutido */ }
+      if (!data) { try { data = JSON.parse(localStorage.getItem('arc_rules_cache') || 'null'); } catch (e) { } }
+      data = data || {};
+      if (_isNonEmptyObj(data.classes)) CLASS_DATA = data.classes;
+      if (_isNonEmptyObj(data.subattrs)) {
+        const cm = _pick(data.subattrs, _SUB_CM), al = _pick(data.subattrs, _SUB_ALMA);
+        if (_isNonEmptyObj(cm)) SUBATTR_SKILLS = cm;
+        if (_isNonEmptyObj(al)) SUBATTR_SKILLS_ALMA = al;
+      }
+      if (data.status && _isNonEmptyObj(data.status.natures)) {
+        Object.keys(data.status.natures).forEach(function (nat) {
+          if (NATURE_DATA[nat]) { // const permite mutar propriedades
+            const s = data.status.natures[nat];
+            if (s.hp) NATURE_DATA[nat].hp = s.hp;
+            if (s.sta) NATURE_DATA[nat].sta = s.sta;
+            if (s.buff) NATURE_DATA[nat].buff = s.buff;
+            if (s.debuff) NATURE_DATA[nat].debuff = s.debuff;
+            if (s.habUnica) NATURE_DATA[nat].habUnica = s.habUnica;
+          }
+        });
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
     // INIT & SAVE
     // ═══════════════════════════════════════════════════════════════
-    function init() {
+    async function init() {
+      await loadRules();
       const saved = localStorage.getItem('arc_v1');
       if (saved) { try { S = { ...S, ...JSON.parse(saved) }; } catch (e) { } }
       buildPericiasTable();
