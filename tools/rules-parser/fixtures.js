@@ -108,4 +108,33 @@ const SAMPLE_SYSTEMS = [
   N('Não deve aparecer: fora da seção'),
 ];
 
-module.exports = { SAMPLE, SAMPLE_SUBATTR, SAMPLE_STATUS, SAMPLE_NATURES, SAMPLE_SYSTEMS };
+// Recorte da seção "# Ações": descrição "Ofensiva VS. Defensiva" + 3 colunas de ações
+// (Ofensivas, Defensivas, Inspiradoras). Intro/Obs antes das colunas são ignorados;
+// itens "Nome: desc" (Inspiradoras trazem custo "(1PI)"); "custam 2S"/limite de PI = nota.
+const SAMPLE_ACTIONS = [
+  H1('Ações'),
+  N('Existem as ações: Padrão, Bônus, Movimento, Fala, Reação e Coringa.'),
+  N('Obs:'),
+  N('Ações de Fala resetam por luta, não por rodada'),
+  N('Ofensiva VS. Defensiva'),
+  N('Caso o atacante não passe da CA do defensor, ele erra naturalmente, sem necessidade de reação.'),
+  N('Em casos de ambas ações ofensivas e defensivas critarem, vence o maior resultado total.'),
+  N('Ofensivas'),
+  N('Atacar: Consome 1 ação padrão e seu teste é 1d20+Corpo/Mente+Implante.'),
+  N('Ataque de oportunidade: Consome 1 reação, pode ser usado quando um inimigo:'),
+  N('1- se move em distância adjacente de você;'),
+  N('Ações ofensivas básicas custam 2S'),
+  N('Defensivas'),
+  N('Esquivar: Consome 1 reação e seu teste é 1d20+Mente-Armadura, nega todo o dano.'),
+  N('Ações defensivas básicas custam 2S'),
+  N('Inspiradoras'),
+  N('Você pode conceder aos seus aliados 1 ponto de inspiração fazendo algo que os inspira.'),
+  N('Com pontos de inspiração você pode:'),
+  N('Superar seus limites (1PI): Transforma uma falha em um acerto, um acerto em um crítico.'),
+  N('Dar mais um suspiro (2PI): Quando em 0 de stamina, você não gasta stamina no próximo turno.'),
+  N('Você pode ter até um máximo de 3 pontos de inspiração'),
+  H1('Naturezas'),
+  N('Não deve aparecer: fora da seção'),
+];
+
+module.exports = { SAMPLE, SAMPLE_SUBATTR, SAMPLE_STATUS, SAMPLE_NATURES, SAMPLE_SYSTEMS, SAMPLE_ACTIONS };

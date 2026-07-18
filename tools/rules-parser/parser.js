@@ -352,4 +352,49 @@ function parseSystems(paragraphs) {
   return { systems: systems, warnings: warnings };
 }
 
-module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses, diffClasses, parseSubattrs, parseStatus, parseNatures, parseSystems };
+// Seção "# Ações": descrição "Ofensiva VS. Defensiva" (topo do painel) + 3 colunas
+// rotuladas (Ofensivas, Defensivas, Inspiradoras), cada uma { intro, items:[{name,cost,desc}], note }.
+// Itens no formato "Nome: desc" ou "Nome (custo): desc" (Inspiradoras usam "(1PI)");
+// linhas soltas antes do 1º item = intro; "…custam 2S"/limite de PI = note; linha solta
+// após um item = continuação da desc. Intro/Obs antes das colunas são ignorados.
+const ACT_SECTIONS = {
+  'ofensiva vs. defensiva': 'desc', 'ofensiva vs defensiva': 'desc',
+  'ofensivas': 'ofensivas', 'defensivas': 'defensivas', 'inspiradoras': 'inspiradoras',
+};
+const ACT_COL_KEYS = ['ofensivas', 'defensivas', 'inspiradoras'];
+const ACT_ITEM_RE = /^(.{1,40}?)(?:\s*\(([^)]+)\))?:\s*(.+)$/;
+const ACT_NOTE_RE = /custam\s+\d+\s*s|m[áa]ximo de \d+ pontos de inspira/i;
+
+function parseActions(paragraphs) {
+  const columns = {
+    ofensivas: { intro: null, items: [], note: null },
+    defensivas: { intro: null, items: [], note: null },
+    inspiradoras: { intro: null, items: [], note: null },
+  };
+  const actions = { desc: '', columns: columns };
+  const warnings = [];
+  let inActions = false, mode = undefined, item = null;
+  for (const p of paragraphs) {
+    const heading = p.heading || 'NORMAL';
+    const full = String(p.text || '');
+    if (heading === 'HEADING1') { inActions = _norm(full) === 'acoes'; mode = undefined; item = null; continue; }
+    if (!inActions) continue;
+    for (const raw of full.split(/\r?\n/)) {
+      const t = raw.trim();
+      if (!t) continue;
+      const n = _norm(t);
+      if (Object.prototype.hasOwnProperty.call(ACT_SECTIONS, n)) { mode = ACT_SECTIONS[n]; item = null; continue; }
+      if (mode === 'desc') { actions.desc = (actions.desc ? actions.desc + ' ' : '') + t; continue; }
+      if (ACT_COL_KEYS.indexOf(mode) < 0) continue; // intro/Obs antes das colunas: ignora
+      const col = columns[mode];
+      if (ACT_NOTE_RE.test(t) && t.indexOf(':') < 0) { col.note = t; item = null; continue; }
+      const m = t.match(ACT_ITEM_RE);
+      if (m) { item = { name: m[1].trim(), cost: (m[2] || '').trim() || null, desc: m[3].trim() }; col.items.push(item); }
+      else if (item) { item.desc += ' ' + t; }
+      else { col.intro = (col.intro ? col.intro + ' ' : '') + t; }
+    }
+  }
+  return { actions: actions, warnings: warnings };
+}
+
+module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses, diffClasses, parseSubattrs, parseStatus, parseNatures, parseSystems, parseActions };

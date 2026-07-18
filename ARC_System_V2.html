@@ -407,6 +407,69 @@
       margin-top: 6px
     }
 
+    /* ── AÇÕES (Ficha): descrição no topo + tabela de 3 colunas (mesmo estilo de Regras) ── */
+    .act-desc {
+      border: 1px solid var(--bd);
+      background: rgba(255, 255, 255, .02);
+      padding: 8px 10px;
+      margin-bottom: 12px
+    }
+
+    .act-desc-lbl {
+      font-family: 'Orbitron', monospace;
+      font-size: var(--fs-sm);
+      letter-spacing: 2px;
+      color: var(--blue);
+      margin-bottom: 6px
+    }
+
+    .act-cols {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px
+    }
+
+    .act-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px
+    }
+
+    .act-col-head {
+      font-family: 'Orbitron', monospace;
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-align: center;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--bd-b)
+    }
+
+    .act-col-ofensivas .act-col-head {
+      color: var(--red)
+    }
+
+    .act-col-defensivas .act-col-head {
+      color: var(--blue)
+    }
+
+    .act-col-inspiradoras .act-col-head {
+      color: var(--gold)
+    }
+
+    .act-cost {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: var(--fs-sm);
+      font-weight: 400;
+      color: var(--gold)
+    }
+
+    @media (max-width: 640px) {
+      .act-cols {
+        grid-template-columns: 1fr
+      }
+    }
+
     /* ── GRID ── */
     .g2 {
       display: grid;
@@ -2176,95 +2239,6 @@
             </div>
           </div>
 
-        </div>
-
-        <!-- RIGHT -->
-        <div class="col">
-
-          <!-- ACTIONS -->
-          <div class="panel">
-            <div class="panel-title">AÇÕES</div>
-            <div class="g2" style="gap:10px;margin-bottom:12px">
-              <div class="field"><span class="lbl">PADRÃO</span><input class="inp" type="number" id="actPadrao"
-                  value="1" min="0" oninput="autosave()"></div>
-              <div class="field"><span class="lbl">BÔNUS</span><input class="inp" type="number" id="actBonus" value="1"
-                  min="0" oninput="autosave()"></div>
-              <div class="field"><span class="lbl">MOVIMENTO</span><input class="inp" type="number" id="actMov"
-                  value="1" min="0" oninput="autosave()"></div>
-              <div class="field"><span class="lbl">REAÇÃO</span><input class="inp" type="number" id="actReacao"
-                  value="1" min="0" oninput="autosave()"></div>
-            </div>
-            <div class="g2" style="gap:10px">
-              <div class="field">
-                <span class="lbl">FALA</span>
-                <div class="attr-ctrl">
-                  <button class="c-btn" onclick="changeFala(-1)">−</button>
-                  <span class="c-val" id="falaVal">1</span>
-                  <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d)">/</span>
-                  <input type="number" id="falaMax" value="1" min="0" oninput="autosave()"
-                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:17px;text-align:center;outline:none">
-                  <button class="c-btn btn-sm" onclick="resetFala()" title="Resetar">↺</button>
-                </div>
-              </div>
-              <div class="field">
-                <span class="lbl">CORINGA</span>
-                <div class="attr-ctrl">
-                  <button class="c-btn" onclick="changeCoringa(-1)">−</button>
-                  <span class="c-val" id="coringaVal" style="color:var(--purple-b)">0</span>
-                  <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d)">/</span>
-                  <input type="number" id="coringaMax" value="0" min="0" oninput="autosave()"
-                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:17px;text-align:center;outline:none">
-                  <button class="c-btn btn-sm" onclick="resetCoringa()" title="Resetar">↺</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- DEATH SAVES -->
-          <div class="panel panel-purple">
-            <div class="panel-title">TESTES DE MORTE</div>
-            <div class="g2" style="gap:20px">
-              <div class="death-col">
-                <div class="death-row"><span class="death-label" style="color:var(--green)">SUCESSOS</span></div>
-                <div class="death-row">
-                  <div class="death-col">
-                    <button class="c-btn" onclick="changeDeath('suc',-1)"
-                      style="width:36px;height:36px;font-size:24px">-</button>
-                  </div>
-                  <div class="death-num suc" class="death-col" id="deathSucVal">0</div>
-                  <div class="death-col">
-                    <button class="c-btn" onclick="changeDeath('suc',1)"
-                      style="width:36px;height:36px;font-size:24px">+</button>
-                  </div>
-                </div>
-              </div>
-              <div class="death-col">
-                <div class="death-row"><span class="death-label" style="color:var(--red)">FALHAS</span></div>
-                <div class="death-row">
-                  <div class="death-col">
-                    <button class="c-btn" onclick="changeDeath('mort',-1)"
-                      style="width:36px;height:36px;font-size:24px">-</button>
-                  </div>
-                  <div class="death-num mort" class="death-col" id="deathMortVal">0</div>
-                  <div class="death-col">
-                    <button class="c-btn" onclick="changeDeath('mort',1)"
-                      style="width:36px;height:36px;font-size:24px">+</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="sep" style="opacity:0"></div>
-            <div class="lbl mb8">DEGRADAÇÃO CORPORAL</div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <div class="degradpip" id="deg0" onclick="toggleDeg(0)"></div>
-              <div class="degradpip" id="deg1" onclick="toggleDeg(1)"></div>
-              <div class="degradpip" id="deg2" onclick="toggleDeg(2)"></div>
-              <div class="degradpip" id="deg3" onclick="toggleDeg(3)"></div>
-              <span style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);margin-left:6px"
-                id="degLabel">Nenhuma queda</span>
-            </div>
-          </div>
-
           <!-- DoTS -->
           <div class="panel">
             <div class="panel-title">DoTs ATIVOS</div>
@@ -2321,6 +2295,98 @@
             <!-- Extras -->
             <div id="dotExtrasWrap"></div>
             <button class="dashed-btn" onclick="addDotExtra()">+ ADICIONAR EFEITO</button>
+          </div>
+
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col">
+
+          <!-- ACTIONS -->
+          <div class="panel">
+            <div class="panel-title">AÇÕES</div>
+            <div id="actDescBox"></div>
+            <div class="g2" style="gap:10px;margin-bottom:12px">
+              <div class="field"><span class="lbl">PADRÃO</span><input class="inp" type="number" id="actPadrao"
+                  value="1" min="0" oninput="autosave()"></div>
+              <div class="field"><span class="lbl">BÔNUS</span><input class="inp" type="number" id="actBonus" value="1"
+                  min="0" oninput="autosave()"></div>
+              <div class="field"><span class="lbl">MOVIMENTO</span><input class="inp" type="number" id="actMov"
+                  value="1" min="0" oninput="autosave()"></div>
+              <div class="field"><span class="lbl">REAÇÃO</span><input class="inp" type="number" id="actReacao"
+                  value="1" min="0" oninput="autosave()"></div>
+            </div>
+            <div class="g2" style="gap:10px">
+              <div class="field">
+                <span class="lbl">FALA</span>
+                <div class="attr-ctrl">
+                  <button class="c-btn" onclick="changeFala(-1)">−</button>
+                  <span class="c-val" id="falaVal">1</span>
+                  <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d)">/</span>
+                  <input type="number" id="falaMax" value="1" min="0" oninput="autosave()"
+                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:17px;text-align:center;outline:none">
+                  <button class="c-btn btn-sm" onclick="resetFala()" title="Resetar">↺</button>
+                </div>
+              </div>
+              <div class="field">
+                <span class="lbl">CORINGA</span>
+                <div class="attr-ctrl">
+                  <button class="c-btn" onclick="changeCoringa(-1)">−</button>
+                  <span class="c-val" id="coringaVal" style="color:var(--purple-b)">0</span>
+                  <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d)">/</span>
+                  <input type="number" id="coringaMax" value="0" min="0" oninput="autosave()"
+                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:17px;text-align:center;outline:none">
+                  <button class="c-btn btn-sm" onclick="resetCoringa()" title="Resetar">↺</button>
+                </div>
+              </div>
+            </div>
+            <div class="sep"></div>
+            <div id="actTableBox"></div>
+          </div>
+
+          <!-- DEATH SAVES -->
+          <div class="panel panel-purple">
+            <div class="panel-title">TESTES DE MORTE</div>
+            <div class="g2" style="gap:20px">
+              <div class="death-col">
+                <div class="death-row"><span class="death-label" style="color:var(--green)">SUCESSOS</span></div>
+                <div class="death-row">
+                  <div class="death-col">
+                    <button class="c-btn" onclick="changeDeath('suc',-1)"
+                      style="width:36px;height:36px;font-size:24px">-</button>
+                  </div>
+                  <div class="death-num suc" class="death-col" id="deathSucVal">0</div>
+                  <div class="death-col">
+                    <button class="c-btn" onclick="changeDeath('suc',1)"
+                      style="width:36px;height:36px;font-size:24px">+</button>
+                  </div>
+                </div>
+              </div>
+              <div class="death-col">
+                <div class="death-row"><span class="death-label" style="color:var(--red)">FALHAS</span></div>
+                <div class="death-row">
+                  <div class="death-col">
+                    <button class="c-btn" onclick="changeDeath('mort',-1)"
+                      style="width:36px;height:36px;font-size:24px">-</button>
+                  </div>
+                  <div class="death-num mort" class="death-col" id="deathMortVal">0</div>
+                  <div class="death-col">
+                    <button class="c-btn" onclick="changeDeath('mort',1)"
+                      style="width:36px;height:36px;font-size:24px">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="sep" style="opacity:0"></div>
+            <div class="lbl mb8">DEGRADAÇÃO CORPORAL</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div class="degradpip" id="deg0" onclick="toggleDeg(0)"></div>
+              <div class="degradpip" id="deg1" onclick="toggleDeg(1)"></div>
+              <div class="degradpip" id="deg2" onclick="toggleDeg(2)"></div>
+              <div class="degradpip" id="deg3" onclick="toggleDeg(3)"></div>
+              <span style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);margin-left:6px"
+                id="degLabel">Nenhuma queda</span>
+            </div>
           </div>
         </div>
       </div>
@@ -2810,6 +2876,45 @@
       arredondamentos: { intro: 'Sempre para cima, a não ser que esteja explicitamente escrito o contrário', items: [] }
     };
 
+    // Seção "# Ações" do Doc (Doc → Firebase → ARC; este é o fallback embutido).
+    const ACTIONS_EMBEDDED = {
+      desc: 'Caso o atacante não passe da CA do defensor, ele erra naturalmente, sem necessidade de reação. Caso passe, o defensor tem a opção de usar as suas ações defensivas. Em casos de ambas ações ofensivas e defensivas critarem, vence o maior resultado total. Se o resultado ainda for o mesmo, ambos rolam 1d20 puro até desempatar.',
+      columns: {
+        ofensivas: {
+          intro: null,
+          items: [
+            { name: 'Atacar', cost: null, desc: 'Consome 1 ação padrão e seu teste é 1d20+Corpo/Mente+Implante. Ataques desarmados causam 1d6+Corpo.' },
+            { name: 'Ataque de oportunidade', cost: null, desc: 'Consome 1 reação, pode ser usado quando um inimigo: 1- se move em distância adjacente de você; 2- sofre uma falha crítica em um ataque contra você; 3- esquivou ou bloqueou de um ataque seu sem crítico.' },
+            { name: 'Quebra', cost: null, desc: 'Consome 1 ação padrão e seu teste é 1d20+Corpo, pode escolher entre aplicar desprotegido ou exposto; em caso de crítico, aplique ambos.' },
+            { name: 'Desarme', cost: null, desc: 'Consome 1 ação bônus + 1 de movimento e seu teste é 1d20+Corpo+Mente.' }
+          ],
+          note: 'Ações ofensivas básicas custam 2S'
+        },
+        defensivas: {
+          intro: null,
+          items: [
+            { name: 'Esquivar', cost: null, desc: 'Consome 1 reação e seu teste é 1d20+Mente-Armadura, nega todo o dano que iria receber; em caso de crítico, poderá usar sua ação bônus para atacar o alvo com um ataque simples (não aplica efeitos).' },
+            { name: 'Bloquear', cost: null, desc: 'Consome 1 reação e seu teste é 1d20+Corpo+Armadura, reduz em 50% o dano recebido; em caso de crítico, reduza 75%. Gastando 1 ação bônus adicional, você pode entrar na frente de um ataque inimigo dentro de 5m de você — nesse caso o bloqueio é um sucesso automático sem possibilidade de crítico.' },
+            { name: 'Defesa precipitada', cost: null, desc: 'Consome 1 ação padrão e você ganha vantagem e um bônus de +3 na sua próxima ação defensiva.' },
+            { name: 'Mudança de postura', cost: null, desc: 'Consome 1 ação bônus + 1 ação de movimento, pode escolher entre ganhar +3 na CA, +5 em testes defensivos ou resistência a controle de grupo por 1 rodada.' },
+            { name: 'Leitura de campo', cost: null, desc: 'Consome o seu turno completo; por 1 rodada nenhum aliado pode sofrer ataques de oportunidade nem críticos fracos.' }
+          ],
+          note: 'Ações defensivas básicas custam 2S'
+        },
+        inspiradoras: {
+          intro: 'Você pode conceder aos seus aliados 1 ponto de inspiração fazendo algo que os inspira (um ataque que deu muito dano, um bloqueio perfeito) ou encorajá-los com 1 ação de fala. Inspirar por fala rola 1d20+bônus conforme a situação: <7 falha; 8-17 sucesso (+1 PI); 18+ sucesso alto (+2 PI).',
+          items: [
+            { name: 'Superar seus limites', cost: '1PI', desc: 'Transforma uma falha em um acerto, um acerto em um crítico, ou um crítico com +1x.' },
+            { name: 'Elevar sua ação', cost: '1PI', desc: 'Dobra o dano e/ou cura da sua próxima ação.' },
+            { name: 'Defender heroicamente', cost: '1PI', desc: 'Ignora um crítico inimigo, um ataque surpresa ou efeito de controle de grupo.' },
+            { name: 'Agir em sequência', cost: '1PI', desc: 'Segue atrás de uma ação de um aliado, mesmo se não for o seu turno. Essa ação é um sucesso automático.' },
+            { name: 'Dar mais um suspiro', cost: '2PI', desc: 'Em 0 de stamina, não gasta stamina no próximo turno. Em 0 de vida, luta até receber mais um ataque. Em 0 de sanidade, resiste por mais 1 rodada sem enlouquecer.' }
+          ],
+          note: 'Você pode ter até um máximo de 3 pontos de inspiração'
+        }
+      }
+    };
+
     const NATURE_DATA = {
       Brutamontes: { buff: '+2 vida extra por nível (+5 a partir do nível 10)', debuff: 'CA naturalmente -2', habUnica: { name: 'Avanço Brutal', action: 'Especial', cost: '4S', desc: 'Avança a distância de seu movimento, atacando e empurrando todos na linha (inclui aliados), causando 2d6+(2×Corpo).' }, hp: '10 + 5d4 + 5×Corpo | Por nível: +5 + 3×Corpo', sta: '5 + 3d6 + 3×Corpo | Por nível: +3 + 3×Corpo | Rec: 5>7>10>15' },
       Guerreiro: { buff: 'Começa usando armas adjacentes leves e médias sem restrição de Corpo', debuff: '1 desvantagem em qualquer arma à distância', habUnica: { name: 'Rajada de Golpes', action: 'Especial', cost: '5S', desc: '1× por luta, por 2 rodadas, pode atacar uma vez a mais por ação padrão.' }, hp: '10 + 3d8 + 3×Corpo | Por nível: +5 + 2×Corpo', sta: '5 + 2d4 + 2×Corpo | Por nível: +3 + 2×Corpo+Mente | Rec: 3>5>8>12' },
@@ -3087,6 +3192,7 @@
     let SUBATTR_SKILLS = SUBATTR_SKILLS_EMBEDDED;
     let SUBATTR_SKILLS_ALMA = SUBATTR_SKILLS_ALMA_EMBEDDED;
     let SYSTEMS = SYSTEMS_EMBEDDED;
+    let ACTIONS = ACTIONS_EMBEDDED;
     const FB_RULES_URL = 'https://intitulations-default-rtdb.firebaseio.com/arc_rules.json';
     const _SUB_CM = ['forca', 'vigor', 'agilidade', 'habilidade', 'sincronia', 'intelecto'];
     const _SUB_ALMA = ['conexao', 'entendimento'];
@@ -3128,6 +3234,7 @@
         if (en && en.items && en.items.length) { STATUS_NEG = en.items.map(i => i.name); en.items.forEach(i => { STATUS_DESC[i.name] = i.desc; }); }
         if (ep && ep.items && ep.items.length) { STATUS_POS = ep.items.map(i => i.name); ep.items.forEach(i => { STATUS_DESC[i.name] = i.desc; }); }
       }
+      if (data.actions && (data.actions.desc || _isNonEmptyObj(data.actions.columns))) ACTIONS = data.actions;
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -3141,6 +3248,7 @@
       buildDotStacks();
       buildMulticlasse();
       renderDotDescs();
+      renderActions();
       buildRegras();
       loadDOM();
       updateAll();
@@ -4081,6 +4189,29 @@
         box.innerHTML = parts + (it.note ? `<div style="margin-top:6px;opacity:.6;font-style:italic">${_esc(it.note)}</div>` : '');
       });
     }
+    // AÇÕES (Doc → ACTIONS): descrição "Ofensiva VS. Defensiva" no topo do painel + tabela de 3 colunas.
+    const ACT_COLS = [['ofensivas', 'OFENSIVAS'], ['defensivas', 'DEFENSIVAS'], ['inspiradoras', 'INSPIRADORAS']];
+    function renderActions() {
+      const descBox = document.getElementById('actDescBox');
+      if (descBox) {
+        descBox.innerHTML = ACTIONS.desc
+          ? `<div class="act-desc"><div class="act-desc-lbl">OFENSIVA VS. DEFENSIVA</div><div class="reg-cell-desc">${_esc(ACTIONS.desc)}</div></div>`
+          : '';
+      }
+      const tableBox = document.getElementById('actTableBox'); if (!tableBox) return;
+      const cols = ACTIONS.columns || {};
+      tableBox.innerHTML = `<div class="act-cols">` + ACT_COLS.map(([k, title]) => {
+        const c = cols[k]; if (!c) return '';
+        const intro = c.intro ? `<div class="reg-cell-desc" style="margin-bottom:2px">${_esc(c.intro)}</div>` : '';
+        const items = (c.items || []).map(it =>
+          `<div class="reg-cell"><div class="reg-cell-title">${_esc(it.name)}${it.cost ? ` <span class="act-cost">${_esc(it.cost)}</span>` : ''}</div>`
+          + `<div class="reg-cell-desc">${_esc(it.desc)}</div></div>`
+        ).join('');
+        const note = c.note ? `<div class="reg-note">${_esc(c.note)}</div>` : '';
+        return `<div class="act-col act-col-${k}"><div class="act-col-head">${title}</div>${intro}${items}${note}</div>`;
+      }).join('') + `</div>`;
+    }
+
     const REGRAS_ORDER = [
       ['critico', 'CRÍTICO'], ['tiposDano', 'TIPOS DE DANO'], ['categoriasDano', 'CATEGORIAS DE DANO'],
       ['duasArmas', 'DUAS ARMAS'], ['distancias', 'DISTÂNCIAS'], ['chance', 'CHANCE'],

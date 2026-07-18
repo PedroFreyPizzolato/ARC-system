@@ -361,6 +361,48 @@ function parseSystems(paragraphs) {
   }
   return { systems: systems, warnings: warnings };
 }
+
+// Seção "# Ações": descrição "Ofensiva VS. Defensiva" (topo do painel) + 3 colunas
+// rotuladas (Ofensivas, Defensivas, Inspiradoras), cada uma { intro, items:[{name,cost,desc}], note }.
+const ACT_SECTIONS = {
+  'ofensiva vs. defensiva': 'desc', 'ofensiva vs defensiva': 'desc',
+  'ofensivas': 'ofensivas', 'defensivas': 'defensivas', 'inspiradoras': 'inspiradoras',
+};
+const ACT_COL_KEYS = ['ofensivas', 'defensivas', 'inspiradoras'];
+const ACT_ITEM_RE = /^(.{1,40}?)(?:\s*\(([^)]+)\))?:\s*(.+)$/;
+const ACT_NOTE_RE = /custam\s+\d+\s*s|m[áa]ximo de \d+ pontos de inspira/i;
+
+function parseActions(paragraphs) {
+  const columns = {
+    ofensivas: { intro: null, items: [], note: null },
+    defensivas: { intro: null, items: [], note: null },
+    inspiradoras: { intro: null, items: [], note: null },
+  };
+  const actions = { desc: '', columns: columns };
+  const warnings = [];
+  let inActions = false, mode = undefined, item = null;
+  for (const p of paragraphs) {
+    const heading = p.heading || 'NORMAL';
+    const full = String(p.text || '');
+    if (heading === 'HEADING1') { inActions = _norm(full) === 'acoes'; mode = undefined; item = null; continue; }
+    if (!inActions) continue;
+    for (const raw of full.split(/\r?\n/)) {
+      const t = raw.trim();
+      if (!t) continue;
+      const n = _norm(t);
+      if (Object.prototype.hasOwnProperty.call(ACT_SECTIONS, n)) { mode = ACT_SECTIONS[n]; item = null; continue; }
+      if (mode === 'desc') { actions.desc = (actions.desc ? actions.desc + ' ' : '') + t; continue; }
+      if (ACT_COL_KEYS.indexOf(mode) < 0) continue; // intro/Obs antes das colunas: ignora
+      const col = columns[mode];
+      if (ACT_NOTE_RE.test(t) && t.indexOf(':') < 0) { col.note = t; item = null; continue; }
+      const m = t.match(ACT_ITEM_RE);
+      if (m) { item = { name: m[1].trim(), cost: (m[2] || '').trim() || null, desc: m[3].trim() }; col.items.push(item); }
+      else if (item) { item.desc += ' ' + t; }
+      else { col.intro = (col.intro ? col.intro + ' ' : '') + t; }
+    }
+  }
+  return { actions: actions, warnings: warnings };
+}
 // ---- FIM cópia de tools/rules-parser/parser.js ----
 
 // ---- Camada Google (I/O): lê o Doc, mostra preview, grava no Firebase ----
@@ -398,6 +440,7 @@ function construirArcRules() {
   const st = parseStatus(paras);
   const nt = parseNatures(paras);
   const sy = parseSystems(paras);
+  const ac = parseActions(paras);
   // Mescla buff/debuff/habUnica (# Naturezas) no mesmo nó de cada natureza (hp/sta vêm de # Status).
   Object.keys(nt.natures).forEach(function (n) {
     const dst = st.natures[n] || (st.natures[n] = {}), src = nt.natures[n];
@@ -406,12 +449,13 @@ function construirArcRules() {
     if (src.habUnica) dst.habUnica = src.habUnica;
   });
   return {
-    rules: { _version: 1, _updatedAt: new Date().getTime(), classes: c.classes, subattrs: s.subattrs, status: { natures: st.natures }, systems: sy.systems },
-    warnings: c.warnings.concat(s.warnings).concat(st.warnings).concat(nt.warnings).concat(sy.warnings),
+    rules: { _version: 1, _updatedAt: new Date().getTime(), classes: c.classes, subattrs: s.subattrs, status: { natures: st.natures }, systems: sy.systems, actions: ac.actions },
+    warnings: c.warnings.concat(s.warnings).concat(st.warnings).concat(nt.warnings).concat(sy.warnings).concat(ac.warnings),
     countClasses: Object.keys(c.classes).length,
     countSubattrs: Object.keys(s.subattrs).length,
     countNatures: Object.keys(st.natures).length,
     countSystems: Object.keys(sy.systems).length,
+    countActions: ACT_COL_KEYS.reduce(function (acc, k) { return acc + (ac.actions.columns[k].items || []).length; }, 0),
   };
 }
 
@@ -440,6 +484,24 @@ function _envSystems(systems) {
       skills.push({ name: it.name, action: '', cost: null, desc: it.desc + (it.note ? ' | ' + it.note : '') });
     });
     o[k] = { skills: skills, ultimate: null };
+  });
+  return o;
+}
+
+// Envelopa actions {desc,columns} como pseudo-classes (descrição + colunas) p/ reusar diffClasses.
+function _envActions(actions) {
+  actions = actions || {};
+  const o = {};
+  const dSk = [];
+  if (actions.desc) dSk.push({ name: '(Ofensiva VS. Defensiva)', action: '', cost: null, desc: actions.desc });
+  o['Ações — descrição'] = { skills: dSk, ultimate: null };
+  const cols = actions.columns || {};
+  ['ofensivas', 'defensivas', 'inspiradoras'].forEach(function (k) {
+    const c = cols[k] || {}, sk = [];
+    if (c.intro) sk.push({ name: '(intro)', action: '', cost: null, desc: c.intro });
+    (c.items || []).forEach(function (it) { sk.push({ name: it.name, action: '', cost: it.cost || null, desc: it.desc }); });
+    if (c.note) sk.push({ name: '(nota)', action: '', cost: null, desc: c.note });
+    o['Ações — ' + k] = { skills: sk, ultimate: null };
   });
   return o;
 }
@@ -476,8 +538,8 @@ function _diffSection(titulo, diff) {
     + '<table><tr><th>Atual (Firebase)</th><th>Novo (Doc)</th></tr>' + rows + '</table>';
 }
 
-function _previewHtml(out, diffCls, diffSub, diffSt, diffSy) {
-  let head = '<div class="hd">Classes: <b>' + out.countClasses + '</b> (14) · Subatributos: <b>' + out.countSubattrs + '</b> (8) · Naturezas Vida/Sta: <b>' + out.countNatures + '</b> (4) · Sistemas: <b>' + out.countSystems + '</b></div>';
+function _previewHtml(out, diffCls, diffSub, diffSt, diffSy, diffAc) {
+  let head = '<div class="hd">Classes: <b>' + out.countClasses + '</b> (14) · Subatributos: <b>' + out.countSubattrs + '</b> (8) · Naturezas Vida/Sta: <b>' + out.countNatures + '</b> (4) · Sistemas: <b>' + out.countSystems + '</b> · Ações: <b>' + out.countActions + '</b></div>';
   if (out.warnings.length) {
     head += '<div class="warn">⚠️ ' + out.warnings.length + ' aviso(s):<ul>';
     out.warnings.forEach(function (w) { head += '<li>' + _esc(w) + '</li>'; });
@@ -496,7 +558,7 @@ function _previewHtml(out, diffCls, diffSub, diffSt, diffSy) {
     + '.tag.modified{background:#9a6700}.tag.skill-added,.tag.class-added{background:#22863a}'
     + '.tag.skill-removed,.tag.class-removed{background:#d73a49}'
     + '</style>';
-  return css + head + _diffSection('Classes', diffCls) + _diffSection('Subatributos', diffSub) + _diffSection('Status (Vida/Stamina)', diffSt) + _diffSection('Sistemas e Esclarecimentos', diffSy);
+  return css + head + _diffSection('Classes', diffCls) + _diffSection('Subatributos', diffSub) + _diffSection('Status (Vida/Stamina)', diffSt) + _diffSection('Sistemas e Esclarecimentos', diffSy) + _diffSection('Ações', diffAc);
 }
 
 function onOpen() {
@@ -514,7 +576,8 @@ function mostrarPreview() {
   const diffSub = diffClasses(_envelope(atual.subattrs), _envelope(out.rules.subattrs));
   const diffSt = diffClasses(_envStatus(atual.status && atual.status.natures), _envStatus(out.rules.status.natures));
   const diffSy = diffClasses(_envSystems(atual.systems), _envSystems(out.rules.systems));
-  const html = HtmlService.createHtmlOutput(_previewHtml(out, diffCls, diffSub, diffSt, diffSy)).setWidth(860).setHeight(620);
+  const diffAc = diffClasses(_envActions(atual.actions), _envActions(out.rules.actions));
+  const html = HtmlService.createHtmlOutput(_previewHtml(out, diffCls, diffSub, diffSt, diffSy, diffAc)).setWidth(860).setHeight(620);
   DocumentApp.getUi().showModalDialog(html, 'Preview — Ponte ARC');
 }
 
@@ -525,10 +588,11 @@ function publicar() {
   const nMud = diffClasses(atual.classes, out.rules.classes).rows.length
     + diffClasses(_envelope(atual.subattrs), _envelope(out.rules.subattrs)).rows.length
     + diffClasses(_envStatus(atual.status && atual.status.natures), _envStatus(out.rules.status.natures)).rows.length
-    + diffClasses(_envSystems(atual.systems), _envSystems(out.rules.systems)).rows.length;
+    + diffClasses(_envSystems(atual.systems), _envSystems(out.rules.systems)).rows.length
+    + diffClasses(_envActions(atual.actions), _envActions(out.rules.actions)).rows.length;
   const aviso = out.warnings.length ? ('\n\n⚠️ ' + out.warnings.length + ' aviso(s)! Veja o Preview antes.') : '';
   const resp = ui.alert('Publicar no Firebase',
-    'Enviar ' + out.countClasses + ' classes + ' + out.countSubattrs + ' subatributos + ' + out.countNatures + ' naturezas + ' + out.countSystems + ' sistemas (' + nMud + ' mudança(s)) para o ARC?'
+    'Enviar ' + out.countClasses + ' classes + ' + out.countSubattrs + ' subatributos + ' + out.countNatures + ' naturezas + ' + out.countSystems + ' sistemas + ' + out.countActions + ' ações (' + nMud + ' mudança(s)) para o ARC?'
     + '\nUse "Pré-visualizar" para ver o diff lado a lado.' + aviso,
     ui.ButtonSet.OK_CANCEL);
   if (resp !== ui.Button.OK) return;

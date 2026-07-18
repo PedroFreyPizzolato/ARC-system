@@ -337,3 +337,47 @@ test('parseSystems ignora conteúdo fora da seção', () => {
   const dump = JSON.stringify(systems);
   assert.ok(!/fora da seção/.test(dump));
 });
+
+const { parseActions } = require('./parser');
+const { SAMPLE_ACTIONS } = require('./fixtures');
+
+test('parseActions extrai a descrição "Ofensiva VS. Defensiva"', () => {
+  const { actions } = parseActions(SAMPLE_ACTIONS);
+  assert.match(actions.desc, /Caso o atacante não passe da CA/);
+  assert.match(actions.desc, /vence o maior resultado total/);
+});
+
+test('parseActions extrai itens das 3 colunas', () => {
+  const { actions } = parseActions(SAMPLE_ACTIONS);
+  assert.equal(actions.columns.ofensivas.items[0].name, 'Atacar');
+  assert.equal(actions.columns.defensivas.items[0].name, 'Esquivar');
+  assert.equal(actions.columns.inspiradoras.items[0].name, 'Superar seus limites');
+});
+
+test('parseActions: linha solta vira continuação da desc do item', () => {
+  const { actions } = parseActions(SAMPLE_ACTIONS);
+  const ao = actions.columns.ofensivas.items[1];
+  assert.equal(ao.name, 'Ataque de oportunidade');
+  assert.match(ao.desc, /se move em distância adjacente/);
+});
+
+test('parseActions: custo "(1PI)" das Inspiradoras vira cost do item', () => {
+  const { actions } = parseActions(SAMPLE_ACTIONS);
+  const insp = actions.columns.inspiradoras.items;
+  assert.equal(insp[0].cost, '1PI');
+  assert.equal(insp[1].cost, '2PI');
+});
+
+test('parseActions: "custam 2S" e limite de PI viram nota da coluna', () => {
+  const { actions } = parseActions(SAMPLE_ACTIONS);
+  assert.match(actions.columns.ofensivas.note, /custam 2S/);
+  assert.match(actions.columns.defensivas.note, /custam 2S/);
+  assert.match(actions.columns.inspiradoras.note, /máximo de 3 pontos/);
+});
+
+test('parseActions: intro/Obs antes das colunas e conteúdo fora da seção são ignorados', () => {
+  const { actions } = parseActions(SAMPLE_ACTIONS);
+  const dump = JSON.stringify(actions);
+  assert.ok(!/Existem as ações/.test(dump));
+  assert.ok(!/fora da seção/.test(dump));
+});
