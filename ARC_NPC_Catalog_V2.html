@@ -2259,10 +2259,12 @@
       } catch (e) { /* offline/timeout: usa cache/embutido */ }
       if (!data) { try { data = JSON.parse(localStorage.getItem('arc_npc_rules_cache') || 'null'); } catch (e) { } }
       if (!data) return; // sem rede e sem cache → mantém embutido
-      applyClasses(data.classes);
-      applySubattrs(data.subattrs);
-      if (data.status) applyNatures(data.status.natures);
-      if (data.systems) applyEffects(data.systems);
+      try {
+        applyClasses(data.classes);
+        applySubattrs(data.subattrs);
+        if (data.status) applyNatures(data.status.natures);
+        if (data.systems) applyEffects(data.systems);
+      } catch (e) { console.warn('[sync] falha ao aplicar regras, mantendo embutido:', e); }
     }
 
     (async function boot() { await loadRules(); load(); })();
