@@ -1287,8 +1287,8 @@
     const CL_ESP_BY_NAT = { Brutamontes: ['Titã', 'Aniquilador'], Guerreiro: ['Gladiador', 'Exterminador'], Atleta: ['Corredor de Linha', 'Lutador'], Velocista: ['Batedor Cinético', 'Predador'] };
     const SUB_LBL = { forca: 'Força', vigor: 'Vigor', agilidade: 'Agilidade', habilidade: 'Habilidade', sincronia: 'Sincronia', intelecto: 'Intelecto', conexao: 'Conexão', entendimento: 'Entendimento' };
     const ATTR_SUBS = { corpo: ['forca', 'vigor', 'agilidade'], mente: ['habilidade', 'sincronia', 'intelecto'], alma: ['conexao', 'entendimento'] };
-    const STATUS_NEG = ['Morrendo', 'Terreno Difícil', 'Quebrado', 'Amedrontado', 'Atordoado', 'Membro Quebrado', 'Imobilizado', 'Em Choque', 'Vulnerável', 'Exaustão', 'Exaustão Grave', 'Fraqueza', 'Derrubado', 'Desprotegido', 'Exposto', 'Suprimido', 'Cegueira'];
-    const STATUS_POS = ['Fortificado', 'Acelerado', 'Focado', 'Imparável', 'Blindado', 'Energizado', 'Fortalecido', 'Protegido'];
+    let STATUS_NEG = ['Morrendo', 'Terreno Difícil', 'Quebrado', 'Amedrontado', 'Atordoado', 'Membro Quebrado', 'Imobilizado', 'Em Choque', 'Vulnerável', 'Exaustão', 'Exaustão Grave', 'Fraqueza', 'Derrubado', 'Desprotegido', 'Exposto', 'Suprimido', 'Cegueira'];
+    let STATUS_POS = ['Fortificado', 'Acelerado', 'Focado', 'Imparável', 'Blindado', 'Energizado', 'Fortalecido', 'Protegido'];
 
     // ── PERÍCIAS ──  bônus = (pontos no subatributo) × 3 ; Treinado: +50% no total + passiva única (1 a cada 5 níveis)
     const PERICIAS = [
@@ -2160,7 +2160,112 @@
       render();
     }
 
-    load();
+    // ═══════════════════════════════════════════════════════════════
+    // SYNC: regras do Doc → Firebase → NPC Catalog (fallback embutido/cache)
+    // Funções puras abaixo = cópia fiel de tools/rules-parser/adapters.js. Mudou uma, mude nas duas.
+    // ═══════════════════════════════════════════════════════════════
+    const FB_RULES_URL = 'https://intitulations-default-rtdb.firebaseio.com/arc_rules.json';
+    function normFormula(s) {
+      if (s == null) return s;
+      return String(s).replace(/\*/g, '×').replace(/\s*>\s*/g, '→').replace(/\s*\+\s*/g, '+').trim();
+    }
+    function mapSkill(s) {
+      const o = { n: s.name, a: s.action || '', c: s.cost == null ? null : s.cost, d: s.desc || '' };
+      if (s.lb) o.lb = true;
+      return o;
+    }
+    function mapClass(c) {
+      const o = { tipo: c.type === 'especifica' ? 'e' : 'g', sk: (c.skills || []).map(mapSkill), ult: null };
+      if (c.natureza) o.nat = c.natureza;
+      if (c.ultimate) {
+        const u = c.ultimate;
+        o.ult = { n: u.name, a: u.action || '', c: u.cost == null ? null : u.cost, d: u.desc || '' };
+        if (u.limit) o.ult.lim = u.limit;
+      }
+      return o;
+    }
+    function mapNature(nat) {
+      const o = {};
+      if (nat.buff != null) o.buff = nat.buff;
+      if (nat.debuff != null) o.debuff = nat.debuff;
+      if (nat.habUnica) { const h = nat.habUnica; o.habUnica = { n: h.name, a: h.action || '', c: h.cost == null ? null : h.cost, d: h.desc || '' }; }
+      if (nat.hpBase != null) o.hpF = normFormula(nat.hpBase);
+      if (nat.hpNivel != null) o.hpL = normFormula(nat.hpNivel);
+      if (nat.staBase != null) o.staF = normFormula(nat.staBase);
+      if (nat.staNivel != null) o.staL = normFormula(nat.staNivel);
+      if (nat.staRec != null) o.staRec = normFormula(nat.staRec);
+      return o;
+    }
+    function effectNames(section) {
+      if (!section || !Array.isArray(section.items)) return null;
+      const names = section.items.map(function (i) { return i.name; }).filter(Boolean);
+      return names.length ? names : null;
+    }
+    const STAR_KEYS = ['hpB', 'caB', 'movB', 'sanB'];
+    function preserveStars(oldSkills, newSkills) {
+      const byName = {};
+      (newSkills || []).forEach(function (s) { byName[s.n] = s; });
+      const lostStars = [];
+      (oldSkills || []).forEach(function (o) {
+        const stars = STAR_KEYS.filter(function (k) { return o[k] != null; });
+        if (!stars.length) return;
+        const match = byName[o.n];
+        if (match) stars.forEach(function (k) { match[k] = o[k]; });
+        else lostStars.push(o.n);
+      });
+      return { skills: newSkills || [], lostStars: lostStars };
+    }
+
+    // ── Aplicadores (merge-if-present; preservam estrelas de cálculo) ──
+    function applyClasses(fb) {
+      if (!fb) return;
+      Object.keys(fb).forEach(function (name) {
+        const mapped = mapClass(fb[name]);
+        const old = CL[name];
+        const res = preserveStars(old && old.sk, mapped.sk);
+        if (res.lostStars.length) { console.warn('[sync] classe "' + name + '": estrela sem par no Doc, mantendo embutido:', res.lostStars); return; }
+        mapped.sk = res.skills;
+        CL[name] = mapped;
+      });
+    }
+    function applySubattrs(fb) {
+      if (!fb) return;
+      Object.keys(fb).forEach(function (key) {
+        if (!SA[key]) return; // só chaves de subatributo conhecidas
+        const mapped = (fb[key] || []).map(mapSkill);
+        const res = preserveStars(SA[key], mapped);
+        if (res.lostStars.length) { console.warn('[sync] subatributo "' + key + '": estrela sem par, mantendo embutido:', res.lostStars); return; }
+        SA[key] = res.skills;
+      });
+    }
+    function applyNatures(fb) {
+      if (!fb) return;
+      Object.keys(fb).forEach(function (nat) { if (NATURE_DATA[nat]) Object.assign(NATURE_DATA[nat], mapNature(fb[nat])); });
+    }
+    function applyEffects(sys) {
+      if (!sys) return;
+      const neg = effectNames(sys.efeitosNegativos), pos = effectNames(sys.efeitosPositivos);
+      if (neg) STATUS_NEG = neg;
+      if (pos) STATUS_POS = pos;
+    }
+    async function loadRules() {
+      let data = null;
+      try {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 4000);
+        const resp = await fetch(FB_RULES_URL + '?t=' + Date.now(), { signal: ctrl.signal });
+        clearTimeout(tid);
+        if (resp.ok) { const d = await resp.json(); if (d) { data = d; localStorage.setItem('arc_npc_rules_cache', JSON.stringify(d)); } }
+      } catch (e) { /* offline/timeout: usa cache/embutido */ }
+      if (!data) { try { data = JSON.parse(localStorage.getItem('arc_npc_rules_cache') || 'null'); } catch (e) { } }
+      if (!data) return; // sem rede e sem cache → mantém embutido
+      applyClasses(data.classes);
+      applySubattrs(data.subattrs);
+      if (data.status) applyNatures(data.status.natures);
+      if (data.systems) applyEffects(data.systems);
+    }
+
+    (async function boot() { await loadRules(); load(); })();
   </script>
 </body>
 
