@@ -1861,6 +1861,7 @@
       <button class="tab" onclick="switchTab('personagem')">PERSONAGEM</button>
       <button class="tab" onclick="switchTab('titulos')">TÍTULOS</button>
       <button class="tab" onclick="switchTab('classes')">CLASSES</button>
+      <button class="tab" onclick="switchTab('regras')">REGRAS</button>
       <button class="tab" onclick="switchTab('notas')">NOTAS</button>
     </div>
 
@@ -2210,6 +2211,7 @@
                 <div class="dot-field"><span class="dot-lbl">DURAÇÃO</span><input class="dot-inp" type="text"
                     id="sangDur" placeholder="X rodadas" oninput="autosave()"></div>
               </div>
+              <div class="sk-desc mt8" id="sangDescBox"></div>
             </div>
             <!-- Queimadura -->
             <div class="dot-block que mt8" id="dotQueim">
@@ -2227,6 +2229,7 @@
                 <div class="dot-field"><span class="dot-lbl">DURAÇÃO</span><input class="dot-inp" type="text"
                     id="queimDur" placeholder="X rodadas" oninput="autosave()"></div>
               </div>
+              <div class="sk-desc mt8" id="queimDescBox"></div>
             </div>
             <!-- Envenenamento -->
             <div class="dot-block env mt8" id="dotEnv">
@@ -2240,6 +2243,7 @@
                 <div class="dot-field"><span class="dot-lbl">EFEITO</span><input class="dot-inp" type="text"
                     id="envEfeito" placeholder="efeito adicional" oninput="autosave()" style="width:140px"></div>
               </div>
+              <div class="sk-desc mt8" id="envDescBox"></div>
             </div>
             <!-- Extras -->
             <div id="dotExtrasWrap"></div>
@@ -2576,6 +2580,13 @@
       </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════
+     TAB: REGRAS (referência — "Sistemas e Esclarecimentos" do Doc)
+    ═══════════════════════════════════════════════════════ -->
+    <div id="tab-regras" class="tab-content">
+      <div id="regrasWrap"></div>
+    </div>
+
   </div><!-- /wrap -->
 
   <!-- FIREBASE SYNC BAR -->
@@ -2640,8 +2651,8 @@
       { name: 'Alinhamento', sub: 'sincronia' }, { name: 'Manipulação', sub: 'sincronia' }, { name: 'Presença', sub: 'sincronia' }, { name: 'Canalização', sub: 'sincronia' }
     ];
 
-    const STATUS_NEG = ['Morrendo', 'Terreno Difícil', 'Quebrado', 'Amedrontado', 'Atordoado', 'Membro Quebrado', 'Imobilizado', 'Em Choque', 'Vulnerável', 'Exaustão', 'Exaustão Grave', 'Fraqueza', 'Derrubado', 'Desprotegido', 'Exposto', 'Suprimido', 'Cegueira'];
-    const STATUS_POS = ['Fortificado', 'Acelerado', 'Focado', 'Imparável', 'Blindado', 'Energizado', 'Fortalecido', 'Protegido'];
+    let STATUS_NEG = ['Morrendo', 'Terreno Difícil', 'Quebrado', 'Amedrontado', 'Atordoado', 'Membro Quebrado', 'Imobilizado', 'Em Choque', 'Vulnerável', 'Exaustão', 'Exaustão Grave', 'Fraqueza', 'Derrubado', 'Desprotegido', 'Exposto', 'Suprimido', 'Cegueira'];
+    let STATUS_POS = ['Fortificado', 'Acelerado', 'Focado', 'Imparável', 'Blindado', 'Energizado', 'Fortalecido', 'Protegido'];
     const STATUS_DURATIONS = { Atordoado: '1 turno', Amedrontado: 'até pass. Mente', Imobilizado: 'até pass. Corpo', 'Em Choque': 'até pass. Mente', Derrubado: 'até levantar', Desprotegido: '1 ataque', Exposto: '1 ataque', Suprimido: 'fim do turno', Acelerado: '1 turno', Imparável: '1 turno', Blindado: '1 ataque', Energizado: '1 turno', Protegido: '1 dano' };
     const STATUS_DESC = {
       'Morrendo': 'Os pontos de vida foram zerados. Quando estiver sob esse efeito você deverá rolar 1d2 todo início do seu turno, caindo 1 você ganha 1 ponto de morte, caindo 2 você ganha 1 ponto de vida, com um máximo de 3 para ambos. Caso esteja sob esse efeito, um aliado poderá gastar o seu turno completo para lhe garantir um sucesso instantaneamente. Enquanto nesse efeito, você pode, no seu turno, escolher receber 1 ponto de morte em troca de uma ação, podendo ser um ataque, movimento, skill, uso de item, etc.',
@@ -2669,6 +2680,74 @@
       'Energizado': 'No seu próximo turno, todo custo de stamina é reduzido pela metade.',
       'Fortalecido': 'Aumenta o seu dano em +1d.',
       'Protegido': 'Diminui o próximo dano que receber pela metade.'
+    };
+
+    // Regras da seção "Sistemas e Esclarecimentos" (Doc → Firebase → ARC; este é o fallback embutido).
+    // efeitos neg/pos ficam em STATUS_* acima; Combos/Coberturas foram simplificados à mão (fora do sync).
+    const SYSTEMS_EMBEDDED = {
+      dot: {
+        intro: 'Stacks do mesmo DoT acumulam o dano que você recebe (2 stacks de 1d6 causam 2d6 de dano) e resetam a duração do efeito.',
+        items: [
+          { name: 'Sangramento', desc: 'Você toma dano no começo de seu turno. Toda cura que você receber é reduzida em 25%. Você pode parar sangramentos com equipamentos médicos e uma ação padrão.', note: 'Esse efeito pode stackar até 3x, quando chegar no 3° stack, você toma o dano maximizado de todos os acúmulos de uma só vez e os próximos danos de sangramento são dobrados' },
+          { name: 'Queimadura', desc: 'Você toma dano por cada ação que fizer no seu turno. Seus equipamentos podem ser danificados pelas chamas no final do seu turno com 33% de chance, além disso, se entrar em contato com alguém, a outra pessoa tem 25% de chance de ganhar 1 stack desse efeito. Você pode apagar o fogo com uma ação de movimento.', note: 'Esse efeito pode stackar até 2x' },
+          { name: 'Envenenado', desc: 'Você toma dano no início da rodada. O veneno além do dano lhe causa efeitos negativos aleatórios no início da rodada, você rola 1d8 entre: 1) quebrado 2) em choque 3) vulnerável 4) exaustão 5) fraqueza 6) desprotegido 7) exposto 8) cegueira. Você pode se curar com um antídoto e uma ação completa.', note: 'Esse efeito não é stackável' }
+        ]
+      },
+      distancias: {
+        intro: null,
+        items: [
+          { name: 'Adjacente', desc: '1 metro' }, { name: 'Curta', desc: '2 - 9 metros' },
+          { name: 'Média', desc: '10 - 24 metros' }, { name: 'Longa', desc: '25 - 49 metros' },
+          { name: 'Extrema', desc: '50+ metros' }
+        ]
+      },
+      duasArmas: {
+        intro: 'Para empunhar duas armas simultaneamente, ambas devem ser leves ou médias e você precisa atender os requisitos de Corpo de ambas. Armas que exigem mais de uma ação para usar não podem ser usadas com outras armas.',
+        items: [
+          { name: 'Melee + melee', desc: 'Você ataca com a arma principal usando sua ação padrão normalmente. Pode então atacar com a arma secundária gastando 1 ação bônus, com -2 no acerto. A arma secundária não aplica o bônus de atributo no dano, apenas o dado base e não aplica efeitos' },
+          { name: 'Ranged + ranged', desc: 'Você atira com ambas as armas simultaneamente como uma única ação padrão, rolando os dois ataques ao mesmo tempo como um só, com -3 no acerto. Os dois ataques devem ter o mesmo alvo.' },
+          { name: 'Melee + ranged', desc: 'Você ataca com a arma corpo a corpo usando sua ação padrão normalmente. A arma à distância pode ser usada como ação bônus, mas apenas contra o mesmo alvo do ataque melee e somente se ele estiver em distância adjacente ou curta. Ambas as armas sofrem -2 no acerto.' }
+        ]
+      },
+      idades: {
+        intro: null,
+        items: [
+          { name: 'Até 10', desc: 'Seu movimento é reduzido pela metade, todo gasto de stamina é dobrado, tem sua vida reduzida em 75%. Você não pode ter reduções, classes e nem naturezas. Seus atributos começam com -2' },
+          { name: '11-17', desc: 'Sua vida é reduzida em 25% e sua redução de dano em 33%' },
+          { name: '18-34', desc: 'Você é normal' },
+          { name: '35-49', desc: 'Seu gasto de stamina é aumentado em 10%' },
+          { name: '50-69', desc: 'Seu gasto de stamina é aumentado em 33% e sua redução de dano é reduzida em 25%' },
+          { name: '70-99', desc: 'Seu gasto de stamina é dobrado, sua redução e seu movimento são reduzidos pela metade e sua vida total em 25%' },
+          { name: '100+', desc: 'Todo gasto de stamina é triplicado, sua redução e seu movimento são reduzidos em 75% e sua vida em 50%. Seus atributos começam com -1' }
+        ]
+      },
+      critico: {
+        intro: 'A margem de crítico não pode ser menor que 11.',
+        items: [
+          { name: 'Forte (nat 20)', desc: 'Dano maximizado e multiplicado' },
+          { name: 'Fraco (não nat 20)', desc: 'Dano apenas multiplicado' }
+        ]
+      },
+      categoriasDano: {
+        intro: null,
+        items: [
+          { name: 'Padrão', desc: 'É o dano e a redução que todos têm normalmente' },
+          { name: 'Verdadeiro', desc: 'O dano verdadeiro ignora a redução padrão. A redução verdadeira reduz o dano verdadeiro e é 2x mais efetiva contra o dano padrão' },
+          { name: 'Dano absoluto', desc: 'Ele é irredutível (exceto quando algo fala explicitamente que reduz), o número que aparecer é a vida que você vai perder. Também ignora skills básicas de "você resiste com 1 de HP" ou similares, como Vigor 10, "Instinto de Preservação", entre outros' }
+        ]
+      },
+      tiposDano: {
+        intro: 'Ser resistente à um tipo de dano reduz a categoria dos dados de dano em 1 (d8 → d6). Ser vulnerável à um tipo de dano aumenta a categoria dos dados de dano em 1 (d8 → d10)',
+        items: [
+          { name: 'Balístico', desc: 'projéteis, flechas, lanças' },
+          { name: 'Energia', desc: 'laser, plasma, elétrico' },
+          { name: 'Explosivo', desc: 'área, fragmentação, incendiário' },
+          { name: 'Físico', desc: 'cortante, perfurante, contundente' }
+        ]
+      },
+      ca: { intro: '10 + Bônus de Corpo e Mente ± Implantes - Armadura', items: [] },
+      chance: { intro: 'Sempre que algo tiver uma chance você irá rolar 1d100, caso caia um número igual ou menor do que o do teste aquilo irá acontecer (exemplo: uma ação tem 20 de chance de causar sangramento, caso cair 20 ou menos, o sangramento é aplicado)', items: [] },
+      arredondamentos: { intro: 'Sempre para cima, a não ser que esteja explicitamente escrito o contrário', items: [] }
     };
 
     const NATURE_DATA = {
@@ -2947,6 +3026,7 @@
     let CLASS_DATA = CLASS_DATA_EMBEDDED;
     let SUBATTR_SKILLS = SUBATTR_SKILLS_EMBEDDED;
     let SUBATTR_SKILLS_ALMA = SUBATTR_SKILLS_ALMA_EMBEDDED;
+    let SYSTEMS = SYSTEMS_EMBEDDED;
     const FB_RULES_URL = 'https://intitulations-default-rtdb.firebaseio.com/arc_rules.json';
     const _SUB_CM = ['forca', 'vigor', 'agilidade', 'habilidade', 'sincronia', 'intelecto'];
     const _SUB_ALMA = ['conexao', 'entendimento'];
@@ -2981,6 +3061,13 @@
           }
         });
       }
+      if (_isNonEmptyObj(data.systems)) {
+        SYSTEMS = Object.assign({}, SYSTEMS, data.systems);
+        // Efeitos neg/pos: nomes viram as listas dos dropdowns; descrições alimentam STATUS_DESC.
+        const en = data.systems.efeitosNegativos, ep = data.systems.efeitosPositivos;
+        if (en && en.items && en.items.length) { STATUS_NEG = en.items.map(i => i.name); en.items.forEach(i => { STATUS_DESC[i.name] = i.desc; }); }
+        if (ep && ep.items && ep.items.length) { STATUS_POS = ep.items.map(i => i.name); ep.items.forEach(i => { STATUS_DESC[i.name] = i.desc; }); }
+      }
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -2993,6 +3080,8 @@
       buildPericiasTable();
       buildDotStacks();
       buildMulticlasse();
+      renderDotDescs();
+      buildRegras();
       loadDOM();
       updateAll();
       setupNotesFormat();
@@ -3911,6 +4000,45 @@
     }
     function toggleExtraOn(i) { S.dotExtras[i].on = !S.dotExtras[i].on; renderDotExtras(); autosave(); }
     function removeExtra(i) { S.dotExtras.splice(i, 1); renderDotExtras(); autosave(); }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SISTEMAS E ESCLARECIMENTOS (Doc → SYSTEMS): DoTs na Ficha + aba Regras
+    // ═══════════════════════════════════════════════════════════════
+    function _esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function _sysItem(sec, needle) {
+      return sec && (sec.items || []).find(it => it.name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').indexOf(needle) === 0);
+    }
+    function renderDotDescs() {
+      const dot = SYSTEMS.dot; if (!dot) return;
+      const map = { sangDescBox: 'sangr', queimDescBox: 'queim', envDescBox: 'envenen' };
+      Object.keys(map).forEach(id => {
+        const box = document.getElementById(id); if (!box) return;
+        const it = _sysItem(dot, map[id]);
+        if (!it) { box.innerHTML = ''; return; }
+        // Cada frase da descrição (quando toma dano · efeitos adicionais · como remover) no seu próprio bloco.
+        const parts = it.desc.split(/(?<=\.)\s+/).filter(Boolean)
+          .map(s => `<div style="padding:3px 0 3px 8px;border-left:2px solid rgba(255,255,255,.12);margin-bottom:4px">${_esc(s)}</div>`).join('');
+        box.innerHTML = parts + (it.note ? `<div style="margin-top:6px;opacity:.6;font-style:italic">${_esc(it.note)}</div>` : '');
+      });
+    }
+    const REGRAS_ORDER = [
+      ['distancias', 'DISTÂNCIAS'], ['duasArmas', 'DUAS ARMAS'], ['idades', 'IDADES'],
+      ['critico', 'CRÍTICO'], ['categoriasDano', 'CATEGORIAS DE DANO E REDUÇÃO'], ['tiposDano', 'TIPOS DE DANO'],
+      ['ca', 'CA'], ['chance', 'CHANCE'], ['arredondamentos', 'ARREDONDAMENTOS']
+    ];
+    function buildRegras() {
+      const wrap = document.getElementById('regrasWrap'); if (!wrap) return;
+      wrap.innerHTML = REGRAS_ORDER.map(([k, title]) => {
+        const sec = SYSTEMS[k]; if (!sec) return '';
+        let html = `<div class="panel mt12"><div class="panel-title">${title}</div>`;
+        if (sec.intro) html += `<div class="sk-desc" style="margin-bottom:${(sec.items || []).length ? '12px' : '0'}">${_esc(sec.intro)}</div>`;
+        (sec.items || []).forEach(it => {
+          html += `<div style="margin-bottom:10px"><span class="sk-name">${_esc(it.name)}</span>`
+            + `<div class="sk-desc">${_esc(it.desc)}${it.note ? `<div style="margin-top:4px;opacity:.7">${_esc(it.note)}</div>` : ''}</div></div>`;
+        });
+        return html + `</div>`;
+      }).join('');
+    }
 
     // ═══════════════════════════════════════════════════════════════
     // TITLES

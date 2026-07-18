@@ -296,3 +296,40 @@ test('parseNatures: hab. única de uma natureza não vaza para a próxima', () =
   assert.equal(natures.Guerreiro.buff, 'x');
   assert.equal(natures.Guerreiro.habUnica.name, 'Rajada');
 });
+
+const { parseSystems } = require('./parser');
+const { SAMPLE_SYSTEMS } = require('./fixtures');
+
+test('parseSystems extrai itens "Nome: desc" por seção', () => {
+  const { systems } = parseSystems(SAMPLE_SYSTEMS);
+  assert.equal(systems.distancias.intro, null);
+  assert.deepEqual(systems.distancias.items, [
+    { name: 'Adjacente', desc: '1 metro' },
+    { name: 'Curta', desc: '2 - 9 metros' },
+  ]);
+});
+
+test('parseSystems: intro antes do 1º item, note depois (DoT)', () => {
+  const { systems } = parseSystems(SAMPLE_SYSTEMS);
+  assert.match(systems.dot.intro, /Stacks do mesmo DoT/);
+  assert.equal(systems.dot.items.length, 1);
+  assert.equal(systems.dot.items[0].name, 'Sangramento');
+  assert.equal(systems.dot.items[0].note, 'Esse efeito pode stackar até 3x');
+});
+
+test('parseSystems ignora Combos/Coberturas/Ficha', () => {
+  const { systems } = parseSystems(SAMPLE_SYSTEMS);
+  assert.ok(!('combos' in systems));
+});
+
+test('parseSystems: seção só com intro fica sem itens', () => {
+  const { systems } = parseSystems(SAMPLE_SYSTEMS);
+  assert.match(systems.ca.intro, /10 \+ Bônus de Corpo/);
+  assert.deepEqual(systems.ca.items, []);
+});
+
+test('parseSystems ignora conteúdo fora da seção', () => {
+  const { systems } = parseSystems(SAMPLE_SYSTEMS);
+  const dump = JSON.stringify(systems);
+  assert.ok(!/fora da seção/.test(dump));
+});

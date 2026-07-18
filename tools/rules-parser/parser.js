@@ -303,4 +303,54 @@ function parseNatures(paragraphs) {
   return { natures: acc, warnings: warnings };
 }
 
-module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses, diffClasses, parseSubattrs, parseStatus, parseNatures };
+// Seção "# Sistemas e Esclarecimentos": blocos rotulados por parágrafo simples
+// (Distâncias, DoT, Idades, ...). Cada bloco vira { intro, items:[{name,desc,note?}] }.
+// Itens no formato "Nome: descrição"; linhas soltas antes do 1º item = intro,
+// depois do 1º item = note do último item. Combos/Coberturas/Ficha são ignorados.
+const SYS_SECTIONS = {
+  'distancias': 'distancias',
+  'efeitos negativos': 'efeitosNegativos',
+  'efeitos positivos': 'efeitosPositivos',
+  'dot': 'dot',
+  'duas armas': 'duasArmas',
+  'idades': 'idades',
+  'critico': 'critico',
+  'categorias de dano e reducao': 'categoriasDano',
+  'tipos de dano': 'tiposDano',
+  'ca': 'ca',
+  'chance': 'chance',
+  'arredondamentos': 'arredondamentos',
+  'combos': null, 'coberturas': null, 'ficha': null,
+};
+function _norm(text) {
+  return String(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
+}
+const SYS_ITEM_RE = /^([^:]{1,60}):\s*(.+)$/;
+
+function parseSystems(paragraphs) {
+  const systems = {};
+  const warnings = [];
+  let inSystems = false, key = undefined, item = null;
+  function ensure(k) { if (!systems[k]) systems[k] = { intro: null, items: [] }; return systems[k]; }
+  for (const p of paragraphs) {
+    const heading = p.heading || 'NORMAL';
+    const full = String(p.text || '');
+    if (heading === 'HEADING1') { inSystems = _norm(full) === 'sistemas e esclarecimentos'; key = undefined; item = null; continue; }
+    if (!inSystems) continue;
+    for (const raw of full.split(/\r?\n/)) {
+      const t = raw.trim();
+      if (!t) continue;
+      const n = _norm(t);
+      if (Object.prototype.hasOwnProperty.call(SYS_SECTIONS, n)) { key = SYS_SECTIONS[n]; item = null; continue; }
+      if (!key) continue; // fora de seção conhecida ou seção ignorada
+      const sec = ensure(key);
+      const m = t.match(SYS_ITEM_RE);
+      if (m) { item = { name: m[1].trim(), desc: m[2].trim() }; sec.items.push(item); }
+      else if (item) { item.note = (item.note ? item.note + ' ' : '') + t; }
+      else { sec.intro = (sec.intro ? sec.intro + ' ' : '') + t; }
+    }
+  }
+  return { systems: systems, warnings: warnings };
+}
+
+module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses, diffClasses, parseSubattrs, parseStatus, parseNatures, parseSystems };

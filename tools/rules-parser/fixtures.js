@@ -87,4 +87,23 @@ const SAMPLE_NATURES = [
   N('Habilidade única: Rodada de Golpes (bônus) [5S]: 1x por luta, por 2 rodadas, pode atacar uma vez a mais por ação padrão'),
 ];
 
-module.exports = { SAMPLE, SAMPLE_SUBATTR, SAMPLE_STATUS, SAMPLE_NATURES };
+// Recorte da seção "# Sistemas e Esclarecimentos": blocos rotulados por parágrafo
+// simples; itens "Nome: desc"; DoT com nota de stack; Combos ignorado; CA só intro.
+const SAMPLE_SYSTEMS = [
+  H1('Sistemas e Esclarecimentos'),
+  N('Distâncias'),
+  N('Adjacente: 1 metro'),
+  N('Curta: 2 - 9 metros'),
+  N('DoT'),
+  N('Stacks do mesmo DoT acumulam o dano que você recebe e resetam a duração.'),
+  N('Sangramento: Você toma dano no começo de seu turno.'),
+  N('Esse efeito pode stackar até 3x'),
+  N('Combos'),
+  N('Combo solo: isto deve ser ignorado'),
+  N('CA'),
+  N('10 + Bônus de Corpo e Mente ± Implantes - Armadura'),
+  H1('Ações'),
+  N('Não deve aparecer: fora da seção'),
+];
+
+module.exports = { SAMPLE, SAMPLE_SUBATTR, SAMPLE_STATUS, SAMPLE_NATURES, SAMPLE_SYSTEMS };
