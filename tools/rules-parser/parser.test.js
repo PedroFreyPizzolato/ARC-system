@@ -161,6 +161,18 @@ test('parseStatus: mapeia "Brutamonte" → "Brutamontes" e ignora Sanidade/notas
   assert.equal(natures.Guerreiro.sta, undefined); // sem stamina no fixture pra Guerreiro
 });
 
+test('parseStatus: expõe fórmulas granulares por natureza (hpBase/hpNivel/staBase/staNivel/staRec)', () => {
+  const { natures } = parseStatus(SAMPLE_STATUS);
+  assert.equal(natures.Brutamontes.hpBase, '10 + 5d4 + 5*Corpo');
+  assert.equal(natures.Brutamontes.hpNivel, '5 + 3*Corpo');
+  assert.equal(natures.Brutamontes.staBase, '5 + 3d6 + 3*Corpo');
+  assert.equal(natures.Brutamontes.staNivel, '2 + Corpo');
+  assert.equal(natures.Brutamontes.staRec, '5 > 7 > 10 > 15');
+  // Guerreiro não tem stamina no fixture → granulares de stamina ausentes; hp continua
+  assert.equal(natures.Guerreiro.hpBase, '10 + 3d8 + 3*Corpo');
+  assert.equal(natures.Guerreiro.staBase, undefined);
+});
+
 test('parseSubattrs: extrai skills por subatributo (Corpo/Mente/Alma)', () => {
   const { subattrs } = parseSubattrs(SAMPLE_SUBATTR);
   assert.equal(subattrs.forca.length, 3);

@@ -266,6 +266,12 @@ function parseStatus(paragraphs) {
     const a = acc[n], o = {};
     if (a.vida0) o.hp = a.vida0 + (a.vidaN ? ' | Por nível: ' + a.vidaN : '');
     if (a.stamina0) o.sta = a.stamina0 + (a.staminaN ? ' | Por nível: ' + a.staminaN : '') + (a.staR ? ' | Rec: ' + a.staR : '');
+    // Campos granulares (mesmos dados, separados) p/ apps que montam suas próprias strings (ex.: NPC Catalog).
+    if (a.vida0) o.hpBase = a.vida0;
+    if (a.vidaN) o.hpNivel = a.vidaN;
+    if (a.stamina0) o.staBase = a.stamina0;
+    if (a.staminaN) o.staNivel = a.staminaN;
+    if (a.staR) o.staRec = a.staR;
     if (o.hp || o.sta) natures[n] = o;
   });
   return { natures: natures, warnings: warnings };
