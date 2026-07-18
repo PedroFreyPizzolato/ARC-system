@@ -1796,8 +1796,8 @@
     const ISLOTS = ['Braço', 'Perna', 'Cabeça', 'Olho', 'Tronco', 'Coluna', 'Pele', 'Mão', 'Outro'];
     const ICATS = ['Cibernético', 'Biológico', 'Nano', 'Místico', 'Híbrido', 'Experimental'];
     const ACTS = ['Passiva', 'Padrão', 'Bônus', 'Movimento', 'Reação', 'Livre', 'Completa', 'Fala', 'Padrão+Bônus', 'Padrão+Movimento', 'Reação+Bônus', 'Especial'];
-    const SNEG = ['Morrendo', 'Terreno Difícil', 'Quebrado', 'Amedrontado', 'Atordoado', 'Membro Quebrado', 'Imobilizado', 'Em Choque', 'Vulnerável', 'Exaustão', 'Exaustão Grave', 'Fraqueza', 'Derrubado', 'Desprotegido', 'Exposto', 'Suprimido', 'Cegueira'];
-    const SPOS = ['Fortificado', 'Acelerado', 'Focado', 'Imparável', 'Blindado', 'Energizado', 'Fortalecido', 'Protegido'];
+    let SNEG = ['Morrendo', 'Terreno Difícil', 'Quebrado', 'Amedrontado', 'Atordoado', 'Membro Quebrado', 'Imobilizado', 'Em Choque', 'Vulnerável', 'Exaustão', 'Exaustão Grave', 'Fraqueza', 'Derrubado', 'Desprotegido', 'Exposto', 'Suprimido', 'Cegueira'];
+    let SPOS = ['Fortificado', 'Acelerado', 'Focado', 'Imparável', 'Blindado', 'Energizado', 'Fortalecido', 'Protegido'];
     const NATS = ['Brutamontes', 'Guerreiro', 'Atleta', 'Velocista'];
     const VIRTUES = ['Diligência', 'Generosidade', 'Temperança', 'Paciência', 'Castidade', 'Caridade', 'Humildade'];
     const SINS = ['Preguiça', 'Avareza', 'Gula', 'Ira', 'Luxúria', 'Inveja', 'Soberba'];
@@ -1850,7 +1850,37 @@
     let _ast;
     function autosave() { clearTimeout(_ast); _ast = setTimeout(() => { localStorage.setItem('arc_gm_v2', JSON.stringify(S)) }, 500) }
 
-    function init() {
+    // ── SYNC: efeitos do Doc → Firebase → GM Screen (fallback embutido/cache) ──
+    // effectNames = cópia fiel de tools/rules-parser/adapters.js. Mudou uma, mude nas duas.
+    const FB_RULES_URL = 'https://intitulations-default-rtdb.firebaseio.com/arc_rules.json';
+    function effectNames(section) {
+      if (!section || !Array.isArray(section.items)) return null;
+      const names = section.items.map(function (i) { return i.name; }).filter(Boolean);
+      return names.length ? names : null;
+    }
+    function applyEffects(sys) {
+      if (!sys) return;
+      const neg = effectNames(sys.efeitosNegativos), pos = effectNames(sys.efeitosPositivos);
+      if (neg) SNEG = neg;
+      if (pos) SPOS = pos;
+    }
+    async function loadRules() {
+      let data = null;
+      try {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 4000);
+        const resp = await fetch(FB_RULES_URL + '?t=' + Date.now(), { signal: ctrl.signal });
+        clearTimeout(tid);
+        if (resp.ok) { const d = await resp.json(); if (d) { data = d; localStorage.setItem('arc_gm_rules_cache', JSON.stringify(d)); } }
+      } catch (e) { /* offline/timeout: usa cache/embutido */ }
+      if (!data) { try { data = JSON.parse(localStorage.getItem('arc_gm_rules_cache') || 'null'); } catch (e) { } }
+      if (!data) return;
+      try { if (data.systems) applyEffects(data.systems); }
+      catch (e) { console.warn('[sync] falha ao aplicar efeitos, mantendo embutido:', e); }
+    }
+
+    async function init() {
+      await loadRules();
       const sv = localStorage.getItem('arc_gm_v2');
       if (sv) { try { S = { ...S, ...JSON.parse(sv) } } catch (e) { } }
       if (!S.armaLib) S.armaLib = { armas: [], implantes: [] };
