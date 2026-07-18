@@ -2525,7 +2525,7 @@
             <div id="classeGeralSkills"></div>
           </div>
           <div class="panel panel-gold">
-            <div class="panel-title">MULTI-CLASSE (4 slots)</div>
+            <div class="panel-title">MULTI-CLASSE (2 slots)</div>
             <div class="col" id="multiclasseWrap" style="gap:12px"></div>
           </div>
         </div>
@@ -2936,7 +2936,8 @@
       fullName: '', age: '', gender: '', height: '', weight: '', hair: '', eyes: '', skin: '', marks: '', photo: '',
       personality: '', dream: '', bonds: '', qualities: '', flaws: '',
       classeGeralSel: '', classeEspSel: '',
-      multiclass: [{ cls: '', sk: -1 }, { cls: '', sk: -1 }, { cls: '', sk: -1 }, { cls: '', sk: -1 }],
+      multiclass: [{ cls: '', sk: -1 }, { cls: '', sk: -1 }],
+      classSkillAcquired: {},
       inventory: [], relations: [], notes: ''
     };
 
@@ -3155,7 +3156,8 @@
             titles: [], fullName: '', age: '', gender: '', height: '', weight: '', hair: '',
             eyes: '', skin: '', marks: '', photo: '', personality: '', dream: '', bonds: '',
             qualities: '', flaws: '', classeGeralSel: '', classeEspSel: '',
-            multiclass: [{ cls: '', sk: -1 }, { cls: '', sk: -1 }, { cls: '', sk: -1 }, { cls: '', sk: -1 }],
+            multiclass: [{ cls: '', sk: -1 }, { cls: '', sk: -1 }],
+            classSkillAcquired: {},
             inventory: [], relations: [], notes: ''
           };
           S = { ...defaults, ...data };
@@ -3617,9 +3619,9 @@
       const wrap = document.getElementById('classeGeralSkills'); if (!wrap) return;
       if (!cls || !CLASS_DATA[cls]) { wrap.innerHTML = '<div class="empty-msg">Selecione uma classe.</div>'; return; }
       const data = CLASS_DATA[cls];
-      wrap.innerHTML = data.skills.map(sk => renderSkillCard(sk)).join('') +
+      wrap.innerHTML = data.skills.map(sk => renderSkillCard(sk, false, '', cls + ':' + sk.name)).join('') +
         `<div class="sep"></div><div style="font-family:'Orbitron',monospace;font-size:14px;color:var(--gold);letter-spacing:2px;margin-bottom:8px">ULTIMATE — ${data.ultimate.limit || ''}</div>` +
-        renderSkillCard(data.ultimate, false, 'ultimate');
+        renderSkillCard(data.ultimate, false, 'ultimate', cls + ':' + data.ultimate.name);
       S.classeGeralSel = cls;
       localStorage.setItem('arc_v1', JSON.stringify(S));
     }
@@ -3629,19 +3631,24 @@
       const wrap = document.getElementById('classeEspSkills'); if (!wrap) return;
       if (!cls || !CLASS_DATA[cls]) { wrap.innerHTML = '<div class="empty-msg">Selecione uma classe específica.</div>'; return; }
       const data = CLASS_DATA[cls];
-      wrap.innerHTML = data.skills.map(sk => renderSkillCard(sk)).join('') +
+      wrap.innerHTML = data.skills.map(sk => renderSkillCard(sk, false, '', cls + ':' + sk.name)).join('') +
         `<div class="sep"></div><div style="font-family:'Orbitron',monospace;font-size:14px;color:var(--gold);letter-spacing:2px;margin-bottom:8px">ULTIMATE — ${data.ultimate.limit || ''}</div>` +
-        renderSkillCard(data.ultimate, false, 'ultimate');
+        renderSkillCard(data.ultimate, false, 'ultimate', cls + ':' + data.ultimate.name);
       S.classeEspSel = cls;
       localStorage.setItem('arc_v1', JSON.stringify(S));
     }
 
-    function renderSkillCard(sk, readonly = false, extraClass = '') {
+    function renderSkillCard(sk, readonly = false, extraClass = '', clsKey = '') {
       const isPassiva = sk.action === 'Passiva';
       const actionOpts = ACTIONS_LIST.map(a => `<option${a === sk.action ? ' selected' : ''}>${a}</option>`).join('');
-      return `<div class="skill-card${extraClass ? ' ' + extraClass : ''}">
+      const acquired = clsKey && S.classSkillAcquired?.[clsKey];
+      const chk = clsKey ? `<input type="checkbox" ${acquired ? 'checked' : ''} onchange="toggleSkillAcquired('${clsKey}',this)" style="width:15px;height:15px;accent-color:var(--purple-b);cursor:pointer;flex-shrink:0">` : '';
+      return `<div class="skill-card${extraClass ? ' ' + extraClass : ''}${acquired ? ' selected' : ''}">
     <div class="sk-header">
-      <span class="sk-name">${sk.name}${sk.lb ? '<span style="color:var(--gold);font-size:14px;margin-left:6px">[LIMIT BREAK]</span>' : ''}</span>
+      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+        ${chk}
+        <span class="sk-name">${sk.name}${sk.lb ? '<span style="color:var(--gold);font-size:14px;margin-left:6px">[LIMIT BREAK]</span>' : ''}</span>
+      </div>
       <div class="sk-meta">
         <select class="action-sel" onchange="toggleCostField(this)">${actionOpts}</select>
         <input class="cost-inp" type="text" value="${sk.cost || ''}" placeholder="—S" ${isPassiva ? 'disabled' : ''} style="opacity:${isPassiva ? '.3' : '1'}">
@@ -3649,6 +3656,14 @@
     </div>
     <div class="sk-desc">${sk.desc}</div>
   </div>`;
+    }
+
+    function toggleSkillAcquired(key, el) {
+      if (!S.classSkillAcquired) S.classSkillAcquired = {};
+      S.classSkillAcquired[key] = el.checked;
+      const card = el.closest('.skill-card');
+      if (card) card.classList.toggle('selected', el.checked);
+      autosave();
     }
 
     function toggleCostField(sel) {
@@ -3661,7 +3676,7 @@
     function buildMulticlasse() {
       const wrap = document.getElementById('multiclasseWrap'); if (!wrap) return;
       wrap.innerHTML = '';
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 2; i++) {
         const mc = S.multiclass[i] || { cls: '', sk: -1 };
         const div = document.createElement('div'); div.className = 'mc-entry';
         div.innerHTML = `
@@ -3686,7 +3701,7 @@
         wrap.appendChild(div);
         if (mc.cls && CLASS_DATA[mc.cls] && mc.sk >= 0) {
           const sk = CLASS_DATA[mc.cls].skills[mc.sk];
-          if (sk) { const d = document.getElementById('mc_detail_' + i); if (d) d.innerHTML = renderSkillCard(sk); }
+          if (sk) { const d = document.getElementById('mc_detail_' + i); if (d) d.innerHTML = renderSkillCard(sk, false, '', mc.cls + ':' + sk.name); }
         }
       }
     }
@@ -3706,7 +3721,7 @@
       const cls = S.multiclass[i].cls;
       const d = document.getElementById('mc_detail_' + i); if (!d) return;
       if (cls && CLASS_DATA[cls] && idx >= 0 && CLASS_DATA[cls].skills[idx]) {
-        d.innerHTML = renderSkillCard(CLASS_DATA[cls].skills[idx]);
+        d.innerHTML = renderSkillCard(CLASS_DATA[cls].skills[idx], false, '', cls + ':' + CLASS_DATA[cls].skills[idx].name);
       } else { d.innerHTML = ''; }
       autosave();
     }

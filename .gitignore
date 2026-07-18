@@ -4,3 +4,4 @@
 .remember/
 node_modules/
 *.log
+.playwright-mcp/
