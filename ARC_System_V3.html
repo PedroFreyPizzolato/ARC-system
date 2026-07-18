@@ -428,8 +428,6 @@
 
     /* ── AÇÕES (Ficha): descrição no topo + tabela de 3 colunas (mesmo estilo de Regras) ── */
     .act-desc {
-      border: 1px solid var(--bd);
-      background: rgba(255, 255, 255, .02);
       padding: 8px 10px;
       margin-bottom: 12px
     }
@@ -442,38 +440,98 @@
       margin-bottom: 6px
     }
 
-    .act-cols {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+    .act-rows {
+      display: flex;
+      flex-direction: row;
       gap: 10px
     }
 
-    .act-col {
+    .act-tabs {
       display: flex;
-      flex-direction: column;
-      gap: 8px
+      flex-direction: row;
+      gap: 10px
     }
 
-    .act-col-head {
+    .act-tab {
+      flex: 1;
+      cursor: pointer;
+      opacity: .4;
+      transition: opacity .15s
+    }
+
+    .act-tab:hover {
+      opacity: .7
+    }
+
+    .act-tab.active {
+      opacity: 1
+    }
+
+    .act-row {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 10px
+    }
+
+    .act-row-head {
       font-family: 'Orbitron', monospace;
       font-size: var(--fs-sm);
       font-weight: 700;
       letter-spacing: 2px;
+      display: flex;
+      align-items: center;
       text-align: center;
       padding-bottom: 6px;
-      border-bottom: 1px solid var(--bd-b)
+      gap: 6px;
     }
 
-    .act-col-ofensivas .act-col-head {
+    .act-row-head::before {
+      content: '';
+      flex: 2;
+      height: 1px;
+    }
+
+    .act-row-head::after {
+      content: '';
+      flex: 2;
+      height: 1px;
+    }
+
+    .act-row-ofensivas .act-row-head {
       color: var(--red)
     }
 
-    .act-col-defensivas .act-col-head {
+    .act-row-ofensivas .act-row-head::before {
+      background: linear-gradient(90deg, transparent, var(--red))
+    }
+
+    .act-row-ofensivas .act-row-head::after {
+      background: linear-gradient(90deg, var(--red), transparent)
+    }
+
+    .act-row-defensivas .act-row-head {
       color: var(--blue)
     }
 
-    .act-col-inspiradoras .act-col-head {
+    .act-row-defensivas .act-row-head::before {
+      background: linear-gradient(90deg, transparent, var(--blue))
+    }
+
+    .act-row-defensivas .act-row-head::after {
+      background: linear-gradient(90deg, var(--blue), transparent)
+    }
+
+    .act-row-inspiradoras .act-row-head {
       color: var(--gold)
+    }
+
+    .act-row-inspiradoras .act-row-head::before {
+      background: linear-gradient(90deg, transparent, var(--gold))
+    }
+
+    .act-row-inspiradoras .act-row-head::after {
+      background: linear-gradient(90deg, var(--gold), transparent)
     }
 
     .act-cost {
@@ -481,12 +539,6 @@
       font-size: var(--fs-sm);
       font-weight: 400;
       color: var(--gold)
-    }
-
-    @media (max-width: 640px) {
-      .act-cols {
-        grid-template-columns: 1fr
-      }
     }
 
     /* ── GRID ── */
@@ -2258,6 +2310,104 @@
             </div>
           </div>
 
+          <!-- EFEITOS NEG/POS -->
+          <div class="panel">
+            <div class="panel-title">EFEITOS NEGATIVOS/POSITIVOS</div>
+            <div id="dotExtrasWrap"></div>
+            <button class="dashed-btn" onclick="addDotExtra()">+ ADICIONAR EFEITO</button>
+          </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col">
+
+          <!-- ACTIONS -->
+          <div class="panel">
+            <div class="panel-title">AÇÕES</div>
+            <div class="g2" style="gap:10px;margin-bottom:12px">
+              <div class="field"><span class="lbl">PADRÃO</span><input class="inp" type="number" id="actPadrao"
+                  value="1" min="0" oninput="autosave()"></div>
+              <div class="field"><span class="lbl">BÔNUS</span><input class="inp" type="number" id="actBonus" value="1"
+                  min="0" oninput="autosave()"></div>
+              <div class="field"><span class="lbl">MOVIMENTO</span><input class="inp" type="number" id="actMov"
+                  value="1" min="0" oninput="autosave()"></div>
+              <div class="field"><span class="lbl">REAÇÃO</span><input class="inp" type="number" id="actReacao"
+                  value="1" min="0" oninput="autosave()"></div>
+            </div>
+            <div class="g2" style="gap:10px">
+              <div class="field">
+                <span class="lbl">FALA</span>
+                <div class="attr-ctrl">
+                  <button class="c-btn" onclick="changeFala(-1)">−</button>
+                  <span class="c-val" id="falaVal">1</span>
+                  <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d)">/</span>
+                  <input type="number" id="falaMax" value="1" min="0" oninput="autosave()"
+                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:17px;text-align:center;outline:none">
+                  <button class="c-btn btn-sm" onclick="resetFala()" title="Resetar">↺</button>
+                </div>
+              </div>
+              <div class="field">
+                <span class="lbl">CORINGA</span>
+                <div class="attr-ctrl">
+                  <button class="c-btn" onclick="changeCoringa(-1)">−</button>
+                  <span class="c-val" id="coringaVal" style="color:var(--purple-b)">0</span>
+                  <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d)">/</span>
+                  <input type="number" id="coringaMax" value="0" min="0" oninput="autosave()"
+                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:17px;text-align:center;outline:none">
+                  <button class="c-btn btn-sm" onclick="resetCoringa()" title="Resetar">↺</button>
+                </div>
+              </div>
+            </div>
+            <div class="sep"></div>
+            <div id="actDescBox"></div>
+            <div id="actTableBox"></div>
+          </div>
+
+          <!-- DEATH SAVES -->
+          <div class="panel panel-purple">
+            <div class="panel-title">TESTES DE MORTE</div>
+            <div class="g2" style="gap:20px">
+              <div class="death-col">
+                <div class="death-row"><span class="death-label" style="color:var(--green)">SUCESSOS</span></div>
+                <div class="death-row">
+                  <div class="death-col">
+                    <button class="c-btn" onclick="changeDeath('suc',-1)"
+                      style="width:36px;height:36px;font-size:24px">-</button>
+                  </div>
+                  <div class="death-num suc" class="death-col" id="deathSucVal">0</div>
+                  <div class="death-col">
+                    <button class="c-btn" onclick="changeDeath('suc',1)"
+                      style="width:36px;height:36px;font-size:24px">+</button>
+                  </div>
+                </div>
+              </div>
+              <div class="death-col">
+                <div class="death-row"><span class="death-label" style="color:var(--red)">FALHAS</span></div>
+                <div class="death-row">
+                  <div class="death-col">
+                    <button class="c-btn" onclick="changeDeath('mort',-1)"
+                      style="width:36px;height:36px;font-size:24px">-</button>
+                  </div>
+                  <div class="death-num mort" class="death-col" id="deathMortVal">0</div>
+                  <div class="death-col">
+                    <button class="c-btn" onclick="changeDeath('mort',1)"
+                      style="width:36px;height:36px;font-size:24px">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="sep" style="opacity:0"></div>
+            <div class="lbl mb8">DEGRADAÇÃO CORPORAL</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div class="degradpip" id="deg0" onclick="toggleDeg(0)"></div>
+              <div class="degradpip" id="deg1" onclick="toggleDeg(1)"></div>
+              <div class="degradpip" id="deg2" onclick="toggleDeg(2)"></div>
+              <div class="degradpip" id="deg3" onclick="toggleDeg(3)"></div>
+              <span style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);margin-left:6px"
+                id="degLabel">Nenhuma queda</span>
+            </div>
+          </div>
+
           <!-- DoTS -->
           <div class="panel">
             <div class="panel-title">DoTs ATIVOS</div>
@@ -2310,101 +2460,6 @@
                     id="envEfeito" placeholder="efeito adicional" oninput="autosave()" style="width:140px"></div>
               </div>
               <div class="sk-desc mt8" id="envDescBox"></div>
-            </div>
-            <!-- Extras -->
-            <div id="dotExtrasWrap"></div>
-            <button class="dashed-btn" onclick="addDotExtra()">+ ADICIONAR EFEITO</button>
-          </div>
-
-        </div>
-
-        <!-- RIGHT -->
-        <div class="col">
-
-          <!-- ACTIONS -->
-          <div class="panel">
-            <div class="panel-title">AÇÕES</div>
-            <div id="actDescBox"></div>
-            <div class="g2" style="gap:10px;margin-bottom:12px">
-              <div class="field"><span class="lbl">PADRÃO</span><input class="inp" type="number" id="actPadrao"
-                  value="1" min="0" oninput="autosave()"></div>
-              <div class="field"><span class="lbl">BÔNUS</span><input class="inp" type="number" id="actBonus" value="1"
-                  min="0" oninput="autosave()"></div>
-              <div class="field"><span class="lbl">MOVIMENTO</span><input class="inp" type="number" id="actMov"
-                  value="1" min="0" oninput="autosave()"></div>
-              <div class="field"><span class="lbl">REAÇÃO</span><input class="inp" type="number" id="actReacao"
-                  value="1" min="0" oninput="autosave()"></div>
-            </div>
-            <div class="g2" style="gap:10px">
-              <div class="field">
-                <span class="lbl">FALA</span>
-                <div class="attr-ctrl">
-                  <button class="c-btn" onclick="changeFala(-1)">−</button>
-                  <span class="c-val" id="falaVal">1</span>
-                  <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d)">/</span>
-                  <input type="number" id="falaMax" value="1" min="0" oninput="autosave()"
-                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:17px;text-align:center;outline:none">
-                  <button class="c-btn btn-sm" onclick="resetFala()" title="Resetar">↺</button>
-                </div>
-              </div>
-              <div class="field">
-                <span class="lbl">CORINGA</span>
-                <div class="attr-ctrl">
-                  <button class="c-btn" onclick="changeCoringa(-1)">−</button>
-                  <span class="c-val" id="coringaVal" style="color:var(--purple-b)">0</span>
-                  <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d)">/</span>
-                  <input type="number" id="coringaMax" value="0" min="0" oninput="autosave()"
-                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:17px;text-align:center;outline:none">
-                  <button class="c-btn btn-sm" onclick="resetCoringa()" title="Resetar">↺</button>
-                </div>
-              </div>
-            </div>
-            <div class="sep"></div>
-            <div id="actTableBox"></div>
-          </div>
-
-          <!-- DEATH SAVES -->
-          <div class="panel panel-purple">
-            <div class="panel-title">TESTES DE MORTE</div>
-            <div class="g2" style="gap:20px">
-              <div class="death-col">
-                <div class="death-row"><span class="death-label" style="color:var(--green)">SUCESSOS</span></div>
-                <div class="death-row">
-                  <div class="death-col">
-                    <button class="c-btn" onclick="changeDeath('suc',-1)"
-                      style="width:36px;height:36px;font-size:24px">-</button>
-                  </div>
-                  <div class="death-num suc" class="death-col" id="deathSucVal">0</div>
-                  <div class="death-col">
-                    <button class="c-btn" onclick="changeDeath('suc',1)"
-                      style="width:36px;height:36px;font-size:24px">+</button>
-                  </div>
-                </div>
-              </div>
-              <div class="death-col">
-                <div class="death-row"><span class="death-label" style="color:var(--red)">FALHAS</span></div>
-                <div class="death-row">
-                  <div class="death-col">
-                    <button class="c-btn" onclick="changeDeath('mort',-1)"
-                      style="width:36px;height:36px;font-size:24px">-</button>
-                  </div>
-                  <div class="death-num mort" class="death-col" id="deathMortVal">0</div>
-                  <div class="death-col">
-                    <button class="c-btn" onclick="changeDeath('mort',1)"
-                      style="width:36px;height:36px;font-size:24px">+</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="sep" style="opacity:0"></div>
-            <div class="lbl mb8">DEGRADAÇÃO CORPORAL</div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <div class="degradpip" id="deg0" onclick="toggleDeg(0)"></div>
-              <div class="degradpip" id="deg1" onclick="toggleDeg(1)"></div>
-              <div class="degradpip" id="deg2" onclick="toggleDeg(2)"></div>
-              <div class="degradpip" id="deg3" onclick="toggleDeg(3)"></div>
-              <span style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);margin-left:6px"
-                id="degLabel">Nenhuma queda</span>
             </div>
           </div>
         </div>
@@ -4229,8 +4284,10 @@
         box.innerHTML = parts + (it.note ? `<div style="margin-top:6px;opacity:.6;font-style:italic">${_esc(it.note)}</div>` : '');
       });
     }
-    // AÇÕES (Doc → ACTIONS): descrição "Ofensiva VS. Defensiva" no topo do painel + tabela de 3 colunas.
+    // AÇÕES (Doc → ACTIONS): descrição "Ofensiva VS. Defensiva" no topo do painel + abas Ofensivas/Defensivas/Inspiradoras.
     const ACT_COLS = [['ofensivas', 'OFENSIVAS'], ['defensivas', 'DEFENSIVAS'], ['inspiradoras', 'INSPIRADORAS']];
+    let actSelectedCol = 'ofensivas';
+    function selectActCol(k) { actSelectedCol = k; renderActions(); }
     function renderActions() {
       const descBox = document.getElementById('actDescBox');
       if (descBox) {
@@ -4240,16 +4297,22 @@
       }
       const tableBox = document.getElementById('actTableBox'); if (!tableBox) return;
       const cols = ACTIONS.columns || {};
-      tableBox.innerHTML = `<div class="act-cols">` + ACT_COLS.map(([k, title]) => {
-        const c = cols[k]; if (!c) return '';
-        const intro = c.intro ? `<div class="reg-cell-desc" style="margin-bottom:2px">${_esc(c.intro)}</div>` : '';
-        const items = (c.items || []).map(it =>
-          `<div class="reg-cell"><div class="reg-cell-title">${_esc(it.name)}${it.cost ? ` <span class="act-cost">${_esc(it.cost)}</span>` : ''}</div>`
+      const tabs = `<div class="act-tabs">` + ACT_COLS.map(([k, title]) =>
+        `<div class="act-tab act-row-${k}${k === actSelectedCol ? ' active' : ''}" onclick="selectActCol('${k}')"><div class="act-row-head">${title}</div></div>`
+      ).join('') + `</div>`;
+      const k = ACT_COLS.some(([ck]) => ck === actSelectedCol) ? actSelectedCol : ACT_COLS[0][0];
+      const c = cols[k];
+      let body = '';
+      if (c) {
+        const intro = c.intro ? `<div class="act-row"><div class="reg-cell-desc" style="margin-bottom:2px">${_esc(c.intro)}</div></div>` : '';
+        const items = `<div class="act-row">` + (c.items || []).map(it =>
+          `<div class="reg-cell"><div class="reg-cell-title">${_esc(it.name)}${it.cost ? ` <br><span class="act-cost">${_esc(it.cost)}</span>` : ''}</div>`
           + `<div class="reg-cell-desc">${_esc(it.desc)}</div></div>`
-        ).join('');
-        const note = c.note ? `<div class="reg-note">${_esc(c.note)}</div>` : '';
-        return `<div class="act-col act-col-${k}"><div class="act-col-head">${title}</div>${intro}${items}${note}</div>`;
-      }).join('') + `</div>`;
+        ).join('') + '</div>';
+        const note = c.note ? `<div class="act-row"><div class="reg-note">${_esc(c.note)}</div></div>` : '';
+        body = `<div class="act-row-${k}" style="padding-bottom: 6px;border-bottom: 1px solid var(${k === 'ofensivas' ? '--red' : k === 'defensivas' ? '--blue' : '--gold'})">${intro}${items}${note}</div>`;
+      }
+      tableBox.innerHTML = tabs + body;
     }
 
     const REGRAS_ORDER = [
