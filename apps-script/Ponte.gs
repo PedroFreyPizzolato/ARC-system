@@ -323,14 +323,13 @@ const SYS_SECTIONS = {
   'efeitos positivos': 'efeitosPositivos',
   'dot': 'dot',
   'duas armas': 'duasArmas',
-  'idades': 'idades',
   'critico': 'critico',
   'categorias de dano e reducao': 'categoriasDano',
   'tipos de dano': 'tiposDano',
-  'ca': 'ca',
   'chance': 'chance',
   'arredondamentos': 'arredondamentos',
-  'combos': null, 'coberturas': null, 'ficha': null,
+  // reconhecidos mas ignorados (conteúdo não entra no ARC nem vaza p/ a seção anterior)
+  'ca': null, 'idades': null, 'combos': null, 'coberturas': null, 'ficha': null,
 };
 function _norm(text) {
   return String(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();

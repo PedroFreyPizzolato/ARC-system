@@ -102,6 +102,8 @@ const SAMPLE_SYSTEMS = [
   N('Combo solo: isto deve ser ignorado'),
   N('CA'),
   N('10 + Bônus de Corpo e Mente ± Implantes - Armadura'),
+  N('Chance'),
+  N('Sempre que algo tiver uma chance role 1d100.'),
   H1('Ações'),
   N('Não deve aparecer: fora da seção'),
 ];

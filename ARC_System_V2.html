@@ -21,7 +21,7 @@
       --orange: #f97316;
       --bg: #020408;
       --bg-purple: #050009;
-      --bg-yellow: #271803;
+      --bg-yellow: #090703;
       --bg-panel: rgba(0, 212, 255, 0.03);
       --bg-hover: rgba(0, 212, 255, 0.07);
       --bd: rgba(0, 212, 255, 0.15);
@@ -332,6 +332,79 @@
 
     .panel-gold .panel-title::after {
       background: linear-gradient(90deg, rgba(245, 158, 11, .4), transparent)
+    }
+
+    /* ── REGRAS (aba de referência: seções colapsáveis + itens em grade) ── */
+    .reg-head {
+      font-family: 'Orbitron', monospace;
+      font-size: var(--fs-sm);
+      letter-spacing: 3px;
+      color: var(--blue);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none
+    }
+
+    .reg-head::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--bd-b), transparent)
+    }
+
+    .reg-caret {
+      font-size: var(--fs-xl);
+      transition: transform .2s
+    }
+
+    .reg-section.collapsed .reg-caret {
+      transform: rotate(-90deg)
+    }
+
+    .reg-section.collapsed .reg-body {
+      display: none
+    }
+
+    .reg-body {
+      margin-top: 14px
+    }
+
+    .reg-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px
+    }
+
+    .reg-cell {
+      border: 1px solid var(--bd);
+      background: rgba(255, 255, 255, .02);
+      padding: 8px 10px
+    }
+
+    .reg-cell-title {
+      font-family: 'Orbitron', monospace;
+      font-size: var(--fs);
+      font-weight: 700;
+      color: var(--txt);
+      text-align: center;
+      letter-spacing: .5px;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--bd)
+    }
+
+    .reg-cell-desc {
+      font-size: var(--fs);
+      color: var(--txt-nsd);
+      line-height: 1.6
+    }
+
+    .reg-note {
+      font-size: var(--fs-sm);
+      font-style: italic;
+      margin-top: 6px
     }
 
     /* ── GRID ── */
@@ -2709,18 +2782,6 @@
           { name: 'Melee + ranged', desc: 'Você ataca com a arma corpo a corpo usando sua ação padrão normalmente. A arma à distância pode ser usada como ação bônus, mas apenas contra o mesmo alvo do ataque melee e somente se ele estiver em distância adjacente ou curta. Ambas as armas sofrem -2 no acerto.' }
         ]
       },
-      idades: {
-        intro: null,
-        items: [
-          { name: 'Até 10', desc: 'Seu movimento é reduzido pela metade, todo gasto de stamina é dobrado, tem sua vida reduzida em 75%. Você não pode ter reduções, classes e nem naturezas. Seus atributos começam com -2' },
-          { name: '11-17', desc: 'Sua vida é reduzida em 25% e sua redução de dano em 33%' },
-          { name: '18-34', desc: 'Você é normal' },
-          { name: '35-49', desc: 'Seu gasto de stamina é aumentado em 10%' },
-          { name: '50-69', desc: 'Seu gasto de stamina é aumentado em 33% e sua redução de dano é reduzida em 25%' },
-          { name: '70-99', desc: 'Seu gasto de stamina é dobrado, sua redução e seu movimento são reduzidos pela metade e sua vida total em 25%' },
-          { name: '100+', desc: 'Todo gasto de stamina é triplicado, sua redução e seu movimento são reduzidos em 75% e sua vida em 50%. Seus atributos começam com -1' }
-        ]
-      },
       critico: {
         intro: 'A margem de crítico não pode ser menor que 11.',
         items: [
@@ -2745,7 +2806,6 @@
           { name: 'Físico', desc: 'cortante, perfurante, contundente' }
         ]
       },
-      ca: { intro: '10 + Bônus de Corpo e Mente ± Implantes - Armadura', items: [] },
       chance: { intro: 'Sempre que algo tiver uma chance você irá rolar 1d100, caso caia um número igual ou menor do que o do teste aquilo irá acontecer (exemplo: uma ação tem 20 de chance de causar sangramento, caso cair 20 ou menos, o sangramento é aplicado)', items: [] },
       arredondamentos: { intro: 'Sempre para cima, a não ser que esteja explicitamente escrito o contrário', items: [] }
     };
@@ -4022,21 +4082,27 @@
       });
     }
     const REGRAS_ORDER = [
-      ['distancias', 'DISTÂNCIAS'], ['duasArmas', 'DUAS ARMAS'], ['idades', 'IDADES'],
-      ['critico', 'CRÍTICO'], ['categoriasDano', 'CATEGORIAS DE DANO E REDUÇÃO'], ['tiposDano', 'TIPOS DE DANO'],
-      ['ca', 'CA'], ['chance', 'CHANCE'], ['arredondamentos', 'ARREDONDAMENTOS']
+      ['critico', 'CRÍTICO'], ['tiposDano', 'TIPOS DE DANO'], ['categoriasDano', 'CATEGORIAS DE DANO'],
+      ['duasArmas', 'DUAS ARMAS'], ['distancias', 'DISTÂNCIAS'], ['chance', 'CHANCE'],
+      ['arredondamentos', 'ARREDONDAMENTOS']
     ];
+    function toggleReg(el) { el.closest('.reg-section').classList.toggle('collapsed'); }
     function buildRegras() {
       const wrap = document.getElementById('regrasWrap'); if (!wrap) return;
       wrap.innerHTML = REGRAS_ORDER.map(([k, title]) => {
         const sec = SYSTEMS[k]; if (!sec) return '';
-        let html = `<div class="panel mt12"><div class="panel-title">${title}</div>`;
-        if (sec.intro) html += `<div class="sk-desc" style="margin-bottom:${(sec.items || []).length ? '12px' : '0'}">${_esc(sec.intro)}</div>`;
-        (sec.items || []).forEach(it => {
-          html += `<div style="margin-bottom:10px"><span class="sk-name">${_esc(it.name)}</span>`
-            + `<div class="sk-desc">${_esc(it.desc)}${it.note ? `<div style="margin-top:4px;opacity:.7">${_esc(it.note)}</div>` : ''}</div></div>`;
-        });
-        return html + `</div>`;
+        const items = sec.items || [];
+        let body = '';
+        if (sec.intro) body += `<div class="reg-cell-desc" style="color:var(--txt)${items.length ? ';margin-bottom:12px"' : '"'}>${_esc(sec.intro)}</div>`;
+        if (items.length) {
+          body += `<div class="reg-grid">` + items.map(it =>
+            `<div class="reg-cell"><div class="reg-cell-title">${_esc(it.name)}</div>`
+            + `<div class="reg-cell-desc">${_esc(it.desc)}${it.note ? `<div class="reg-note">${_esc(it.note)}</div>` : ''}</div></div>`
+          ).join('') + `</div>`;
+        }
+        return `<div class="reg-section panel mt12">`
+          + `<div class="reg-head" onclick="toggleReg(this)"><span class="reg-caret">▾</span>${title}</div>`
+          + `<div class="reg-body">${body}</div></div>`;
       }).join('');
     }
 

@@ -317,15 +317,19 @@ test('parseSystems: intro antes do 1º item, note depois (DoT)', () => {
   assert.equal(systems.dot.items[0].note, 'Esse efeito pode stackar até 3x');
 });
 
-test('parseSystems ignora Combos/Coberturas/Ficha', () => {
+test('parseSystems ignora Combos/CA/Idades (não vazam p/ a seção anterior)', () => {
   const { systems } = parseSystems(SAMPLE_SYSTEMS);
   assert.ok(!('combos' in systems));
+  assert.ok(!('ca' in systems));
+  assert.ok(!('idades' in systems));
+  // conteúdo de CA (linha ignorada) não vaza para a seção anterior (dot)
+  assert.equal(systems.dot.items.length, 1);
 });
 
 test('parseSystems: seção só com intro fica sem itens', () => {
   const { systems } = parseSystems(SAMPLE_SYSTEMS);
-  assert.match(systems.ca.intro, /10 \+ Bônus de Corpo/);
-  assert.deepEqual(systems.ca.items, []);
+  assert.match(systems.chance.intro, /Sempre que algo tiver uma chance/);
+  assert.deepEqual(systems.chance.items, []);
 });
 
 test('parseSystems ignora conteúdo fora da seção', () => {
