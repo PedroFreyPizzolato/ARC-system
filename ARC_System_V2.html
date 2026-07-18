@@ -334,6 +334,25 @@
       background: linear-gradient(90deg, rgba(245, 158, 11, .4), transparent)
     }
 
+    /* ── PAINÉIS COLAPSÁVEIS (todo .panel-title vira um head clicável, igual à aba Regras) ── */
+    .panel-title.pt-collapsible {
+      cursor: pointer;
+      user-select: none
+    }
+
+    .pt-caret {
+      font-size: var(--fs-xl);
+      transition: transform .2s
+    }
+
+    .panel-title.collapsed .pt-caret {
+      transform: rotate(-90deg)
+    }
+
+    .panel-body.collapsed {
+      display: none
+    }
+
     /* ── REGRAS (aba de referência: seções colapsáveis + itens em grade) ── */
     .reg-head {
       font-family: 'Orbitron', monospace;
@@ -3240,7 +3259,28 @@
     // ═══════════════════════════════════════════════════════════════
     // INIT & SAVE
     // ═══════════════════════════════════════════════════════════════
+    // Torna todo painel colapsável (mesmo padrão da aba Regras): cada .panel-title clicável
+    // colapsa o conteúdo até o próximo .panel-title (ou fim do painel). Alguns painéis (ex:
+    // ARMAS/ARMADURAS) têm 2 títulos no mesmo painel — cada um vira uma seção independente.
+    function makePanelsCollapsible() {
+      document.querySelectorAll('.panel-title').forEach(title => {
+        title.classList.add('pt-collapsible');
+        title.insertAdjacentHTML('afterbegin', '<span class="pt-caret">▾</span>');
+        const body = document.createElement('div');
+        body.className = 'panel-body';
+        let node = title.nextSibling;
+        while (node && !(node.nodeType === 1 && node.classList.contains('panel-title'))) {
+          const next = node.nextSibling;
+          body.appendChild(node);
+          node = next;
+        }
+        title.after(body);
+        title.addEventListener('click', () => { title.classList.toggle('collapsed'); body.classList.toggle('collapsed'); });
+      });
+    }
+
     async function init() {
+      makePanelsCollapsible();
       await loadRules();
       const saved = localStorage.getItem('arc_v1');
       if (saved) { try { S = { ...S, ...JSON.parse(saved) }; } catch (e) { } }
