@@ -153,6 +153,22 @@
       flex: 1
     }
 
+    /* mesmo truque do .grp-acts: width:0 fora do hover para o nome usar a largura toda */
+    .npc-ord {
+      display: flex;
+      gap: 1px;
+      flex-shrink: 0;
+      width: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity .12s
+    }
+
+    .npc-item:hover .npc-ord {
+      width: auto;
+      opacity: 1
+    }
+
     .npc-del {
       background: none;
       border: none;
@@ -214,6 +230,102 @@
       font-family: 'Share Tech Mono', monospace;
       font-size: 13px;
       color: var(--dim)
+    }
+
+    .grp-hdr {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 4px;
+      margin-top: 4px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.12);
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--blue)
+    }
+
+    .grp-hdr:hover {
+      background: var(--bgh)
+    }
+
+    .grp-hdr.sub {
+      font-size: 12px;
+      color: var(--purp);
+      border-bottom-color: rgba(168, 85, 247, 0.12)
+    }
+
+    .grp-hdr.none {
+      color: var(--dim);
+      border-bottom-color: var(--bd);
+      cursor: default
+    }
+
+    .grp-hdr.none:hover {
+      background: transparent
+    }
+
+    .grp-caret {
+      font-size: 11px;
+      flex-shrink: 0
+    }
+
+    .grp-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .grp-count {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      color: var(--dim);
+      flex-shrink: 0;
+      margin-left: auto
+    }
+
+    /* escondidos com width:0 (e não só opacity) para o nome do grupo usar a largura toda */
+    .grp-acts {
+      display: flex;
+      gap: 1px;
+      flex-shrink: 0;
+      width: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity .12s
+    }
+
+    .grp-hdr:hover .grp-acts {
+      width: auto;
+      opacity: 1
+    }
+
+    .grp-act {
+      background: none;
+      border: none;
+      color: var(--dim);
+      cursor: pointer;
+      font-size: 12px;
+      line-height: 1;
+      padding: 0 2px
+    }
+
+    .grp-act:hover {
+      color: var(--blue)
+    }
+
+    .grp-act.del:hover {
+      color: var(--red)
+    }
+
+    .grp-body {
+      padding-left: 7px;
+      margin: 3px 0 3px 2px;
+      border-left: 1px solid rgba(0, 212, 255, 0.1)
     }
 
     .sb-add {
@@ -1481,10 +1593,12 @@
     // ================================================================
     let _uid = 0;
     function uid() { return 'npc_' + (++_uid) + '_' + Date.now(); }
+    function gid() { return 'grp_' + (++_uid) + '_' + Date.now(); }
 
     function mkNPC() {
       return {
         id: uid(), name: 'Novo NPC', role: '', faccao: '', level: 0, rank: 'C', natureza: '',
+        groupId: null,  // grupo/subgrupo da sidebar (null = sem grupo)
         // lv0: ponto de atributo do nível 0 (antes de qualquer level up)
         lv0: { corpo: 0, mente: 0, alma: 0, corpoPick: null, mentePick: null, almaPick: null },
         // levelHistory[i] = dados do level up para nível (i+1)
@@ -1500,12 +1614,53 @@
     }
 
     let npcs = [mkNPC()];
+    let groups = [];      // [{id, name, parentId, collapsed}] — ordem = posição no array
     let selId = npcs[0].id;
     let activeTab = 'status';
     let openLvIdx = null; // qual entry de levelHistory está expandida
     const EMBEDDED = window.parent !== window; // true quando rodando dentro do GM Screen (iframe)
 
     function npc() { return npcs.find(n => n.id === selId) || npcs[0] || null; }
+
+    // ================================================================
+    // GRUPOS / SUBGRUPOS — lógica pura
+    // Cópia fiel de tools/npc-groups/groups.js. Mudou uma, mude nas duas.
+    // ================================================================
+    function buildTree(groups, npcs) {
+      const list = Array.isArray(groups) ? groups : [];
+      const items = Array.isArray(npcs) ? npcs : [];
+      const byId = new Map(list.map(g => [g.id, g]));
+      const isRoot = g => { const p = byId.get(g.parentId); return !p || !!p.parentId; };
+      const npcsOf = id => items.filter(n => n.groupId === id);
+      const roots = list.filter(isRoot).map(g => ({
+        group: g,
+        npcs: npcsOf(g.id),
+        children: list.filter(c => !isRoot(c) && c.parentId === g.id).map(c => ({ group: c, npcs: npcsOf(c.id) }))
+      }));
+      return { roots, ungrouped: items.filter(n => !byId.has(n.groupId)) };
+    }
+    function removeGroup(groups, npcs, id) {
+      const list = Array.isArray(groups) ? groups : [];
+      const doomed = new Set([id]);
+      list.forEach(g => { if (g.parentId === id) doomed.add(g.id); });
+      return {
+        groups: list.filter(g => !doomed.has(g.id)),
+        npcs: (Array.isArray(npcs) ? npcs : []).map(n => doomed.has(n.groupId) ? { ...n, groupId: null } : n)
+      };
+    }
+    function moveInSiblings(list, id, dir, parentKey) {
+      const out = (Array.isArray(list) ? list : []).slice();
+      const i = out.findIndex(x => x.id === id);
+      if (i < 0) return out;
+      const parent = out[i][parentKey] || null;
+      const sibs = out.map((x, idx) => idx).filter(idx => (out[idx][parentKey] || null) === parent);
+      const target = sibs[sibs.indexOf(i) + dir];
+      if (target === undefined) return out;
+      const tmp = out[i]; out[i] = out[target]; out[target] = tmp;
+      return out;
+    }
+    function moveGroup(groups, id, dir) { return moveInSiblings(groups, id, dir, 'parentId'); }
+    function moveNpc(npcs, id, dir) { return moveInSiblings(npcs, id, dir, 'groupId'); }
 
     // ================================================================
     // LEVEL HISTORY HELPERS
@@ -2017,6 +2172,16 @@
       return html;
     }
 
+    function groupOpts(sel) {
+      const opt = (v, lbl) => `<option value="${v}"${(sel || '') === v ? ' selected' : ''}>${lbl}</option>`;
+      let h = opt('', '— Sem grupo —');
+      buildTree(groups, npcs).roots.forEach(r => {
+        h += opt(r.group.id, esc(r.group.name));
+        r.children.forEach(c => { h += opt(c.group.id, `${esc(r.group.name)} › ${esc(c.group.name)}`); });
+      });
+      return h;
+    }
+
     function renderInfo() {
       const n = npc(); if (!n) return '';
       const calc = calcFromHistory(n);
@@ -2025,6 +2190,7 @@
     <div><label class="lbl">NOME</label><input class="inp" value="${esc(n.name)}" oninput="su('name',this.value)" placeholder="Nome do NPC"></div>
     <div><label class="lbl">PAPEL / FUNÇÃO</label><input class="inp" value="${esc(n.role || '')}" oninput="su('role',this.value)" placeholder="ex: Chefe de Guarda"></div>
     <div><label class="lbl">FACÇÃO / ORGANIZAÇÃO</label><input class="inp" value="${esc(n.faccao || '')}" oninput="su('faccao',this.value)" placeholder="ex: Reich Global"></div>
+    <div><label class="lbl">GRUPO (PASTA DA BARRA LATERAL)</label><select class="sel" onchange="setGroup(this.value)">${groupOpts(n.groupId)}</select></div>
     <div class="g2" style="gap:8px">
       <div><label class="lbl">NÍVEL</label><div style="display:flex;gap:5px;align-items:center"><button style="width:24px;height:30px;background:transparent;border:1px solid var(--bd);color:var(--dim);cursor:pointer;font-size:20px" onclick="changeLevel(-1)">−</button><span style="font-family:'Orbitron',monospace;font-size:20px;font-weight:700;color:var(--blue);min-width:28px;text-align:center">${n.level || 0}</span><button style="width:24px;height:30px;background:transparent;border:1px solid var(--bd);color:var(--dim);cursor:pointer;font-size:20px" onclick="changeLevel(1)">+</button></div></div>
       <div><label class="lbl">RANK</label><select class="sel" onchange="su('rank',this.value)">${['C', 'B', 'A', 'S'].map(r => `<option${n.rank === r ? ' selected' : ''}>${r}</option>`).join('')}</select></div>
@@ -2063,12 +2229,23 @@
       const n = npc();
       const calc = n ? calcFromHistory(n) : null;
       const hp = calc?.hp, sta = calc?.sta, ca = calc?.ca, init = calc?.init ?? 0;
-      const sidebarItems = npcs.map(np => {
+      const npcCard = np => {
         const c2 = calcFromHistory(np);
         const h = c2.hp; const p = pct(np.hpCur || 0, h.total);
         const bc = p > 50 ? '#10b981' : p > 25 ? '#f59e0b' : '#ef4444';
-        return `<div class="npc-item ${np.id === selId ? 'active' : ''}" onclick="selectNPC('${np.id}')"><div class="npc-item-top"><span class="npc-name">${esc(np.name) || 'Sem Nome'}</span><button class="npc-del" onclick="event.stopPropagation();deleteNPC('${np.id}')">✕</button></div><div class="npc-badges">${np.natureza ? `<span class="badge badge-purp">${esc(np.natureza)}</span>` : ''}<span class="badge badge-blue">NV.${np.level || 0}</span><span class="badge badge-gold">${np.rank || 'C'}</span></div><div class="hp-bar-wrap"><div class="hp-bar-fill" style="width:${p}%;background:${bc}"></div></div><div class="hp-bar-text">${np.hpCur || 0}/${h.total} HP</div></div>`;
-      }).join('');
+        return `<div class="npc-item ${np.id === selId ? 'active' : ''}" onclick="selectNPC('${np.id}')"><div class="npc-item-top"><span class="npc-name">${esc(np.name) || 'Sem Nome'}</span><span class="npc-ord"><button class="grp-act" title="Subir" onclick="event.stopPropagation();moveNp('${np.id}',-1)">▲</button><button class="grp-act" title="Descer" onclick="event.stopPropagation();moveNp('${np.id}',1)">▼</button></span><button class="npc-del" onclick="event.stopPropagation();deleteNPC('${np.id}')">✕</button></div><div class="npc-badges">${np.natureza ? `<span class="badge badge-purp">${esc(np.natureza)}</span>` : ''}<span class="badge badge-blue">NV.${np.level || 0}</span><span class="badge badge-gold">${np.rank || 'C'}</span></div><div class="hp-bar-wrap"><div class="hp-bar-fill" style="width:${p}%;background:${bc}"></div></div><div class="hp-bar-text">${np.hpCur || 0}/${h.total} HP</div></div>`;
+      };
+      const grpHdr = (g, isSub, count) => `<div class="grp-hdr${isSub ? ' sub' : ''}" onclick="toggleGroup('${g.id}')"><span class="grp-caret">${g.collapsed ? '▸' : '▾'}</span><span class="grp-name">${esc(g.name)}</span><span class="grp-count">${count}</span><span class="grp-acts"><button class="grp-act" title="Subir" onclick="event.stopPropagation();moveGrp('${g.id}',-1)">▲</button><button class="grp-act" title="Descer" onclick="event.stopPropagation();moveGrp('${g.id}',1)">▼</button>${isSub ? '' : `<button class="grp-act" title="Novo subgrupo" onclick="event.stopPropagation();addGroup('${g.id}')">＋</button>`}<button class="grp-act" title="Renomear" onclick="event.stopPropagation();renameGroup('${g.id}')">✎</button><button class="grp-act del" title="Apagar grupo" onclick="event.stopPropagation();delGroup('${g.id}')">✕</button></span></div>`;
+      const tree = buildTree(groups, npcs);
+      const sidebarItems = tree.roots.map(r => {
+        const total = r.npcs.length + r.children.reduce((s, c) => s + c.npcs.length, 0);
+        const body = r.npcs.map(npcCard).join('') + r.children.map(c =>
+          grpHdr(c.group, true, c.npcs.length) + (c.group.collapsed ? '' : `<div class="grp-body">${c.npcs.map(npcCard).join('')}</div>`)
+        ).join('');
+        return grpHdr(r.group, false, total) + (r.group.collapsed ? '' : `<div class="grp-body">${body}</div>`);
+      }).join('')
+        + (tree.ungrouped.length && groups.length ? `<div class="grp-hdr none">SEM GRUPO<span class="grp-count">${tree.ungrouped.length}</span></div>` : '')
+        + tree.ungrouped.map(npcCard).join('');
 
       const tabs = [{ id: 'status', lbl: 'STATUS' }, { id: 'habilidades', lbl: 'HABILIDADES' }, { id: 'niveis', lbl: 'NÍVEIS' }, { id: 'classes', lbl: 'CLASSES' }, { id: 'pericias', lbl: 'PERÍCIAS' }, { id: 'arsenal', lbl: 'ARSENAL' }, { id: 'info', lbl: 'INFO & NOTAS' }];
       let tabContent = '';
@@ -2086,7 +2263,7 @@
     <div class="sidebar">
       <div class="sb-head"><div class="sb-logo">ARC V2</div><div class="sb-tag">CATÁLOGO DE NPCs</div></div>
       <div class="sb-list">${sidebarItems}</div>
-      <div class="sb-add"><button class="btn-dashed red" onclick="addNPC()">+ NOVO NPC</button></div>
+      <div class="sb-add"><button class="btn-dashed blue" style="margin-bottom:5px" onclick="addGroup(null)">+ NOVO GRUPO</button><button class="btn-dashed red" onclick="addNPC()">+ NOVO NPC</button></div>
     </div>
     <div class="main">
       ${n ? `
@@ -2119,9 +2296,33 @@
     function addNPC() { const n = mkNPC(); npcs.push(n); selId = n.id; activeTab = 'info'; save(); render(); }
     function deleteNPC(id) { npcs = npcs.filter(n => n.id !== id); if (selId === id) selId = npcs[0]?.id || null; save(); render(); }
 
+    function addGroup(parentId) {
+      const name = prompt(parentId ? 'Nome do subgrupo:' : 'Nome do grupo:');
+      if (!name || !name.trim()) return;
+      groups.push({ id: gid(), name: name.trim(), parentId: parentId || null, collapsed: false });
+      save(); render();
+    }
+    function renameGroup(id) {
+      const g = groups.find(x => x.id === id); if (!g) return;
+      const name = prompt('Novo nome:', g.name);
+      if (!name || !name.trim()) return;
+      g.name = name.trim(); save(); render();
+    }
+    function delGroup(id) {
+      const g = groups.find(x => x.id === id); if (!g) return;
+      if (!confirm(`Apagar o grupo "${g.name}"?\n\nOs subgrupos dele somem junto e os NPCs voltam para "sem grupo". Nenhum NPC é apagado.`)) return;
+      const r = removeGroup(groups, npcs, id);
+      groups = r.groups; npcs = r.npcs;
+      save(); render();
+    }
+    function toggleGroup(id) { const g = groups.find(x => x.id === id); if (!g) return; g.collapsed = !g.collapsed; save(); render(); }
+    function moveGrp(id, dir) { groups = moveGroup(groups, id, dir); save(); render(); }
+    function moveNp(id, dir) { npcs = moveNpc(npcs, id, dir); save(); render(); }
+    function setGroup(v) { upd({ groupId: v || null }); }
+
     function save() {
-      if (EMBEDDED) { try { window.parent.postMessage({ type: 'arc-npc-save', npcs: npcs }, '*'); } catch (e) { } return; }
-      try { localStorage.setItem('arc_npc_v3', JSON.stringify(npcs)); } catch (e) { }
+      if (EMBEDDED) { try { window.parent.postMessage({ type: 'arc-npc-save', npcs: npcs, groups: groups }, '*'); } catch (e) { } return; }
+      try { localStorage.setItem('arc_npc_v3', JSON.stringify(npcs)); localStorage.setItem('arc_npc_groups_v1', JSON.stringify(groups)); } catch (e) { }
     }
     function load() {
       if (EMBEDDED) {
@@ -2130,8 +2331,21 @@
         window.addEventListener('message', e => {
           const d = e.data; if (!d || typeof d !== 'object' || d.type !== 'arc-npc-load') return;
           let arr = Array.isArray(d.npcs) ? d.npcs : [];
-          // Migração única: se o GM ainda não tem NPCs, importa os salvos localmente (arc_npc_v3)
-          if (arr.length === 0) { try { const ls = localStorage.getItem('arc_npc_v3'); if (ls) { const p = JSON.parse(ls); if (Array.isArray(p) && p.length) arr = p; } } catch (_e) { } }
+          groups = Array.isArray(d.groups) ? d.groups : [];
+          // Migração única: se o GM ainda não tem NPCs, importa os salvos localmente (arc_npc_v3 + grupos)
+          if (arr.length === 0) {
+            try {
+              const ls = localStorage.getItem('arc_npc_v3');
+              if (ls) {
+                const p = JSON.parse(ls);
+                if (Array.isArray(p) && p.length) {
+                  arr = p;
+                  const lg = JSON.parse(localStorage.getItem('arc_npc_groups_v1') || 'null');
+                  if (Array.isArray(lg)) groups = lg;
+                }
+              }
+            } catch (_e) { }
+          }
           if (arr.length > 0) { npcs = arr.map(n => ({ ...mkNPC(), ...n, levelHistory: n.levelHistory || [] })); selId = npcs[0].id; save(); }
           else { npcs = []; selId = null; }
           render();
@@ -2139,6 +2353,7 @@
         try { window.parent.postMessage({ type: 'arc-npc-ready' }, '*'); } catch (e) { }
         render(); return;
       }
+      try { const g = JSON.parse(localStorage.getItem('arc_npc_groups_v1') || 'null'); if (Array.isArray(g)) groups = g; } catch (e) { }
       // Migrar dados do formato antigo (v2) se existir
       try {
         const old = localStorage.getItem('arc_npc_v2');

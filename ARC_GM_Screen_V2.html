@@ -1887,6 +1887,7 @@
       if (!S.armaLib.armas) S.armaLib.armas = [];
       if (!S.armaLib.implantes) S.armaLib.implantes = [];
       if (!Array.isArray(S.catalogNpcs)) S.catalogNpcs = [];
+      if (!Array.isArray(S.catalogGroups)) S.catalogGroups = [];
       renderApp();
     }
     function setSection(name) {
@@ -2787,9 +2788,10 @@
     window.addEventListener('message', e => {
       const d = e.data; if (!d || typeof d !== 'object') return;
       if (d.type === 'arc-npc-ready') {
-        if (e.source) e.source.postMessage({ type: 'arc-npc-load', npcs: S.catalogNpcs || [] }, '*');
+        if (e.source) e.source.postMessage({ type: 'arc-npc-load', npcs: S.catalogNpcs || [], groups: S.catalogGroups || [] }, '*');
       } else if (d.type === 'arc-npc-save') {
         S.catalogNpcs = Array.isArray(d.npcs) ? d.npcs : [];
+        S.catalogGroups = Array.isArray(d.groups) ? d.groups : [];
         autosave();
       }
     });
