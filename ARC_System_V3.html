@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ARC System V2</title>
+  <title>ARC System V3</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
     href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap"
@@ -20,15 +20,18 @@
       --green: #10b981;
       --orange: #f97316;
       --bg: #020408;
+      --bg-purple: #050009;
+      --bg-yellow: #090703;
       --bg-panel: rgba(0, 212, 255, 0.03);
       --bg-hover: rgba(0, 212, 255, 0.07);
       --bd: rgba(0, 212, 255, 0.15);
       --bd-b: rgba(0, 212, 255, 0.4);
       --txt: #e0f7ff;
+      --txt-nsd: rgba(224, 247, 255, 0.65);
       --txt-d: rgba(224, 247, 255, 0.45);
       --txt-lbl: rgba(0, 212, 255, 0.7);
       --fs: 15px;
-      --fs-sm: 12px;
+      --fs-sm: 13px;
       --fs-xs: 11px;
       --fs-lg: 17px;
       --fs-xl: 20px;
@@ -87,7 +90,7 @@
     .wrap {
       position: relative;
       z-index: 1;
-      max-width: 1500px;
+      max-width: 95%;
       margin: 0 auto;
       padding: 16px;
       padding-bottom: 56px
@@ -117,7 +120,7 @@
 
     .hdr-logo {
       font-family: 'Orbitron', monospace;
-      font-size: 18px;
+      font-size: 21px;
       font-weight: 900;
       letter-spacing: 4px;
       color: var(--blue);
@@ -226,7 +229,7 @@
 
     .btn-sm {
       padding: 5px 12px;
-      font-size: 10px;
+      font-size: 14px;
       letter-spacing: 1px
     }
 
@@ -237,7 +240,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 19px;
       clip-path: none;
       border-radius: 0
     }
@@ -256,7 +259,7 @@
       border: 1px solid var(--bd);
       color: var(--txt-d);
       font-family: 'Orbitron', monospace;
-      font-size: var(--fs-xs);
+      font-size: var(--fs);
       letter-spacing: 2px;
       cursor: pointer;
       transition: all .2s;
@@ -299,7 +302,7 @@
 
     .panel-title {
       font-family: 'Orbitron', monospace;
-      font-size: var(--fs-xs);
+      font-size: var(--fs-sm);
       letter-spacing: 3px;
       color: var(--blue);
       margin-bottom: 14px;
@@ -329,6 +332,213 @@
 
     .panel-gold .panel-title::after {
       background: linear-gradient(90deg, rgba(245, 158, 11, .4), transparent)
+    }
+
+    /* ── PAINÉIS COLAPSÁVEIS (todo .panel-title vira um head clicável, igual à aba Regras) ── */
+    .panel-title.pt-collapsible {
+      cursor: pointer;
+      user-select: none
+    }
+
+    .pt-caret {
+      font-size: var(--fs-xl);
+      transition: transform .2s
+    }
+
+    .panel-title.collapsed .pt-caret {
+      transform: rotate(-90deg)
+    }
+
+    .panel-body.collapsed {
+      display: none
+    }
+
+    /* ── REGRAS (aba de referência: seções colapsáveis + itens em grade) ── */
+    .reg-head {
+      font-family: 'Orbitron', monospace;
+      font-size: var(--fs-sm);
+      letter-spacing: 3px;
+      color: var(--blue);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none
+    }
+
+    .reg-head::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--bd-b), transparent)
+    }
+
+    .reg-caret {
+      font-size: var(--fs-xl);
+      transition: transform .2s
+    }
+
+    .reg-section.collapsed .reg-caret {
+      transform: rotate(-90deg)
+    }
+
+    .reg-section.collapsed .reg-body {
+      display: none
+    }
+
+    .reg-body {
+      margin-top: 14px
+    }
+
+    .reg-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px
+    }
+
+    .reg-cell {
+      border: 1px solid var(--bd);
+      background: rgba(255, 255, 255, .02);
+      padding: 8px 10px
+    }
+
+    .reg-cell-title {
+      font-family: 'Orbitron', monospace;
+      font-size: var(--fs);
+      font-weight: 700;
+      color: var(--txt);
+      text-align: center;
+      letter-spacing: .5px;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--bd)
+    }
+
+    .reg-cell-desc {
+      font-size: var(--fs);
+      color: var(--txt-nsd);
+      line-height: 1.6
+    }
+
+    .reg-note {
+      font-size: var(--fs-sm);
+      font-style: italic;
+      margin-top: 6px
+    }
+
+    /* ── AÇÕES (Ficha): descrição no topo + tabela de 3 colunas (mesmo estilo de Regras) ── */
+    .act-desc {
+      padding: 8px 10px;
+      margin-bottom: 12px
+    }
+
+    .act-desc-lbl {
+      font-family: 'Orbitron', monospace;
+      font-size: var(--fs-sm);
+      letter-spacing: 2px;
+      color: var(--blue);
+      margin-bottom: 6px
+    }
+
+    .act-rows {
+      display: flex;
+      flex-direction: row;
+      gap: 10px
+    }
+
+    .act-tabs {
+      display: flex;
+      flex-direction: row;
+      gap: 10px
+    }
+
+    .act-tab {
+      flex: 1;
+      cursor: pointer;
+      opacity: .4;
+      transition: opacity .15s
+    }
+
+    .act-tab:hover {
+      opacity: .7
+    }
+
+    .act-tab.active {
+      opacity: 1
+    }
+
+    .act-row {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 10px
+    }
+
+    .act-row-head {
+      font-family: 'Orbitron', monospace;
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      text-align: center;
+      padding-bottom: 6px;
+      gap: 6px;
+    }
+
+    .act-row-head::before {
+      content: '';
+      flex: 2;
+      height: 1px;
+    }
+
+    .act-row-head::after {
+      content: '';
+      flex: 2;
+      height: 1px;
+    }
+
+    .act-row-ofensivas .act-row-head {
+      color: var(--red)
+    }
+
+    .act-row-ofensivas .act-row-head::before {
+      background: linear-gradient(90deg, transparent, var(--red))
+    }
+
+    .act-row-ofensivas .act-row-head::after {
+      background: linear-gradient(90deg, var(--red), transparent)
+    }
+
+    .act-row-defensivas .act-row-head {
+      color: var(--blue)
+    }
+
+    .act-row-defensivas .act-row-head::before {
+      background: linear-gradient(90deg, transparent, var(--blue))
+    }
+
+    .act-row-defensivas .act-row-head::after {
+      background: linear-gradient(90deg, var(--blue), transparent)
+    }
+
+    .act-row-inspiradoras .act-row-head {
+      color: var(--gold)
+    }
+
+    .act-row-inspiradoras .act-row-head::before {
+      background: linear-gradient(90deg, transparent, var(--gold))
+    }
+
+    .act-row-inspiradoras .act-row-head::after {
+      background: linear-gradient(90deg, var(--gold), transparent)
+    }
+
+    .act-cost {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: var(--fs-sm);
+      font-weight: 400;
+      color: var(--gold)
     }
 
     /* ── GRID ── */
@@ -458,7 +668,7 @@
       border-bottom: 1px solid var(--bd-b);
       color: var(--txt);
       font-family: 'Orbitron', monospace;
-      font-size: 15px;
+      font-size: 18px;
       width: 58px;
       text-align: center;
       outline: none;
@@ -467,7 +677,7 @@
 
     .bar-sep {
       color: var(--txt-d);
-      font-size: 13px
+      font-size: 17px
     }
 
     .bar-track {
@@ -524,7 +734,7 @@
       border: 1px solid var(--bd);
       color: var(--txt-d);
       cursor: pointer;
-      font-size: 17px;
+      font-size: 20px;
       line-height: 1;
       transition: all .15s;
       display: flex;
@@ -567,7 +777,7 @@
 
     .c-val {
       font-family: 'Orbitron', monospace;
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 700;
       color: var(--blue);
       min-width: 30px;
@@ -599,7 +809,7 @@
 
     .pick-lv {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--txt-d);
       width: 28px;
       flex-shrink: 0
@@ -607,22 +817,61 @@
 
     .pick-btn {
       flex: 1;
+      position: relative;
       padding: 5px 4px;
       background: transparent;
       border: 1px solid rgba(0, 212, 255, .12);
       color: var(--txt-d);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       letter-spacing: .5px;
       cursor: pointer;
       transition: all .15s;
       text-align: center
     }
 
+    .pick-desc {
+      visibility: hidden;
+      opacity: 0;
+      width: 100%;
+      bottom: 120%;
+      left: 0;
+      margin-left: 0;
+
+      color: var(--txt-nsd);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      letter-spacing: .5px;
+      transition: all .25s;
+      text-align: center;
+      position: absolute;
+
+      display: flex;
+      flex-direction: column;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .desc-row {
+      text-align: left;
+      gap: 4px;
+      padding: 6px 4px
+    }
+
+    .pick-btn:hover .pick-desc {
+      visibility: visible;
+      opacity: 1;
+    }
+
     .pick-btn.cor {
       background: transparent;
       border-color: rgba(0, 212, 255, .12);
       color: var(--txt-d)
+    }
+
+    .pick-desc.cor {
+      background: var(--bg);
+      border: 1px solid rgba(0, 212, 255, .5);
     }
 
     .pick-btn.cor:hover {
@@ -655,6 +904,11 @@
       color: var(--txt-d)
     }
 
+    .pick-desc.men {
+      background: var(--bg-purple);
+      border: 1px solid rgba(168, 85, 247, .5);
+    }
+
     .pick-btn.men:hover {
       border-color: var(--purple-b);
       color: var(--txt)
@@ -685,12 +939,18 @@
       color: var(--txt-d)
     }
 
+    .pick-desc.alm {
+      background: var(--bg-yellow);
+      border: 1px solid rgba(245, 158, 11, .5);
+    }
+
     .pick-btn.alm:hover {
       border-color: var(--gold);
       color: var(--txt)
     }
 
     .pick-btn.alm.sel {
+      background: rgb(126, 82, 6);
       background: rgba(245, 158, 11, .12);
       border-color: var(--gold);
       color: var(--gold);
@@ -718,7 +978,7 @@
 
     .subder-item {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 11px;
+      font-size: 15px;
       color: var(--txt-d)
     }
 
@@ -800,7 +1060,7 @@
       border: 1px solid var(--bd);
       color: var(--blue);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       padding: 3px 6px;
       outline: none;
       cursor: pointer;
@@ -817,7 +1077,7 @@
       border: 1px solid rgba(245, 158, 11, .3);
       color: var(--gold);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       padding: 3px 7px;
       outline: none;
       width: 70px;
@@ -833,7 +1093,7 @@
       display: inline-block;
       padding: 2px 8px;
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       letter-spacing: .5px;
       border: 1px solid
     }
@@ -886,7 +1146,7 @@
 
     .per-row.hdr {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--txt-d);
       letter-spacing: 1px;
       padding-bottom: 5px
@@ -898,7 +1158,7 @@
 
     .per-sub {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--txt-d)
     }
 
@@ -908,7 +1168,7 @@
       border: none;
       border-bottom: 1px solid var(--bd);
       color: var(--txt);
-      font-size: 12px;
+      font-size: 16px;
       padding: 2px 4px;
       outline: none;
       text-align: center
@@ -923,7 +1183,7 @@
 
     .per-bonus {
       font-family: 'Orbitron', monospace;
-      font-size: 13px;
+      font-size: 17px;
       color: var(--blue);
       text-align: center
     }
@@ -941,7 +1201,7 @@
       background: transparent;
       color: var(--txt-d);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       letter-spacing: .5px;
       cursor: pointer;
       transition: all .2s
@@ -977,7 +1237,7 @@
 
     .dot-name {
       font-family: 'Orbitron', monospace;
-      font-size: 12px;
+      font-size: 16px;
       letter-spacing: 2px;
       color: var(--red)
     }
@@ -987,7 +1247,7 @@
       border: 1px solid rgba(255, 0, 0, .3);
       color: var(--red);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       padding: 2px 8px;
       cursor: pointer;
       letter-spacing: 1px
@@ -1072,7 +1332,7 @@
 
     .dot-lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       color: var(--txt-d);
       letter-spacing: 1px
     }
@@ -1130,7 +1390,7 @@
 
     .weapon-row.hdr {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--txt-d);
       letter-spacing: 1px
     }
@@ -1161,7 +1421,7 @@
       border: none;
       color: rgba(239, 68, 68, .4);
       cursor: pointer;
-      font-size: 16px;
+      font-size: 19px;
       transition: color .2s
     }
 
@@ -1182,7 +1442,7 @@
 
     .impl-lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--purple-b);
       letter-spacing: 1px;
       margin-bottom: 4px
@@ -1196,9 +1456,16 @@
       gap: 8px
     }
 
+    .death-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 25px
+    }
+
     .death-label {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       letter-spacing: 2px
     }
 
@@ -1233,7 +1500,7 @@
 
     .title-rank {
       font-family: 'Orbitron', monospace;
-      font-size: 10px;
+      font-size: 14px;
       letter-spacing: 3px;
       margin-bottom: 4px
     }
@@ -1256,7 +1523,7 @@
 
     .title-name {
       font-family: 'Orbitron', monospace;
-      font-size: 16px;
+      font-size: 19px;
       font-weight: 700;
       margin-bottom: 12px
     }
@@ -1399,7 +1666,7 @@
 
     .photo-placeholder {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--txt-d);
       letter-spacing: 1px;
       text-align: center;
@@ -1430,7 +1697,7 @@
 
     .info-key {
       font-family: 'Share Tech Mono', monospace;
-      font-size: var(--fs-xs);
+      font-size: var(--fs-sm);
       color: var(--txt-lbl);
       letter-spacing: 1px
     }
@@ -1460,7 +1727,7 @@
       border: 1px dashed rgba(0, 212, 255, .25);
       color: rgba(0, 212, 255, .4);
       font-family: 'Orbitron', monospace;
-      font-size: 10px;
+      font-size: 14px;
       letter-spacing: 2px;
       cursor: pointer;
       transition: all .2s;
@@ -1530,7 +1797,7 @@
       border: 1px solid var(--purple-b);
       color: var(--purple-b);
       font-family: 'Orbitron', monospace;
-      font-size: 11px;
+      font-size: 15px;
       letter-spacing: 2px;
       background: rgba(168, 85, 247, .06)
     }
@@ -1557,7 +1824,7 @@
 
     .action-display {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       padding: 2px 7px;
       border: 1px solid var(--blue);
       color: var(--blue);
@@ -1612,7 +1879,7 @@
 
     .sync-lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--txt-d);
       letter-spacing: 1px;
       flex: 1
@@ -1623,7 +1890,7 @@
       border: 1px solid var(--bd);
       color: var(--txt);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 11px;
+      font-size: 15px;
       padding: 4px 10px;
       outline: none;
       width: 200px;
@@ -1640,7 +1907,7 @@
       border: 1px solid var(--blue);
       color: var(--blue);
       font-family: 'Orbitron', monospace;
-      font-size: 9px;
+      font-size: 13px;
       letter-spacing: 2px;
       cursor: pointer;
       transition: all .15s
@@ -1661,7 +1928,7 @@
 
     .sync-pid {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       color: rgba(0, 212, 255, .4);
       letter-spacing: 1px
     }
@@ -1701,7 +1968,7 @@
 
     .fb-modal-tag {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       letter-spacing: 3px;
       color: var(--blue);
       margin-bottom: 12px;
@@ -1710,7 +1977,7 @@
 
     .fb-modal-title {
       font-family: 'Orbitron', monospace;
-      font-size: 16px;
+      font-size: 19px;
       font-weight: 700;
       color: var(--txt);
       margin-bottom: 6px;
@@ -1719,7 +1986,7 @@
 
     .fb-modal-sub {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--txt-d);
       letter-spacing: .5px;
       line-height: 1.7;
@@ -1735,7 +2002,7 @@
 
     .fb-lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       color: var(--txt-lbl);
       letter-spacing: 1.5px
     }
@@ -1745,7 +2012,7 @@
       border: 1px solid var(--bd);
       color: var(--txt);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 12px;
+      font-size: 16px;
       padding: 8px 12px;
       outline: none;
       width: 100%;
@@ -1775,7 +2042,7 @@
     <!-- HEADER -->
     <header>
       <div class="hdr-left">
-        <div class="hdr-logo">ARC V2</div>
+        <div class="hdr-logo">ARC V3</div>
         <div class="hdr-sep"></div>
         <div class="hdr-char">
           <div class="hdr-name" id="hdrName">NOVO PERSONAGEM</div>
@@ -1785,7 +2052,7 @@
       <div class="hdr-right">
         <div style="display:flex;gap:6px;align-items:center">
           <div class="dot-online"></div>
-          <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--green)">ONLINE</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--green)">ONLINE</span>
         </div>
         <button class="btn btn-gold btn-sm" onclick="exportChar()" title="Baixar personagem como arquivo .json">[
           EXPORTAR ]</button>
@@ -1801,12 +2068,13 @@
       <button class="tab" onclick="switchTab('personagem')">PERSONAGEM</button>
       <button class="tab" onclick="switchTab('titulos')">TÍTULOS</button>
       <button class="tab" onclick="switchTab('classes')">CLASSES</button>
+      <button class="tab" onclick="switchTab('regras')">REGRAS</button>
       <button class="tab" onclick="switchTab('notas')">NOTAS</button>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════
      TAB: FICHA
-═══════════════════════════════════════════════════════ -->
+    ═══════════════════════════════════════════════════════ -->
     <div id="tab-ficha" class="tab-content active">
 
       <!-- SUMMARY BAR -->
@@ -1929,7 +2197,7 @@
             <div class="g3" style="gap:10px">
               <div class="field">
                 <span class="lbl">INICIATIVA</span>
-                <div class="computed" id="iniciativaDisp" style="font-size:16px">+0</div>
+                <div class="computed" id="iniciativaDisp" style="font-size:20px">+0</div>
               </div>
               <div class="field">
                 <span class="lbl">MOVIMENTO (m)</span>
@@ -1988,15 +2256,66 @@
                   value="0" oninput="autosave()"></div>
             </div>
             <div class="sep"></div>
-            <div class="lbl mb8">PONTOS DE INSPIRAÇÃO</div>
-            <div style="display:flex;align-items:center;gap:12px">
-              <button class="c-btn" onclick="changePI(-1)">−</button>
-              <div style="display:flex;gap:8px" id="piDots"></div>
-              <button class="c-btn" onclick="changePI(1)">+</button>
-              <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txt-d)">máx. 3</span>
+            <div class="g2" style="gap:14px">
+              <div>
+                <div class="lbl mb8">PONTOS DE INSPIRAÇÃO</div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <button class="c-btn" onclick="changePI(-1)">−</button>
+                  <div style="display:flex;gap:8px" id="piDots"></div>
+                  <button class="c-btn" onclick="changePI(1)">+</button>
+                </div>
+                <div class="sk-desc mt8">Máx. 3</div>
+              </div>
+              <div>
+                <div class="bar-hdr mb8">
+                  <span class="lbl">NÍVEL DE COBERTURA</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <button class="c-btn" onclick="changeCobertura(-1)">−</button>
+                  <div style="display:flex;gap:8px" id="coberturaDots"></div>
+                  <button class="c-btn" onclick="changeCobertura(1)">+</button>
+                  <span style="font-family:'Orbitron',monospace;font-size:15px;color:var(--gold);letter-spacing:2px"
+                    id="coberturaLabel">NENHUMA</span>
+                </div>
+                <div class="sk-desc mt8" id="coberturaDesc">Sem cobertura no momento.</div>
+              </div>
+            </div>
+            <div class="sep"></div>
+            <div class="g2" style="gap:14px">
+              <div class="field">
+                <div class="bar-hdr">
+                  <span class="lbl">COMBO SOLO</span>
+                  <span class="badge badge-blue" id="comboSoloBonus">+0 dano / +0 acerto</span>
+                </div>
+                <div class="attr-ctrl mt4">
+                  <button class="c-btn" onclick="changeCombo('Solo',-1)">−</button>
+                  <span class="c-val" id="comboSoloVal">0</span>
+                  <button class="c-btn" onclick="changeCombo('Solo',1)">+</button>
+                </div>
+                <div class="sk-desc mt4">Não atacar por 1 rodada ou errar um ataque reseta o seu Combo.</div>
+              </div>
+              <div class="field">
+                <div class="bar-hdr">
+                  <span class="lbl">COMBO EM EQUIPE</span>
+                  <span class="badge badge-blue" id="comboEquipeBonus">+0 dano / +0 acerto</span>
+                </div>
+                <div class="attr-ctrl mt4">
+                  <button class="c-btn" onclick="changeCombo('Equipe',-1)">−</button>
+                  <span class="c-val" id="comboEquipeVal">0</span>
+                  <button class="c-btn" onclick="changeCombo('Equipe',1)">+</button>
+                </div>
+                <div class="sk-desc mt4">Atacar tem 20% de chance de falha, aumentando em 10% para cada aliado a mais.
+                  Não atacar por 1 rodada ou errar todos os ataques reseta o seu Combo em equipe.</div>
+              </div>
             </div>
           </div>
 
+          <!-- EFEITOS NEG/POS -->
+          <div class="panel">
+            <div class="panel-title">EFEITOS NEGATIVOS/POSITIVOS</div>
+            <div id="dotExtrasWrap"></div>
+            <button class="dashed-btn" onclick="addDotExtra()">+ ADICIONAR EFEITO</button>
+          </div>
         </div>
 
         <!-- RIGHT -->
@@ -2021,9 +2340,9 @@
                 <div class="attr-ctrl">
                   <button class="c-btn" onclick="changeFala(-1)">−</button>
                   <span class="c-val" id="falaVal">1</span>
-                  <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txt-d)">/</span>
+                  <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d)">/</span>
                   <input type="number" id="falaMax" value="1" min="0" oninput="autosave()"
-                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:13px;text-align:center;outline:none">
+                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:17px;text-align:center;outline:none">
                   <button class="c-btn btn-sm" onclick="resetFala()" title="Resetar">↺</button>
                 </div>
               </div>
@@ -2032,13 +2351,16 @@
                 <div class="attr-ctrl">
                   <button class="c-btn" onclick="changeCoringa(-1)">−</button>
                   <span class="c-val" id="coringaVal" style="color:var(--purple-b)">0</span>
-                  <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txt-d)">/</span>
+                  <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d)">/</span>
                   <input type="number" id="coringaMax" value="0" min="0" oninput="autosave()"
-                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:13px;text-align:center;outline:none">
+                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:17px;text-align:center;outline:none">
                   <button class="c-btn btn-sm" onclick="resetCoringa()" title="Resetar">↺</button>
                 </div>
               </div>
             </div>
+            <div class="sep"></div>
+            <div id="actDescBox"></div>
+            <div id="actTableBox"></div>
           </div>
 
           <!-- DEATH SAVES -->
@@ -2046,30 +2368,42 @@
             <div class="panel-title">TESTES DE MORTE</div>
             <div class="g2" style="gap:20px">
               <div class="death-col">
-                <span class="death-label" style="color:var(--green)">SUCESSOS</span>
-                <button class="c-btn" onclick="changeDeath('suc',1)"
-                  style="width:36px;height:36px;font-size:20px">+</button>
-                <div class="death-num suc" id="deathSucVal">0</div>
-                <button class="c-btn" onclick="changeDeath('suc',-1)"
-                  style="width:36px;height:36px;font-size:20px">−</button>
+                <div class="death-row"><span class="death-label" style="color:var(--green)">SUCESSOS</span></div>
+                <div class="death-row">
+                  <div class="death-col">
+                    <button class="c-btn" onclick="changeDeath('suc',-1)"
+                      style="width:36px;height:36px;font-size:24px">-</button>
+                  </div>
+                  <div class="death-num suc" class="death-col" id="deathSucVal">0</div>
+                  <div class="death-col">
+                    <button class="c-btn" onclick="changeDeath('suc',1)"
+                      style="width:36px;height:36px;font-size:24px">+</button>
+                  </div>
+                </div>
               </div>
               <div class="death-col">
-                <span class="death-label" style="color:var(--red)">FALHAS</span>
-                <button class="c-btn" onclick="changeDeath('mort',1)"
-                  style="width:36px;height:36px;font-size:20px">+</button>
-                <div class="death-num mort" id="deathMortVal">0</div>
-                <button class="c-btn" onclick="changeDeath('mort',-1)"
-                  style="width:36px;height:36px;font-size:20px">−</button>
+                <div class="death-row"><span class="death-label" style="color:var(--red)">FALHAS</span></div>
+                <div class="death-row">
+                  <div class="death-col">
+                    <button class="c-btn" onclick="changeDeath('mort',-1)"
+                      style="width:36px;height:36px;font-size:24px">-</button>
+                  </div>
+                  <div class="death-num mort" class="death-col" id="deathMortVal">0</div>
+                  <div class="death-col">
+                    <button class="c-btn" onclick="changeDeath('mort',1)"
+                      style="width:36px;height:36px;font-size:24px">+</button>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="sep"></div>
+            <div class="sep" style="opacity:0"></div>
             <div class="lbl mb8">DEGRADAÇÃO CORPORAL</div>
             <div style="display:flex;gap:8px;align-items:center">
               <div class="degradpip" id="deg0" onclick="toggleDeg(0)"></div>
               <div class="degradpip" id="deg1" onclick="toggleDeg(1)"></div>
               <div class="degradpip" id="deg2" onclick="toggleDeg(2)"></div>
               <div class="degradpip" id="deg3" onclick="toggleDeg(3)"></div>
-              <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d);margin-left:6px"
+              <span style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);margin-left:6px"
                 id="degLabel">Nenhuma queda</span>
             </div>
           </div>
@@ -2093,6 +2427,7 @@
                 <div class="dot-field"><span class="dot-lbl">DURAÇÃO</span><input class="dot-inp" type="text"
                     id="sangDur" placeholder="X rodadas" oninput="autosave()"></div>
               </div>
+              <div class="sk-desc mt8" id="sangDescBox"></div>
             </div>
             <!-- Queimadura -->
             <div class="dot-block que mt8" id="dotQueim">
@@ -2110,6 +2445,7 @@
                 <div class="dot-field"><span class="dot-lbl">DURAÇÃO</span><input class="dot-inp" type="text"
                     id="queimDur" placeholder="X rodadas" oninput="autosave()"></div>
               </div>
+              <div class="sk-desc mt8" id="queimDescBox"></div>
             </div>
             <!-- Envenenamento -->
             <div class="dot-block env mt8" id="dotEnv">
@@ -2123,12 +2459,9 @@
                 <div class="dot-field"><span class="dot-lbl">EFEITO</span><input class="dot-inp" type="text"
                     id="envEfeito" placeholder="efeito adicional" oninput="autosave()" style="width:140px"></div>
               </div>
+              <div class="sk-desc mt8" id="envDescBox"></div>
             </div>
-            <!-- Extras -->
-            <div id="dotExtrasWrap"></div>
-            <button class="dashed-btn" onclick="addDotExtra()">+ ADICIONAR EFEITO</button>
           </div>
-
         </div>
       </div>
 
@@ -2140,9 +2473,9 @@
           <div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
               <div>
-                <div style="font-family:'Orbitron',monospace;font-size:16px;color:var(--blue);letter-spacing:2px">CORPO
+                <div style="font-family:'Orbitron',monospace;font-size:20px;color:var(--blue);letter-spacing:2px">CORPO
                 </div>
-                <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d)">Força · Vigor ·
+                <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d)">Força · Vigor ·
                   Agilidade</div>
               </div>
               <div class="attr-ctrl">
@@ -2159,9 +2492,9 @@
           <div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
               <div>
-                <div style="font-family:'Orbitron',monospace;font-size:16px;color:var(--purple-b);letter-spacing:2px">
+                <div style="font-family:'Orbitron',monospace;font-size:20px;color:var(--purple-b);letter-spacing:2px">
                   MENTE</div>
-                <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d)">Habilidade ·
+                <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d)">Habilidade ·
                   Sincronia · Intelecto</div>
               </div>
               <div class="attr-ctrl">
@@ -2180,12 +2513,12 @@
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
               <div>
                 <div
-                  style="font-family:'Orbitron',monospace;font-size:16px;color:var(--gold);letter-spacing:2px;display:flex;align-items:center;gap:10px">
+                  style="font-family:'Orbitron',monospace;font-size:20px;color:var(--gold);letter-spacing:2px;display:flex;align-items:center;gap:10px">
                   ALMA
                   <span
-                    style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold);border:1px solid rgba(245,158,11,.4);padding:2px 7px;letter-spacing:1px">DESBLOQUEADO</span>
+                    style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--gold);border:1px solid rgba(245,158,11,.4);padding:2px 7px;letter-spacing:1px">DESBLOQUEADO</span>
                 </div>
-                <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d)">Conexão ·
+                <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d)">Conexão ·
                   Entendimento</div>
               </div>
               <div class="attr-ctrl">
@@ -2203,9 +2536,9 @@
             style="grid-column:span 2;border-top:1px solid rgba(0,212,255,0.08);padding-top:14px">
             <div style="display:flex;align-items:center;gap:14px">
               <div
-                style="font-family:'Orbitron',monospace;font-size:16px;color:rgba(245,158,11,.25);letter-spacing:2px">
+                style="font-family:'Orbitron',monospace;font-size:20px;color:rgba(245,158,11,.25);letter-spacing:2px">
                 ALMA</div>
-              <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d);letter-spacing:1px">
+              <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);letter-spacing:1px">
                 Bloqueado — requer <span id="almaReqText" style="color:rgba(245,158,11,.5)">Corpo 7 e Mente 7</span>
               </div>
               <div style="flex:1;height:4px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden">
@@ -2279,7 +2612,7 @@
 
     <!-- ═══════════════════════════════════════════════════════
      TAB: PERSONAGEM
-═══════════════════════════════════════════════════════ -->
+    ═══════════════════════════════════════════════════════ -->
     <div id="tab-personagem" class="tab-content">
       <div class="g2" style="gap:14px">
         <!-- COL 1: Identity + Personality -->
@@ -2368,14 +2701,14 @@
 
     <!-- ═══════════════════════════════════════════════════════
      TAB: TÍTULOS
-═══════════════════════════════════════════════════════ -->
+    ═══════════════════════════════════════════════════════ -->
     <div id="tab-titulos" class="tab-content">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <div>
           <span class="lbl">RANK DO PERSONAGEM:</span>
           <span id="rankDisplay" class="rank-C"
-            style="font-family:'Orbitron',monospace;font-size:18px;margin-left:10px">C</span>
-          <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txt-d);margin-left:12px"
+            style="font-family:'Orbitron',monospace;font-size:22px;margin-left:10px">C</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d);margin-left:12px"
             id="titleCountDisp">0/4 títulos</span>
         </div>
         <button class="btn btn-gold btn-sm" onclick="addTitle()">+ ADICIONAR TÍTULO</button>
@@ -2387,7 +2720,7 @@
 
     <!-- ═══════════════════════════════════════════════════════
      TAB: CLASSES
-═══════════════════════════════════════════════════════ -->
+    ═══════════════════════════════════════════════════════ -->
     <div id="tab-classes" class="tab-content">
       <div class="g2" style="gap:14px">
         <!-- Classe Geral -->
@@ -2431,7 +2764,7 @@
 
     <!-- ═══════════════════════════════════════════════════════
      TAB: NOTAS
-═══════════════════════════════════════════════════════ -->
+    ═══════════════════════════════════════════════════════ -->
     <div id="tab-notas" class="tab-content">
       <div class="g2" style="gap:14px">
         <div class="col">
@@ -2450,7 +2783,7 @@
           <div class="panel" style="flex:1">
             <div class="panel-title">ANOTAÇÕES</div>
             <div
-              style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d);margin-bottom:8px;letter-spacing:1px">
+              style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);margin-bottom:8px;letter-spacing:1px">
               — lista de marcadores · 1. lista numerada (auto-formata ao pressionar Enter)
             </div>
             <textarea class="notes-ta" id="notesMain" oninput="autosave()"
@@ -2458,6 +2791,13 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+     TAB: REGRAS (referência — "Sistemas e Esclarecimentos" do Doc)
+    ═══════════════════════════════════════════════════════ -->
+    <div id="tab-regras" class="tab-content">
+      <div id="regrasWrap"></div>
     </div>
 
   </div><!-- /wrap -->
@@ -2524,18 +2864,139 @@
       { name: 'Alinhamento', sub: 'sincronia' }, { name: 'Manipulação', sub: 'sincronia' }, { name: 'Presença', sub: 'sincronia' }, { name: 'Canalização', sub: 'sincronia' }
     ];
 
-    const STATUS_NEG = ['Morrendo', 'Terreno Difícil', 'Quebrado', 'Amedrontado', 'Atordoado', 'Membro Quebrado', 'Imobilizado', 'Em Choque', 'Vulnerável', 'Exaustão', 'Exaustão Grave', 'Fraqueza', 'Derrubado', 'Desprotegido', 'Exposto', 'Suprimido', 'Cegueira'];
-    const STATUS_POS = ['Fortificado', 'Acelerado', 'Focado', 'Imparável', 'Blindado', 'Energizado', 'Fortalecido', 'Protegido'];
+    let STATUS_NEG = ['Morrendo', 'Terreno Difícil', 'Quebrado', 'Amedrontado', 'Atordoado', 'Membro Quebrado', 'Imobilizado', 'Em Choque', 'Vulnerável', 'Exaustão', 'Exaustão Grave', 'Fraqueza', 'Derrubado', 'Desprotegido', 'Exposto', 'Suprimido', 'Cegueira'];
+    let STATUS_POS = ['Fortificado', 'Acelerado', 'Focado', 'Imparável', 'Blindado', 'Energizado', 'Fortalecido', 'Protegido'];
     const STATUS_DURATIONS = { Atordoado: '1 turno', Amedrontado: 'até pass. Mente', Imobilizado: 'até pass. Corpo', 'Em Choque': 'até pass. Mente', Derrubado: 'até levantar', Desprotegido: '1 ataque', Exposto: '1 ataque', Suprimido: 'fim do turno', Acelerado: '1 turno', Imparável: '1 turno', Blindado: '1 ataque', Energizado: '1 turno', Protegido: '1 dano' };
-
-    const NATURE_DATA = {
-      Brutamontes: { buff: '+2 vida extra por nível (+5 a partir do nível 10)', debuff: 'CA naturalmente -2', habUnica: { name: 'Avanço Brutal', action: 'Especial', cost: '4S', desc: 'Avança a distância de seu movimento, atacando e empurrando todos na linha (inclui aliados), causando 2d6+(2×Corpo).' }, hp: '10 + 5d4 + 5×Corpo | Por nível: +5 + 3×Corpo', sta: '5 + 3d6 + 3×Corpo | Por nível: +2 + Corpo | Rec: 5>7>10>15' },
-      Guerreiro: { buff: 'Começa usando armas adjacentes leves e médias sem restrição de Corpo', debuff: '1 desvantagem em qualquer arma à distância', habUnica: { name: 'Rajada de Golpes', action: 'Especial', cost: '5S', desc: '1× por luta, por 2 rodadas, pode atacar uma vez a mais por ação padrão.' }, hp: '10 + 3d8 + 3×Corpo | Por nível: +5 + 2×Corpo', sta: '5 + 2d4 + 2×Corpo | Por nível: +2 + Bôn.Corpo+Bôn.Mente | Rec: 3>5>8>12' },
-      Atleta: { buff: 'Gasta 1 stamina a menos por ação (mín. 1)', debuff: '3 rodadas atacando seguidas = Exaustão', habUnica: { name: 'Limite Zero', action: 'Especial', cost: '99S', desc: '1× por cena: 2 rodadas sem gastar stamina de nenhuma fonte. Após: debuff de Atleta reseta e stamina recupera pela metade.' }, hp: '10 + 3d6 + 2×Corpo | Por nível: +5 + 2×Corpo', sta: '5 + 2d4 + 2×Mente | Por nível: +2 + Bôn.Corpo+Bôn.Mente | Rec: 3>6>9>13' },
-      Velocista: { buff: 'Começa com 1 reação extra', debuff: 'Toma 2 de dano a mais de ataques', habUnica: { name: 'Tornado de Lâminas', action: 'Especial', cost: '15S', desc: 'Avança em direção a todos os inimigos na cena, ignorando restrições, e ataca todos com desvantagem. Se acertar todos, retorna e ataca novamente (½ dano). Ataques no avanço não gastam stamina.' }, hp: '10 + 2d6 + Corpo | Por nível: +5 + Corpo+Mente', sta: '5 + 3d6 + 3×Mente | Por nível: +2 + Mente | Rec: 4>6>10>15' }
+    const STATUS_DESC = {
+      'Morrendo': 'Os pontos de vida foram zerados. Quando estiver sob esse efeito você deverá rolar 1d2 todo início do seu turno, caindo 1 você ganha 1 ponto de morte, caindo 2 você ganha 1 ponto de vida, com um máximo de 3 para ambos. Caso esteja sob esse efeito, um aliado poderá gastar o seu turno completo para lhe garantir um sucesso instantaneamente. Enquanto nesse efeito, você pode, no seu turno, escolher receber 1 ponto de morte em troca de uma ação, podendo ser um ataque, movimento, skill, uso de item, etc.',
+      'Terreno Difícil': 'O seu movimento é reduzido pela metade.',
+      'Quebrado': 'Você recebe metade da cura que receberia normalmente.',
+      'Amedrontado': 'Você é incapaz de se mover na direção do que te causou esse status e tem desvantagem em todos os testes até passar em um teste de Mente.',
+      'Atordoado': 'Você não pode agir nem reagir e perde o seu próximo turno.',
+      'Membro Quebrado': 'Você fica incapaz de usar o membro e perde temporariamente 2 em Corpo.',
+      'Imobilizado': 'Não pode reagir ou usar habilidades até passar em um teste de Corpo contra o alvo. Cada teste falho lhe garante uma vantagem no próximo teste.',
+      'Em Choque': 'Você fica paralisado até passar em um teste de Mente, ficando incapaz de reagir a qualquer coisa.',
+      'Vulnerável': 'Enquanto ativo o alvo toma o dobro do dano de qualquer fonte.',
+      'Exaustão': 'Após esse efeito ser ativado, você precisará ficar 1 rodada completa sem gastar stamina, e cada ação que você fizer enquanto exausto gasta o dobro de stamina. Fazer ações 2 rodadas seguidas enquanto exausto lhe dará o efeito de exaustão grave.',
+      'Exaustão Grave': 'Este efeito funciona similarmente como o morrendo, você cai no chão, não podendo agir nem reagir, e é necessário fazer testes de "levantamento" no início de seus turnos, funcionando como testes de morte. Ao chegar em 2 sucessos, você se levanta, porém ainda em exaustão, ao chegar em 2 fracassos, você desmaia, sendo necessário um turno completo de um aliado para lhe acordar.',
+      'Fraqueza': 'Reduz o dano em 1d, caso tenha apenas 1d de dano, reduza a categoria do dado (1d8 → 1d6).',
+      'Derrubado': 'Alvos com esse efeito precisam gastar sua ação de movimento para se levantar e não podem usar ataques adjacentes.',
+      'Desprotegido': 'Reduz sua CA à 0 para o próximo ataque que receber.',
+      'Exposto': 'Não pode reagir ao próximo ataque que receber.',
+      'Suprimido': 'Você não pode usar skills ativas nem reações especiais até o fim do seu próximo turno.',
+      'Cegueira': 'Reações são feitas com 2 desvantagens verdadeiras, só pode fazer ataques em área e não pode usar nenhuma skill que exija visão.',
+      'Fortificado': 'Recebe +10 em rolagens de defesa e resistência.',
+      'Acelerado': 'Ganha uma ação de movimento extra no turno.',
+      'Focado': 'Recebe 1 vantagem e fica imune a desvantagens em testes de Mente.',
+      'Imparável': 'Ignora Terreno difícil, Derrubado e efeitos que reduzam movimento até seu próximo turno.',
+      'Blindado': 'Aumenta sua CA em +50% para o próximo ataque que receber.',
+      'Energizado': 'No seu próximo turno, todo custo de stamina é reduzido pela metade.',
+      'Fortalecido': 'Aumenta o seu dano em +1d.',
+      'Protegido': 'Diminui o próximo dano que receber pela metade.'
     };
 
-    const SUBATTR_SKILLS = {
+    // Regras da seção "Sistemas e Esclarecimentos" (Doc → Firebase → ARC; este é o fallback embutido).
+    // efeitos neg/pos ficam em STATUS_* acima; Combos/Coberturas foram simplificados à mão (fora do sync).
+    const SYSTEMS_EMBEDDED = {
+      dot: {
+        intro: 'Stacks do mesmo DoT acumulam o dano que você recebe (2 stacks de 1d6 causam 2d6 de dano) e resetam a duração do efeito.',
+        items: [
+          { name: 'Sangramento', desc: 'Você toma dano no começo de seu turno. Toda cura que você receber é reduzida em 25%. Você pode parar sangramentos com equipamentos médicos e uma ação padrão.', note: 'Esse efeito pode stackar até 3x, quando chegar no 3° stack, você toma o dano maximizado de todos os acúmulos de uma só vez e os próximos danos de sangramento são dobrados' },
+          { name: 'Queimadura', desc: 'Você toma dano por cada ação que fizer no seu turno. Seus equipamentos podem ser danificados pelas chamas no final do seu turno com 33% de chance, além disso, se entrar em contato com alguém, a outra pessoa tem 25% de chance de ganhar 1 stack desse efeito. Você pode apagar o fogo com uma ação de movimento.', note: 'Esse efeito pode stackar até 2x' },
+          { name: 'Envenenado', desc: 'Você toma dano no início da rodada. O veneno além do dano lhe causa efeitos negativos aleatórios no início da rodada, você rola 1d8 entre: 1) quebrado 2) em choque 3) vulnerável 4) exaustão 5) fraqueza 6) desprotegido 7) exposto 8) cegueira. Você pode se curar com um antídoto e uma ação completa.', note: 'Esse efeito não é stackável' }
+        ]
+      },
+      distancias: {
+        intro: null,
+        items: [
+          { name: 'Adjacente', desc: '1 metro' }, { name: 'Curta', desc: '2 - 9 metros' },
+          { name: 'Média', desc: '10 - 24 metros' }, { name: 'Longa', desc: '25 - 49 metros' },
+          { name: 'Extrema', desc: '50+ metros' }
+        ]
+      },
+      duasArmas: {
+        intro: 'Para empunhar duas armas simultaneamente, ambas devem ser leves ou médias e você precisa atender os requisitos de Corpo de ambas. Armas que exigem mais de uma ação para usar não podem ser usadas com outras armas.',
+        items: [
+          { name: 'Melee + melee', desc: 'Você ataca com a arma principal usando sua ação padrão normalmente. Pode então atacar com a arma secundária gastando 1 ação bônus, com -2 no acerto. A arma secundária não aplica o bônus de atributo no dano, apenas o dado base e não aplica efeitos' },
+          { name: 'Ranged + ranged', desc: 'Você atira com ambas as armas simultaneamente como uma única ação padrão, rolando os dois ataques ao mesmo tempo como um só, com -3 no acerto. Os dois ataques devem ter o mesmo alvo.' },
+          { name: 'Melee + ranged', desc: 'Você ataca com a arma corpo a corpo usando sua ação padrão normalmente. A arma à distância pode ser usada como ação bônus, mas apenas contra o mesmo alvo do ataque melee e somente se ele estiver em distância adjacente ou curta. Ambas as armas sofrem -2 no acerto.' }
+        ]
+      },
+      critico: {
+        intro: 'A margem de crítico não pode ser menor que 11.',
+        items: [
+          { name: 'Forte (nat 20)', desc: 'Dano maximizado e multiplicado' },
+          { name: 'Fraco (não nat 20)', desc: 'Dano apenas multiplicado' }
+        ]
+      },
+      categoriasDano: {
+        intro: null,
+        items: [
+          { name: 'Padrão', desc: 'É o dano e a redução que todos têm normalmente' },
+          { name: 'Verdadeiro', desc: 'O dano verdadeiro ignora a redução padrão. A redução verdadeira reduz o dano verdadeiro e é 2x mais efetiva contra o dano padrão' },
+          { name: 'Dano absoluto', desc: 'Ele é irredutível (exceto quando algo fala explicitamente que reduz), o número que aparecer é a vida que você vai perder. Também ignora skills básicas de "você resiste com 1 de HP" ou similares, como Vigor 10, "Instinto de Preservação", entre outros' }
+        ]
+      },
+      tiposDano: {
+        intro: 'Ser resistente à um tipo de dano reduz a categoria dos dados de dano em 1 (d8 → d6). Ser vulnerável à um tipo de dano aumenta a categoria dos dados de dano em 1 (d8 → d10)',
+        items: [
+          { name: 'Balístico', desc: 'projéteis, flechas, lanças' },
+          { name: 'Energia', desc: 'laser, plasma, elétrico' },
+          { name: 'Explosivo', desc: 'área, fragmentação, incendiário' },
+          { name: 'Físico', desc: 'cortante, perfurante, contundente' }
+        ]
+      },
+      chance: { intro: 'Sempre que algo tiver uma chance você irá rolar 1d100, caso caia um número igual ou menor do que o do teste aquilo irá acontecer (exemplo: uma ação tem 20 de chance de causar sangramento, caso cair 20 ou menos, o sangramento é aplicado)', items: [] },
+      arredondamentos: { intro: 'Sempre para cima, a não ser que esteja explicitamente escrito o contrário', items: [] }
+    };
+
+    // Seção "# Ações" do Doc (Doc → Firebase → ARC; este é o fallback embutido).
+    const ACTIONS_EMBEDDED = {
+      desc: 'Caso o atacante não passe da CA do defensor, ele erra naturalmente, sem necessidade de reação. Caso passe, o defensor tem a opção de usar as suas ações defensivas. Em casos de ambas ações ofensivas e defensivas critarem, vence o maior resultado total. Se o resultado ainda for o mesmo, ambos rolam 1d20 puro até desempatar.',
+      columns: {
+        ofensivas: {
+          intro: null,
+          items: [
+            { name: 'Atacar', cost: null, desc: 'Consome 1 ação padrão e seu teste é 1d20+Corpo/Mente+Implante. Ataques desarmados causam 1d6+Corpo.' },
+            { name: 'Ataque de oportunidade', cost: null, desc: 'Consome 1 reação, pode ser usado quando um inimigo: 1- se move em distância adjacente de você; 2- sofre uma falha crítica em um ataque contra você; 3- esquivou ou bloqueou de um ataque seu sem crítico.' },
+            { name: 'Quebra', cost: null, desc: 'Consome 1 ação padrão e seu teste é 1d20+Corpo, pode escolher entre aplicar desprotegido ou exposto; em caso de crítico, aplique ambos.' },
+            { name: 'Desarme', cost: null, desc: 'Consome 1 ação bônus + 1 de movimento e seu teste é 1d20+Corpo+Mente.' }
+          ],
+          note: 'Ações ofensivas básicas custam 2S'
+        },
+        defensivas: {
+          intro: null,
+          items: [
+            { name: 'Esquivar', cost: null, desc: 'Consome 1 reação e seu teste é 1d20+Mente-Armadura, nega todo o dano que iria receber; em caso de crítico, poderá usar sua ação bônus para atacar o alvo com um ataque simples (não aplica efeitos).' },
+            { name: 'Bloquear', cost: null, desc: 'Consome 1 reação e seu teste é 1d20+Corpo+Armadura, reduz em 50% o dano recebido; em caso de crítico, reduza 75%. Gastando 1 ação bônus adicional, você pode entrar na frente de um ataque inimigo dentro de 5m de você — nesse caso o bloqueio é um sucesso automático sem possibilidade de crítico.' },
+            { name: 'Defesa precipitada', cost: null, desc: 'Consome 1 ação padrão e você ganha vantagem e um bônus de +3 na sua próxima ação defensiva.' },
+            { name: 'Mudança de postura', cost: null, desc: 'Consome 1 ação bônus + 1 ação de movimento, pode escolher entre ganhar +3 na CA, +5 em testes defensivos ou resistência a controle de grupo por 1 rodada.' },
+            { name: 'Leitura de campo', cost: null, desc: 'Consome o seu turno completo; por 1 rodada nenhum aliado pode sofrer ataques de oportunidade nem críticos fracos.' }
+          ],
+          note: 'Ações defensivas básicas custam 2S'
+        },
+        inspiradoras: {
+          intro: 'Você pode conceder aos seus aliados 1 ponto de inspiração fazendo algo que os inspira (um ataque que deu muito dano, um bloqueio perfeito) ou encorajá-los com 1 ação de fala. Inspirar por fala rola 1d20+bônus conforme a situação: <7 falha; 8-17 sucesso (+1 PI); 18+ sucesso alto (+2 PI).',
+          items: [
+            { name: 'Superar seus limites', cost: '1PI', desc: 'Transforma uma falha em um acerto, um acerto em um crítico, ou um crítico com +1x.' },
+            { name: 'Elevar sua ação', cost: '1PI', desc: 'Dobra o dano e/ou cura da sua próxima ação.' },
+            { name: 'Defender heroicamente', cost: '1PI', desc: 'Ignora um crítico inimigo, um ataque surpresa ou efeito de controle de grupo.' },
+            { name: 'Agir em sequência', cost: '1PI', desc: 'Segue atrás de uma ação de um aliado, mesmo se não for o seu turno. Essa ação é um sucesso automático.' },
+            { name: 'Dar mais um suspiro', cost: '2PI', desc: 'Em 0 de stamina, não gasta stamina no próximo turno. Em 0 de vida, luta até receber mais um ataque. Em 0 de sanidade, resiste por mais 1 rodada sem enlouquecer.' }
+          ],
+          note: 'Você pode ter até um máximo de 3 pontos de inspiração'
+        }
+      }
+    };
+
+    const NATURE_DATA = {
+      Brutamontes: { buff: '+2 vida extra por nível (+5 a partir do nível 10)', debuff: 'CA naturalmente -2', habUnica: { name: 'Avanço Brutal', action: 'Especial', cost: '4S', desc: 'Avança a distância de seu movimento, atacando e empurrando todos na linha (inclui aliados), causando 2d6+(2×Corpo).' }, hp: '10 + 5d4 + 5×Corpo | Por nível: +5 + 3×Corpo', sta: '5 + 3d6 + 3×Corpo | Por nível: +3 + 3×Corpo | Rec: 5>7>10>15' },
+      Guerreiro: { buff: 'Começa usando armas adjacentes leves e médias sem restrição de Corpo', debuff: '1 desvantagem em qualquer arma à distância', habUnica: { name: 'Rajada de Golpes', action: 'Especial', cost: '5S', desc: '1× por luta, por 2 rodadas, pode atacar uma vez a mais por ação padrão.' }, hp: '10 + 3d8 + 3×Corpo | Por nível: +5 + 2×Corpo', sta: '5 + 2d4 + 2×Corpo | Por nível: +3 + 2×Corpo+Mente | Rec: 3>5>8>12' },
+      Atleta: { buff: 'Gasta 1 stamina a menos por ação (mín. 1)', debuff: '3 rodadas atacando seguidas = Exaustão', habUnica: { name: 'Limite Zero', action: 'Especial', cost: '99S', desc: '1× por cena: 2 rodadas sem gastar stamina de nenhuma fonte. Após: debuff de Atleta reseta e stamina recupera pela metade.' }, hp: '10 + 3d6 + 2×Corpo | Por nível: +5 + 2×Corpo', sta: '5 + 2d4 + 2×Mente | Por nível: +3 + Corpo+2×Mente | Rec: 3>6>9>13' },
+      Velocista: { buff: 'Começa com 1 reação extra', debuff: 'Toma 2 de dano a mais de ataques', habUnica: { name: 'Tornado de Lâminas', action: 'Especial', cost: '15S', desc: 'Avança em direção a todos os inimigos na cena, ignorando restrições, e ataca todos com desvantagem. Se acertar todos, retorna e ataca novamente (½ dano). Ataques no avanço não gastam stamina.' }, hp: '10 + 2d6 + Corpo | Por nível: +5 + Corpo+Mente', sta: '5 + 3d6 + 3×Mente | Por nível: +3 + 3×Mente | Rec: 4>6>10>15' }
+    };
+
+    const SUBATTR_SKILLS_EMBEDDED = {
       forca: [
         { name: 'Golpe Fortalecido', action: 'Passiva', cost: null, desc: '+2 dano e +1 acerto de ataques desarmados.' },
         { name: 'Golpe Adicional', action: 'Reação', cost: '2S', desc: 'Ao golpear com ataque adjacente, ataca novamente com desvantagem causando Corpo×2 de dano.' },
@@ -2739,34 +3200,10 @@
       }
     };
 
-    // ── Sincronização de regras (Classes) via Firebase, com fallback offline ──
-    let CLASS_DATA = CLASS_DATA_EMBEDDED;
-    const FB_RULES_URL = 'https://intitulations-default-rtdb.firebaseio.com/arc_rules.json';
-    function _isNonEmptyObj(o) { return o && typeof o === 'object' && Object.keys(o).length > 0; }
-    async function loadClassData() {
-      let remote = null;
-      try {
-        const ctrl = new AbortController();
-        const tid = setTimeout(() => ctrl.abort(), 4000);
-        const resp = await fetch(FB_RULES_URL + '?t=' + Date.now(), { signal: ctrl.signal });
-        clearTimeout(tid);
-        if (resp.ok) {
-          const data = await resp.json();
-          if (data && _isNonEmptyObj(data.classes)) {
-            remote = data.classes;
-            localStorage.setItem('arc_rules_cache', JSON.stringify(data.classes));
-          }
-        }
-      } catch (e) { /* offline / timeout: usa fallback embutido/cache */ }
-      let cached = null;
-      try { cached = JSON.parse(localStorage.getItem('arc_rules_cache') || 'null'); } catch (e) { }
-      CLASS_DATA = _isNonEmptyObj(remote) ? remote : (_isNonEmptyObj(cached) ? cached : CLASS_DATA_EMBEDDED);
-    }
-
     const SUBS_ALMA = ['conexao', 'entendimento'];
     const SUB_LABEL_ALMA = { conexao: 'Conexão', entendimento: 'Entendimento' };
 
-    const SUBATTR_SKILLS_ALMA = {
+    const SUBATTR_SKILLS_ALMA_EMBEDDED = {
       conexao: [
         { name: 'Vínculo Astral', action: 'Reação', cost: '1S', desc: 'Quando errar um ataque, pode usar essa habilidade para re-rolar o teste, limitado a 1 uso por cada 2 rodadas.' },
         { name: 'Custo Reduzido em Combo', action: 'Passiva', cost: null, desc: 'Seus custos de stamina enquanto mantiver os efeitos de combo são reduzidos em X (igual ao buff de acerto e dano recebido por combo), máx. 5.' },
@@ -2797,7 +3234,7 @@
     let S = {
       name: '', nivel: 0, natureza: '', classe: '', classeEsp: '', rank: 'C',
       hpCur: 0, hpMax: 10, hpTemp: 0, staCur: 0, staMax: 5, staTemp: 0, sanCur: 100, sanMax: 100,
-      movimento: 8, stamRed: 0, pi: 0,
+      movimento: 8, stamRed: 0, pi: 0, comboSolo: 0, comboEquipe: 0, cobertura: 0,
       caArmadura: 0, caImplantes: 0, caOutros: 0,
       critMult: '2×', critMargin: 20, danoFisico: '1d6+Corpo', reducao: 0,
       actPadrao: 1, actBonus: 1, actMov: 1, actReacao: 1,
@@ -2823,15 +3260,91 @@
     };
 
     // ═══════════════════════════════════════════════════════════════
+    // SYNC: regras do Doc → Firebase → ARC (fallback embutido/cache)
+    // ═══════════════════════════════════════════════════════════════
+    let CLASS_DATA = CLASS_DATA_EMBEDDED;
+    let SUBATTR_SKILLS = SUBATTR_SKILLS_EMBEDDED;
+    let SUBATTR_SKILLS_ALMA = SUBATTR_SKILLS_ALMA_EMBEDDED;
+    let SYSTEMS = SYSTEMS_EMBEDDED;
+    let ACTIONS = ACTIONS_EMBEDDED;
+    const FB_RULES_URL = 'https://intitulations-default-rtdb.firebaseio.com/arc_rules.json';
+    const _SUB_CM = ['forca', 'vigor', 'agilidade', 'habilidade', 'sincronia', 'intelecto'];
+    const _SUB_ALMA = ['conexao', 'entendimento'];
+    function _isNonEmptyObj(o) { return o && typeof o === 'object' && Object.keys(o).length > 0; }
+    function _pick(obj, keys) { const o = {}; keys.forEach(k => { if (obj && obj[k]) o[k] = obj[k]; }); return o; }
+    async function loadRules() {
+      let data = null;
+      try {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 4000);
+        const resp = await fetch(FB_RULES_URL + '?t=' + Date.now(), { signal: ctrl.signal });
+        clearTimeout(tid);
+        if (resp.ok) { const d = await resp.json(); if (d) { data = d; localStorage.setItem('arc_rules_cache', JSON.stringify(d)); } }
+      } catch (e) { /* offline / timeout: usa cache/embutido */ }
+      if (!data) { try { data = JSON.parse(localStorage.getItem('arc_rules_cache') || 'null'); } catch (e) { } }
+      data = data || {};
+      if (_isNonEmptyObj(data.classes)) CLASS_DATA = data.classes;
+      if (_isNonEmptyObj(data.subattrs)) {
+        const cm = _pick(data.subattrs, _SUB_CM), al = _pick(data.subattrs, _SUB_ALMA);
+        if (_isNonEmptyObj(cm)) SUBATTR_SKILLS = cm;
+        if (_isNonEmptyObj(al)) SUBATTR_SKILLS_ALMA = al;
+      }
+      if (data.status && _isNonEmptyObj(data.status.natures)) {
+        Object.keys(data.status.natures).forEach(function (nat) {
+          if (NATURE_DATA[nat]) { // const permite mutar propriedades
+            const s = data.status.natures[nat];
+            if (s.hp) NATURE_DATA[nat].hp = s.hp;
+            if (s.sta) NATURE_DATA[nat].sta = s.sta;
+            if (s.buff) NATURE_DATA[nat].buff = s.buff;
+            if (s.debuff) NATURE_DATA[nat].debuff = s.debuff;
+            if (s.habUnica) NATURE_DATA[nat].habUnica = s.habUnica;
+          }
+        });
+      }
+      if (_isNonEmptyObj(data.systems)) {
+        SYSTEMS = Object.assign({}, SYSTEMS, data.systems);
+        // Efeitos neg/pos: nomes viram as listas dos dropdowns; descrições alimentam STATUS_DESC.
+        const en = data.systems.efeitosNegativos, ep = data.systems.efeitosPositivos;
+        if (en && en.items && en.items.length) { STATUS_NEG = en.items.map(i => i.name); en.items.forEach(i => { STATUS_DESC[i.name] = i.desc; }); }
+        if (ep && ep.items && ep.items.length) { STATUS_POS = ep.items.map(i => i.name); ep.items.forEach(i => { STATUS_DESC[i.name] = i.desc; }); }
+      }
+      if (data.actions && (data.actions.desc || _isNonEmptyObj(data.actions.columns))) ACTIONS = data.actions;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
     // INIT & SAVE
     // ═══════════════════════════════════════════════════════════════
+    // Torna todo painel colapsável (mesmo padrão da aba Regras): cada .panel-title clicável
+    // colapsa o conteúdo até o próximo .panel-title (ou fim do painel). Alguns painéis (ex:
+    // ARMAS/ARMADURAS) têm 2 títulos no mesmo painel — cada um vira uma seção independente.
+    function makePanelsCollapsible() {
+      document.querySelectorAll('.panel-title').forEach(title => {
+        title.classList.add('pt-collapsible');
+        title.insertAdjacentHTML('afterbegin', '<span class="pt-caret">▾</span>');
+        const body = document.createElement('div');
+        body.className = 'panel-body';
+        let node = title.nextSibling;
+        while (node && !(node.nodeType === 1 && node.classList.contains('panel-title'))) {
+          const next = node.nextSibling;
+          body.appendChild(node);
+          node = next;
+        }
+        title.after(body);
+        title.addEventListener('click', () => { title.classList.toggle('collapsed'); body.classList.toggle('collapsed'); });
+      });
+    }
+
     async function init() {
-      await loadClassData();
+      makePanelsCollapsible();
+      await loadRules();
       const saved = localStorage.getItem('arc_v1');
       if (saved) { try { S = { ...S, ...JSON.parse(saved) }; } catch (e) { } }
       buildPericiasTable();
       buildDotStacks();
       buildMulticlasse();
+      renderDotDescs();
+      renderActions();
+      buildRegras();
       loadDOM();
       updateAll();
       setupNotesFormat();
@@ -2936,6 +3449,8 @@
       updateBars();
       updateCA();
       updatePI();
+      updateCombos();
+      updateCobertura();
       updateSanTier();
       updateAttrPicks();
       updatePericiaBonuses();
@@ -2981,7 +3496,7 @@
           const defaults = {
             name: '', nivel: 0, natureza: '', classe: '', classeEsp: '', rank: 'C',
             hpCur: 0, hpMax: 10, hpTemp: 0, staCur: 0, staMax: 5, staTemp: 0, sanCur: 100, sanMax: 100,
-            movimento: 8, stamRed: 0, pi: 0, caArmadura: 0, caImplantes: 0, caOutros: 0,
+            movimento: 8, stamRed: 0, pi: 0, comboSolo: 0, comboEquipe: 0, cobertura: 0, caArmadura: 0, caImplantes: 0, caOutros: 0,
             critMult: '2×', critMargin: 20, danoFisico: '1d6+Corpo', reducao: 0,
             actPadrao: 1, actBonus: 1, actMov: 1, actReacao: 1, falaMax: 1, falaCur: 1,
             coringaMax: 0, coringaCur: 0, deathSuc: 0, deathMort: 0,
@@ -3026,6 +3541,8 @@
       updateBars();
       updateCA();
       updatePI();
+      updateCombos();
+      updateCobertura();
       updateSanTier();
       updateAttrPicks();
       updatePericiaBonuses();
@@ -3102,6 +3619,15 @@
       st('sanTier', label);
     }
 
+    // ponytail: guarded tooltip content; missing skill entry (LB alma levels, wrong dataset) → fallback instead of throw
+    function pickDescHtml(sk) {
+      if (!sk) return '<span class="desc-row">Sem habilidade</span>';
+      const cost = sk.cost ? ' [' + sk.cost + ']' : '';
+      return '<span class="desc-row" style="color: var(--txt); font-size: 15px; letter-spacing: 0.75px; padding-top: 8px; padding-bottom: 0; padding-left: 2%">' + sk.name + '</span>'
+        + '<span class="desc-row" style="color: var(--txt-d); font-size: 13px; border-bottom: 1px solid rgba(0, 212, 255, .25);">(' + sk.action + ')' + cost + '</span>'
+        + '<span class="desc-row">' + sk.desc + '</span>';
+    }
+
     function updateAttrPicks() {
       ['corpo', 'mente', 'alma'].forEach(attr => {
         const isAlma = attr === 'alma';
@@ -3118,11 +3644,13 @@
           html += `<div class="pick-row"><span class="pick-lv">${isLB ? 'LB' + (i - 6) : ('Nv.' + (i + 1))}</span>`;
           subs.forEach(s => {
             const sel = S[attr + 'Picks'][i] === s;
-            html += `<button class="pick-btn${isCorpo ? ' cor' : isAlma ? ' alm' : ' men'}${sel ? ' sel' : ''}${isLB ? ' lb' : ''}" onclick="setPick('${attr}',${i},'${s}')">${SUB_LABEL[s]}</button>`;
+            const cls = isCorpo ? ' cor' : isAlma ? ' alm' : ' men';
+            const sk = (isAlma ? SUBATTR_SKILLS_ALMA : SUBATTR_SKILLS)[s]?.[i];
+            html += `<button class="pick-btn${cls}${sel ? ' sel' : ''}${isLB ? ' lb' : ''}" onclick="setPick('${attr}',${i},'${s}')">${SUB_LABEL[s]}<span class="pick-desc${cls}">${pickDescHtml(sk)}</span></button>`;
           });
           html += `</div>`;
         }
-        container.innerHTML = html || '<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--txt-d);padding:4px">Aumente o atributo para distribuir pontos.</div>';
+        container.innerHTML = html || '<div style="font-family:\'Share Tech Mono\',monospace;font-size:14px;color:var(--txt-d);padding:4px">Aumente o atributo para distribuir pontos.</div>';
         const counts = {}; subs.forEach(s => counts[s] = 0);
         (S[attr + 'Picks'] || []).forEach(p => { if (p && counts[p] !== undefined) counts[p]++; });
         const dEl = document.getElementById(attr + '-derived');
@@ -3160,11 +3688,12 @@
             html += `<div class="pick-row"><span class="pick-lv">${isLB ? 'LB' + (i - 6) : ('Nv.' + (i + 1))}</span>`;
             SUBS_ALMA.forEach(s => {
               const sel = S.almaPicks[i] === s;
-              html += `<button class="pick-btn alm${sel ? ' sel' : ''}${isLB ? ' lb' : ''}" onclick="setPick('alma',${i},'${s}')">${SUB_LABEL_ALMA[s]}</button>`;
+              const sk = SUBATTR_SKILLS_ALMA[s]?.[i];
+              html += `<button class="pick-btn alm${sel ? ' sel' : ''}${isLB ? ' lb' : ''}" onclick="setPick('alma',${i},'${s}')">${SUB_LABEL_ALMA[s]}<span class="pick-desc alm">${pickDescHtml(sk)}</span></button>`;
             });
             html += `</div>`;
           }
-          almaCont.innerHTML = html || '<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:rgba(245,158,11,.4);padding:4px">Aumente Alma para distribuir pontos.</div>';
+          almaCont.innerHTML = html || '<div style="font-family:\'Share Tech Mono\',monospace;font-size:14px;color:rgba(245,158,11,.4);padding:4px">Aumente Alma para distribuir pontos.</div>';
         }
         const almaCounts = {}; SUBS_ALMA.forEach(s => almaCounts[s] = 0);
         (S.almaPicks || []).forEach(p => { if (p && almaCounts[p] !== undefined) almaCounts[p]++; });
@@ -3265,7 +3794,7 @@
     function buildDotStacks() { renderDotStacks('sangStacks', 0, 3, 'red'); renderDotStacks('queimStacks', 0, 2, 'red'); }
 
     function updateDegradacao() {
-      const labels = ['Nenhuma queda', '1ª — nada acontece', '2ª — vida capada em 25%', '3ª — perde membro permanente', '4ª — MORTE'];
+      const labels = ['Nenhuma queda', '1ª — nada acontece', '2ª — HP máximo -25%; recupera em descanso longo ou 2 sessões sem cair', '3ª — perde membro permanentemente', '4ª — MORTE'];
       let count = 0;
       S.degradacao.forEach((on, i) => {
         const el = document.getElementById('deg' + i); if (el) el.classList.toggle('on', !!on);
@@ -3350,6 +3879,54 @@
     function changePI(d) { S.pi = Math.max(0, Math.min(3, (S.pi || 0) + d)); updatePI(); autosave(); }
 
     // ═══════════════════════════════════════════════════════════════
+    // COMBO SOLO / EM EQUIPE / COBERTURA
+    // ═══════════════════════════════════════════════════════════════
+    const COBERTURA_LEVELS = [
+      { name: 'NENHUMA', desc: 'Sem cobertura no momento.' },
+      { name: 'LEVE', desc: 'Todos ataques a distância tem -2 no acerto contra você' },
+      { name: 'PARCIAL', desc: 'Ataques à distância tem -5 no acerto e ataques adjacentes tem uma chance de 15 de falhar' },
+      { name: 'TOTAL', desc: 'Ataques à distância não te acertam e ataques adjacentes causam -5 no dano e tem uma chance de 35 de falha' }
+    ];
+
+    function changeCombo(type, d) {
+      const key = 'combo' + type;
+      S[key] = Math.max(0, (S[key] || 0) + d);
+      updateCombos(); autosave();
+    }
+
+    function updateCombos() {
+      const solo = S.comboSolo || 0;
+      st('comboSoloVal', solo);
+      const soloB = document.getElementById('comboSoloBonus');
+      if (soloB) soloB.textContent = `+${solo} dano / +${solo} acerto`;
+
+      const eq = S.comboEquipe || 0;
+      st('comboEquipeVal', eq);
+      const eqDano = Math.ceil(eq / 2), eqAcerto = Math.floor(eq / 2);
+      const eqB = document.getElementById('comboEquipeBonus');
+      if (eqB) eqB.textContent = `+${eqDano} dano / +${eqAcerto} acerto`;
+    }
+
+    function changeCobertura(d) {
+      S.cobertura = Math.max(0, Math.min(3, (S.cobertura || 0) + d));
+      updateCobertura(); autosave();
+    }
+
+    function updateCobertura() {
+      const wrap = document.getElementById('coberturaDots'); if (!wrap) return;
+      wrap.innerHTML = '';
+      const lvl = S.cobertura || 0;
+      for (let i = 0; i < 3; i++) {
+        const d = document.createElement('div'); d.className = 'pi-dot' + (i < lvl ? ' on' : '');
+        wrap.appendChild(d);
+      }
+      const data = COBERTURA_LEVELS[lvl];
+      st('coberturaLabel', data.name);
+      const descEl = document.getElementById('coberturaDesc');
+      if (descEl) descEl.textContent = data.desc;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
     // NATUREZA
     // ═══════════════════════════════════════════════════════════════
     function updateNatureza() {
@@ -3368,8 +3945,8 @@
     <div class="sep"></div>
     ${renderSkillCard(nd.habUnica, true)}
     <div class="sep"></div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d);letter-spacing:1px">HP: ${nd.hp}</div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d);letter-spacing:1px;margin-top:4px">STA: ${nd.sta}</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);letter-spacing:1px">HP: ${nd.hp}</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);letter-spacing:1px;margin-top:4px">STA: ${nd.sta}</div>
   `;
     }
 
@@ -3395,7 +3972,7 @@
       if (!cls || !CLASS_DATA[cls]) { wrap.innerHTML = '<div class="empty-msg">Selecione uma classe.</div>'; return; }
       const data = CLASS_DATA[cls];
       wrap.innerHTML = data.skills.map(sk => renderSkillCard(sk, false, '', cls + ':' + sk.name)).join('') +
-        `<div class="sep"></div><div style="font-family:'Orbitron',monospace;font-size:10px;color:var(--gold);letter-spacing:2px;margin-bottom:8px">ULTIMATE — ${data.ultimate.limit || ''}</div>` +
+        `<div class="sep"></div><div style="font-family:'Orbitron',monospace;font-size:14px;color:var(--gold);letter-spacing:2px;margin-bottom:8px">ULTIMATE — ${data.ultimate.limit || ''}</div>` +
         renderSkillCard(data.ultimate, false, 'ultimate', cls + ':' + data.ultimate.name);
       S.classeGeralSel = cls;
       localStorage.setItem('arc_v1', JSON.stringify(S));
@@ -3407,7 +3984,7 @@
       if (!cls || !CLASS_DATA[cls]) { wrap.innerHTML = '<div class="empty-msg">Selecione uma classe específica.</div>'; return; }
       const data = CLASS_DATA[cls];
       wrap.innerHTML = data.skills.map(sk => renderSkillCard(sk, false, '', cls + ':' + sk.name)).join('') +
-        `<div class="sep"></div><div style="font-family:'Orbitron',monospace;font-size:10px;color:var(--gold);letter-spacing:2px;margin-bottom:8px">ULTIMATE — ${data.ultimate.limit || ''}</div>` +
+        `<div class="sep"></div><div style="font-family:'Orbitron',monospace;font-size:14px;color:var(--gold);letter-spacing:2px;margin-bottom:8px">ULTIMATE — ${data.ultimate.limit || ''}</div>` +
         renderSkillCard(data.ultimate, false, 'ultimate', cls + ':' + data.ultimate.name);
       S.classeEspSel = cls;
       localStorage.setItem('arc_v1', JSON.stringify(S));
@@ -3422,7 +3999,7 @@
     <div class="sk-header">
       <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
         ${chk}
-        <span class="sk-name">${sk.name}${sk.lb ? '<span style="color:var(--gold);font-size:10px;margin-left:6px">[LIMIT BREAK]</span>' : ''}</span>
+        <span class="sk-name">${sk.name}${sk.lb ? '<span style="color:var(--gold);font-size:14px;margin-left:6px">[LIMIT BREAK]</span>' : ''}</span>
       </div>
       <div class="sk-meta">
         <select class="action-sel" onchange="toggleCostField(this)">${actionOpts}</select>
@@ -3528,7 +4105,7 @@
         const labelName = isAlma ? SUB_LABEL_ALMA[sub] : SUB_LABEL[sub];
         const badgeColor = isAlma ? 'badge-gold' : isCorpo ? 'badge-blue' : 'badge-purple';
         html += `<div style="margin-bottom:4px">
-      <span class="badge ${badgeColor}" style="margin-bottom:6px;display:inline-block">${labelName} Nv.${level > 7 ? 'LB' + (level - 7) : level}</span>
+      <span class="badge ${badgeColor}" style="margin-bottom:6px;display:inline-block">${labelName} Nv.${level}</span>
       ${renderSkillCard(sk, true)}
     </div>`;
       });
@@ -3571,7 +4148,7 @@
       <input class="w-inp" data-f="name" value="${w.name}" oninput="autosave()" placeholder="Nome">
       <input class="w-inp" data-f="dmg" value="${w.dmg}" oninput="autosave()" placeholder="1d6">
       <input class="w-inp" data-f="crit" value="${w.crit || 20}" oninput="autosave()" placeholder="20">
-      <select class="w-inp" data-f="type" onchange="autosave()" style="font-size:12px">
+      <select class="w-inp" data-f="type" onchange="autosave()" style="font-size:16px">
         <option value="Normal"${(w.type || 'Normal') === 'Normal' ? ' selected' : ''}>Normal</option>
         <option value="Verdadeiro"${w.type === 'Verdadeiro' ? ' selected' : ''}>Verdadeiro</option>
         <option value="Absoluto"${w.type === 'Absoluto' ? ' selected' : ''}>Absoluto</option>
@@ -3662,6 +4239,7 @@
         </select>
         <button class="w-rem" onclick="removeExtra(${i})" style="margin-left:6px">✕</button>
       </div>
+      ${ex.effect && STATUS_DESC[ex.effect] ? `<div class="sk-desc mt4">${STATUS_DESC[ex.effect]}</div>` : ''}
       <div class="dot-fields mt4">
         <div class="dot-field"><span class="dot-lbl">DURAÇÃO</span><input class="dot-inp" data-f="dur" value="${ex.dur || ''}" oninput="autosave()" style="width:120px"></div>
       </div>
@@ -3685,6 +4263,82 @@
     }
     function toggleExtraOn(i) { S.dotExtras[i].on = !S.dotExtras[i].on; renderDotExtras(); autosave(); }
     function removeExtra(i) { S.dotExtras.splice(i, 1); renderDotExtras(); autosave(); }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SISTEMAS E ESCLARECIMENTOS (Doc → SYSTEMS): DoTs na Ficha + aba Regras
+    // ═══════════════════════════════════════════════════════════════
+    function _esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function _sysItem(sec, needle) {
+      return sec && (sec.items || []).find(it => it.name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').indexOf(needle) === 0);
+    }
+    function renderDotDescs() {
+      const dot = SYSTEMS.dot; if (!dot) return;
+      const map = { sangDescBox: 'sangr', queimDescBox: 'queim', envDescBox: 'envenen' };
+      Object.keys(map).forEach(id => {
+        const box = document.getElementById(id); if (!box) return;
+        const it = _sysItem(dot, map[id]);
+        if (!it) { box.innerHTML = ''; return; }
+        // Cada frase da descrição (quando toma dano · efeitos adicionais · como remover) no seu próprio bloco.
+        const parts = it.desc.split(/(?<=\.)\s+/).filter(Boolean)
+          .map(s => `<div style="padding:3px 0 3px 8px;border-left:2px solid rgba(255,255,255,.12);margin-bottom:4px">${_esc(s)}</div>`).join('');
+        box.innerHTML = parts + (it.note ? `<div style="margin-top:6px;opacity:.6;font-style:italic">${_esc(it.note)}</div>` : '');
+      });
+    }
+    // AÇÕES (Doc → ACTIONS): descrição "Ofensiva VS. Defensiva" no topo do painel + abas Ofensivas/Defensivas/Inspiradoras.
+    const ACT_COLS = [['ofensivas', 'OFENSIVAS'], ['defensivas', 'DEFENSIVAS'], ['inspiradoras', 'INSPIRADORAS']];
+    let actSelectedCol = 'ofensivas';
+    function selectActCol(k) { actSelectedCol = k; renderActions(); }
+    function renderActions() {
+      const descBox = document.getElementById('actDescBox');
+      if (descBox) {
+        descBox.innerHTML = ACTIONS.desc
+          ? `<div class="act-desc"><div class="act-desc-lbl">OFENSIVA VS. DEFENSIVA</div><div class="reg-cell-desc">${_esc(ACTIONS.desc)}</div></div>`
+          : '';
+      }
+      const tableBox = document.getElementById('actTableBox'); if (!tableBox) return;
+      const cols = ACTIONS.columns || {};
+      const tabs = `<div class="act-tabs">` + ACT_COLS.map(([k, title]) =>
+        `<div class="act-tab act-row-${k}${k === actSelectedCol ? ' active' : ''}" onclick="selectActCol('${k}')"><div class="act-row-head">${title}</div></div>`
+      ).join('') + `</div>`;
+      const k = ACT_COLS.some(([ck]) => ck === actSelectedCol) ? actSelectedCol : ACT_COLS[0][0];
+      const c = cols[k];
+      let body = '';
+      if (c) {
+        const intro = c.intro ? `<div class="act-row"><div class="reg-cell-desc" style="margin-bottom:2px">${_esc(c.intro)}</div></div>` : '';
+        const items = `<div class="act-row">` + (c.items || []).map(it =>
+          `<div class="reg-cell"><div class="reg-cell-title">${_esc(it.name)}${it.cost ? ` <br><span class="act-cost">${_esc(it.cost)}</span>` : ''}</div>`
+          + `<div class="reg-cell-desc">${_esc(it.desc)}</div></div>`
+        ).join('') + '</div>';
+        const note = c.note ? `<div class="act-row"><div class="reg-note">${_esc(c.note)}</div></div>` : '';
+        body = `<div class="act-row-${k}" style="padding-bottom: 6px;border-bottom: 1px solid var(${k === 'ofensivas' ? '--red' : k === 'defensivas' ? '--blue' : '--gold'})">${intro}${items}${note}</div>`;
+      }
+      tableBox.innerHTML = tabs + body;
+    }
+
+    const REGRAS_ORDER = [
+      ['critico', 'CRÍTICO'], ['tiposDano', 'TIPOS DE DANO'], ['categoriasDano', 'CATEGORIAS DE DANO'],
+      ['duasArmas', 'DUAS ARMAS'], ['distancias', 'DISTÂNCIAS'], ['chance', 'CHANCE'],
+      ['arredondamentos', 'ARREDONDAMENTOS']
+    ];
+    function toggleReg(el) { el.closest('.reg-section').classList.toggle('collapsed'); }
+    function buildRegras() {
+      const wrap = document.getElementById('regrasWrap'); if (!wrap) return;
+      wrap.innerHTML = REGRAS_ORDER.map(([k, title]) => {
+        const sec = SYSTEMS[k]; if (!sec) return '';
+        const items = sec.items || [];
+        let body = '';
+        if (sec.intro) body += `<div class="reg-cell-desc" style="color:var(--txt)${items.length ? ';margin-bottom:12px"' : '"'}>${_esc(sec.intro)}</div>`;
+        if (items.length) {
+          body += `<div class="reg-grid">` + items.map(it =>
+            `<div class="reg-cell"><div class="reg-cell-title">${_esc(it.name)}</div>`
+            + `<div class="reg-cell-desc">${_esc(it.desc)}${it.note ? `<div class="reg-note">${_esc(it.note)}</div>` : ''}</div></div>`
+          ).join('') + `</div>`;
+        }
+        return `<div class="reg-section panel mt12">`
+          + `<div class="reg-head" onclick="toggleReg(this)"><span class="reg-caret">▾</span>${title}</div>`
+          + `<div class="reg-body">${body}</div></div>`;
+      }).join('');
+    }
 
     // ═══════════════════════════════════════════════════════════════
     // TITLES
@@ -3749,18 +4403,18 @@
           <div class="title-rank rank-${t.rank}">RANK ${t.rank}</div>
           <div class="title-name">${t.name}</div>
         </div>
-        <button class="w-rem" onclick="S.titles.splice(${ti},1);renderTitles();autosave()" style="font-size:18px">✕</button>
+        <button class="w-rem" onclick="S.titles.splice(${ti},1);renderTitles();autosave()" style="font-size:22px">✕</button>
       </div>
       ${reqLevel ? `<div class="progress-wrap mb8">
-        <div style="display:flex;justify-content:space-between"><span class="lbl">PROMOÇÃO PARA RANK SUPERIOR</span><span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txt-d)">${playerLevel}/${reqLevel}</span></div>
+        <div style="display:flex;justify-content:space-between"><span class="lbl">PROMOÇÃO PARA RANK SUPERIOR</span><span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d)">${playerLevel}/${reqLevel}</span></div>
         <div class="progress-bar"><div class="progress-fill" style="width:${levelPct}%"></div></div>
-      </div>`: '<div style="font-size:11px;color:var(--gold);font-family:\'Share Tech Mono\',monospace;letter-spacing:1px;margin-bottom:10px">RANK MÁXIMO</div>'}
+      </div>`: '<div style="font-size:15px;color:var(--gold);font-family:\'Share Tech Mono\',monospace;letter-spacing:1px;margin-bottom:10px">RANK MÁXIMO</div>'}
       <div class="sep"></div>
       ${skills}
       <div class="sep"></div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:1px;margin-bottom:6px">MISSÕES DE RANK UP</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--gold);letter-spacing:1px;margin-bottom:6px">MISSÕES DE RANK UP</div>
       ${quests}
-      <button class="dashed-btn dashed-gold mt4" style="font-size:9px" onclick="S.titles[${ti}].quests.push({desc:'',total:0,cur:0});renderTitles();autosave()">+ MISSÃO</button>
+      <button class="dashed-btn dashed-gold mt4" style="font-size:13px" onclick="S.titles[${ti}].quests.push({desc:'',total:0,cur:0});renderTitles();autosave()">+ MISSÃO</button>
     </div>`;
       }).join('');
     }
@@ -3777,11 +4431,11 @@
     <div class="inv-card inv-entry">
       <div class="inv-grid">
         <input class="inp" data-f="name" value="${item.name}" oninput="autosave()" placeholder="Nome do item">
-        <select class="inp" data-f="type" onchange="autosave()" style="font-size:12px">
+        <select class="inp" data-f="type" onchange="autosave()" style="font-size:16px">
           ${['Arma', 'Utilizável', 'Armadura', 'Munição', 'Implante', 'Artefato', 'Outro'].map(t => `<option${item.type === t ? ' selected' : ''}>${t}</option>`).join('')}
         </select>
         <input class="inp" data-f="dmg" value="${item.dmg}" oninput="autosave()" placeholder="Dano">
-        <select class="inp" data-f="action" onchange="autosave()" style="font-size:12px">
+        <select class="inp" data-f="action" onchange="autosave()" style="font-size:16px">
           ${ACTIONS_LIST.map(a => `<option${item.action === a ? ' selected' : ''}>${a}</option>`).join('')}
         </select>
         <input class="inp" data-f="qty" value="${item.qty || 1}" oninput="autosave()" placeholder="Qtd" type="number" min="1">
@@ -3799,7 +4453,7 @@
       wrap.innerHTML = S.relations.map((r, i) => `
     <div class="relation-card rel-entry">
       <input class="inp" data-f="name" value="${r.name}" oninput="autosave()" placeholder="Nome">
-      <select class="inp" data-f="rel" onchange="autosave()" style="font-size:12px">
+      <select class="inp" data-f="rel" onchange="autosave()" style="font-size:16px">
         ${['Aliado', 'Neutro', 'Inimigo', 'Desconhecido', 'Rival', 'Mentor', 'Dependente'].map(t => `<option${r.rel === t ? ' selected' : ''}>${t}</option>`).join('')}
       </select>
       <input class="inp" data-f="desc" value="${r.desc}" oninput="autosave()" placeholder="Descrição">
@@ -3892,13 +4546,6 @@
       if (!raw) return null;
       try { return JSON.parse(raw); } catch (e) { return null; }
     }
-
-    /*
-    apiKey: "AIzaSyBczjpKaMPwxwnEZ74SbU4VHMZcs65wA84",
-    authDomain: "intitulations.firebaseapp.com",
-    databaseURL: "https://intitulations-default-rtdb.firebaseio.com",
-    projectId: "intitulations",
-    */
 
     function fbSaveConfig() {
       const cfg = {

@@ -1,8 +1,8 @@
 # Ponte ARC — instalação e uso
 
-Liga o Doc **"Sistema Intitulados"** ao **ARC** (ficha do player). Você edita as Classes no
-Doc e publica; o `ARC_System_V2.html` passa a ler dessas regras (via Firebase), com fallback
-offline para os dados embutidos.
+Liga o Doc **"Sistema Intitulados"** ao **ARC** (ficha do player). Você edita as **Classes** e as
+**Habilidades de subatributo** (Corpo/Mente/Alma) no Doc e publica; o `ARC_System_V2.html` passa a
+ler dessas regras (via Firebase), com fallback offline para os dados embutidos.
 
 ## 1. Instalar o script no Doc (uma vez)
 
@@ -40,11 +40,11 @@ No [console do Firebase](https://console.firebase.google.com/) → projeto **int
 > `".write": false` em `arc_rules` + token de escrita no Apps Script via `?auth=` guardado em
 > `PropertiesService`. Não mexa em `arc_campaigns` (é a sincronização de fichas que já existe).
 
-## 3. Antes da 1ª publicação: padronizar 2 classes
+## 3. Antes da 1ª publicação: padronizar algumas linhas
 
-As classes **Batedor Cinético** e **Predador** usam um formato diferente no Doc (travessão).
-Veja **`CORRECOES-DOC.md`** e ajuste as 7 linhas. Depois, **Pré-visualizar** deve mostrar
-**14 classes** e **0 avisos**.
+Veja **`CORRECOES-DOC.md`** — há 7 linhas de classes (Batedor Cinético/Predador) e 1 de
+subatributo (Grande Artífice) fora do padrão. Depois, **Pré-visualizar** deve mostrar
+**14 classes**, **8 subatributos** e **0 avisos**.
 
 ## 4. Uso diário
 

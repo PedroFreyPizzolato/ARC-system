@@ -1,6 +1,7 @@
 # Claude
 /docs/*
 !/docs/superpowers/
-.remember
+.remember/
 node_modules/
 *.log
+.playwright-mcp/

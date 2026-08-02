@@ -9,7 +9,8 @@ const ACTION_MAP = {
 
 function normalizeAction(raw) {
   if (!raw) return { value: 'Especial', known: false };
-  const base = String(raw).split('->')[0].toLowerCase().replace(/\s+/g, ' ').trim();
+  const base = String(raw).split('->')[0].split('/')[0]
+    .toLowerCase().replace(/\s*\+\s*/g, ' + ').replace(/\s+/g, ' ').trim();
   if (ACTION_MAP[base]) return { value: ACTION_MAP[base], known: true };
   return { value: String(raw).trim(), known: false };
 }
@@ -123,6 +124,49 @@ function parseClasses(paragraphs) {
   return { classes, warnings };
 }
 
+const SUBATTR_KEYS = ['forca', 'vigor', 'agilidade', 'habilidade', 'sincronia', 'intelecto', 'conexao', 'entendimento'];
+function _subKey(text) {
+  const t = String(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+  return SUBATTR_KEYS.indexOf(t) >= 0 ? t : null;
+}
+const NIVEL_RE = /^n[íi]vel\s+\d+\s*[—–-]\s*(.+)$/i;
+
+// Skills de subatributo: seção "# Atributos", subatributos como parágrafos (nome conhecido),
+// skills em listas com prefixo "Nível N —", "Limit break" marca lb.
+function parseSubattrs(paragraphs) {
+  const subattrs = {};
+  const warnings = [];
+  let inAttrs = false, currentSub = null, lbMode = false;
+  for (const p of paragraphs) {
+    const heading = p.heading || 'NORMAL';
+    const full = String(p.text || '');
+    if (heading === 'HEADING1') { inAttrs = /^atributos$/i.test(full.trim()); currentSub = null; lbMode = false; continue; }
+    if (!inAttrs) continue;
+    if (heading === 'HEADING2') { currentSub = null; lbMode = false; continue; }
+    // um item pode conter várias linhas (quebra de linha interna no Doc) — processa cada uma
+    for (const raw of full.split(/\r?\n/)) {
+      const t = raw.trim();
+      if (!t) continue;
+      const sub = _subKey(t);
+      if (sub) { currentSub = sub; lbMode = false; if (!subattrs[sub]) subattrs[sub] = []; continue; }
+      if (/^limit\s*break$/i.test(t)) { lbMode = true; continue; }
+      const m = t.match(NIVEL_RE);
+      if (m && currentSub) {
+        const sk = parseSkillLine(m[1]);
+        if (sk) {
+          const skill = { name: sk.name, action: sk.action, cost: sk.cost, desc: sk.desc };
+          if (lbMode) { skill.lb = true; skill.desc = '[LB] ' + skill.desc; }
+          if (!sk.actionKnown) warnings.push('Subatributo "' + currentSub + '": ação não reconhecida em "' + sk.name + '"');
+          subattrs[currentSub].push(skill);
+        } else {
+          warnings.push('Subatributo "' + currentSub + '": linha não reconhecida → "' + t.slice(0, 70) + '"');
+        }
+      }
+    }
+  }
+  return { subattrs: subattrs, warnings: warnings };
+}
+
 function _fmtSkill(s) {
   return s.name + ' (' + s.action + (s.cost ? ' ' + s.cost : '') + '): ' + (s.desc || '');
 }
@@ -171,4 +215,192 @@ function diffClasses(oldC, newC) {
   return { hasChanges: rows.length > 0, rows: rows };
 }
 
-module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses, diffClasses };
+const NATURE_NAMES = { 'brutamonte': 'Brutamontes', 'brutamontes': 'Brutamontes', 'guerreiro': 'Guerreiro', 'atleta': 'Atleta', 'velocista': 'Velocista' };
+function _natureKey(text) {
+  const t = String(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+  return NATURE_NAMES[t] || null;
+}
+const N0_RE = /^n[íi]vel\s*0\s*:\s*(.+)$/i;
+const PN_RE = /^por\s*n[íi]vel\s*:\s*(.+)$/i;
+const REC_RE = /^recupera[çc][ãa]o\s*:\s*(.+)$/i;
+
+// Vida/Stamina por natureza (seção "# Status") → strings hp/sta exibidas no ARC.
+function parseStatus(paragraphs) {
+  const acc = {};
+  const warnings = [];
+  let inStatus = false, mode = null, currentNat = null;
+  function ensure(n) { if (!acc[n]) acc[n] = {}; return acc[n]; }
+  for (const p of paragraphs) {
+    const heading = p.heading || 'NORMAL';
+    const full = String(p.text || '');
+    if (heading === 'HEADING1') { inStatus = /^status$/i.test(full.trim()); mode = null; currentNat = null; continue; }
+    if (!inStatus) continue;
+    for (const raw of full.split(/\r?\n/)) {
+      const t = raw.trim();
+      if (!t) continue;
+      if (/^vida$/i.test(t)) { mode = 'vida'; currentNat = null; continue; }
+      if (/^stamina$/i.test(t)) { mode = 'stamina'; currentNat = null; continue; }
+      if (/^sanidade$/i.test(t)) { mode = 'sanidade'; currentNat = null; continue; }
+      const nat = _natureKey(t);
+      if (nat) { currentNat = nat; continue; }
+      if (!currentNat || !mode || mode === 'sanidade') continue;
+      let m;
+      if ((m = t.match(N0_RE))) ensure(currentNat)[mode + '0'] = m[1].trim();
+      else if ((m = t.match(PN_RE))) ensure(currentNat)[mode + 'N'] = m[1].trim();
+      else if (mode === 'stamina' && (m = t.match(REC_RE))) ensure(currentNat).staR = m[1].trim();
+    }
+  }
+  const natures = {};
+  Object.keys(acc).forEach(function (n) {
+    const a = acc[n], o = {};
+    if (a.vida0) o.hp = a.vida0 + (a.vidaN ? ' | Por nível: ' + a.vidaN : '');
+    if (a.stamina0) o.sta = a.stamina0 + (a.staminaN ? ' | Por nível: ' + a.staminaN : '') + (a.staR ? ' | Rec: ' + a.staR : '');
+    // Campos granulares (mesmos dados, separados) p/ apps que montam suas próprias strings (ex.: NPC Catalog).
+    if (a.vida0) o.hpBase = a.vida0;
+    if (a.vidaN) o.hpNivel = a.vidaN;
+    if (a.stamina0) o.staBase = a.stamina0;
+    if (a.staminaN) o.staNivel = a.staminaN;
+    if (a.staR) o.staRec = a.staR;
+    if (o.hp || o.sta) natures[n] = o;
+  });
+  return { natures: natures, warnings: warnings };
+}
+
+const NAT_BUFF_RE = /^buff\s*:\s*(.+)$/i;
+const NAT_DEBUFF_RE = /^debuff\s*:\s*(.+)$/i;
+const NAT_HAB_LABEL_RE = /^habilidade\s*[úu]nica\s*:\s*(.*)$/i;
+
+// Buff/debuff/habilidade única por natureza (seção "# Naturezas").
+// Buff/debuff são strings; a habilidade única é a linha em formato de skill
+// (Nome (ação) [custo]: desc) dentro do bloco da natureza — com ou sem o rótulo
+// "Habilidade única:" antes dela.
+function parseNatures(paragraphs) {
+  const acc = {};
+  const warnings = [];
+  let inNat = false, currentNat = null;
+  function ensure(n) { if (!acc[n]) acc[n] = {}; return acc[n]; }
+  function setHab(line) {
+    const sk = parseSkillLine(line);
+    if (!sk) return false;
+    if (!sk.actionKnown) warnings.push('Natureza "' + currentNat + '": ação não reconhecida na hab. única → "' + sk.action + '"');
+    ensure(currentNat).habUnica = { name: sk.name, action: sk.action, cost: sk.cost, desc: sk.desc };
+    return true;
+  }
+  for (const p of paragraphs) {
+    const heading = p.heading || 'NORMAL';
+    const full = String(p.text || '');
+    if (heading === 'HEADING1') { inNat = /^naturezas$/i.test(full.trim()); currentNat = null; continue; }
+    if (!inNat) continue;
+    for (const raw of full.split(/\r?\n/)) {
+      const t = raw.trim();
+      if (!t) continue;
+      let m;
+      if ((m = t.match(NAT_BUFF_RE))) { if (currentNat) ensure(currentNat).buff = m[1].trim(); continue; }
+      if ((m = t.match(NAT_DEBUFF_RE))) { if (currentNat) ensure(currentNat).debuff = m[1].trim(); continue; }
+      if ((m = t.match(NAT_HAB_LABEL_RE))) { const rest = (m[1] || '').trim(); if (rest && currentNat) setHab(rest); continue; }
+      const nat = _natureKey(t);
+      if (nat) { currentNat = nat; continue; }
+      if (currentNat) setHab(t); // qualquer linha em formato de skill vira a hab. única
+    }
+  }
+  Object.keys(acc).forEach(function (n) {
+    if (!acc[n].habUnica) warnings.push('Natureza "' + n + '": habilidade única não reconhecida (use o formato Nome (ação) [custo]: desc)');
+  });
+  return { natures: acc, warnings: warnings };
+}
+
+// Seção "# Sistemas e Esclarecimentos": blocos rotulados por parágrafo simples
+// (Distâncias, DoT, Idades, ...). Cada bloco vira { intro, items:[{name,desc,note?}] }.
+// Itens no formato "Nome: descrição"; linhas soltas antes do 1º item = intro,
+// depois do 1º item = note do último item. Combos/Coberturas/Ficha são ignorados.
+const SYS_SECTIONS = {
+  'distancias': 'distancias',
+  'efeitos negativos': 'efeitosNegativos',
+  'efeitos positivos': 'efeitosPositivos',
+  'dot': 'dot',
+  'duas armas': 'duasArmas',
+  'critico': 'critico',
+  'categorias de dano e reducao': 'categoriasDano',
+  'tipos de dano': 'tiposDano',
+  'chance': 'chance',
+  'arredondamentos': 'arredondamentos',
+  // reconhecidos mas ignorados (conteúdo não entra no ARC nem vaza p/ a seção anterior)
+  'ca': null, 'idades': null, 'combos': null, 'coberturas': null, 'ficha': null,
+};
+function _norm(text) {
+  return String(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
+}
+const SYS_ITEM_RE = /^([^:]{1,60}):\s*(.+)$/;
+
+function parseSystems(paragraphs) {
+  const systems = {};
+  const warnings = [];
+  let inSystems = false, key = undefined, item = null;
+  function ensure(k) { if (!systems[k]) systems[k] = { intro: null, items: [] }; return systems[k]; }
+  for (const p of paragraphs) {
+    const heading = p.heading || 'NORMAL';
+    const full = String(p.text || '');
+    if (heading === 'HEADING1') { inSystems = _norm(full) === 'sistemas e esclarecimentos'; key = undefined; item = null; continue; }
+    if (!inSystems) continue;
+    for (const raw of full.split(/\r?\n/)) {
+      const t = raw.trim();
+      if (!t) continue;
+      const n = _norm(t);
+      if (Object.prototype.hasOwnProperty.call(SYS_SECTIONS, n)) { key = SYS_SECTIONS[n]; item = null; continue; }
+      if (!key) continue; // fora de seção conhecida ou seção ignorada
+      const sec = ensure(key);
+      const m = t.match(SYS_ITEM_RE);
+      if (m) { item = { name: m[1].trim(), desc: m[2].trim() }; sec.items.push(item); }
+      else if (item) { item.note = (item.note ? item.note + ' ' : '') + t; }
+      else { sec.intro = (sec.intro ? sec.intro + ' ' : '') + t; }
+    }
+  }
+  return { systems: systems, warnings: warnings };
+}
+
+// Seção "# Ações": descrição "Ofensiva VS. Defensiva" (topo do painel) + 3 colunas
+// rotuladas (Ofensivas, Defensivas, Inspiradoras), cada uma { intro, items:[{name,cost,desc}], note }.
+// Itens no formato "Nome: desc" ou "Nome (custo): desc" (Inspiradoras usam "(1PI)");
+// linhas soltas antes do 1º item = intro; "…custam 2S"/limite de PI = note; linha solta
+// após um item = continuação da desc. Intro/Obs antes das colunas são ignorados.
+const ACT_SECTIONS = {
+  'ofensiva vs. defensiva': 'desc', 'ofensiva vs defensiva': 'desc',
+  'ofensivas': 'ofensivas', 'defensivas': 'defensivas', 'inspiradoras': 'inspiradoras',
+};
+const ACT_COL_KEYS = ['ofensivas', 'defensivas', 'inspiradoras'];
+const ACT_ITEM_RE = /^(.{1,40}?)(?:\s*\(([^)]+)\))?:\s*(.+)$/;
+const ACT_NOTE_RE = /custam\s+\d+\s*s|m[áa]ximo de \d+ pontos de inspira/i;
+
+function parseActions(paragraphs) {
+  const columns = {
+    ofensivas: { intro: null, items: [], note: null },
+    defensivas: { intro: null, items: [], note: null },
+    inspiradoras: { intro: null, items: [], note: null },
+  };
+  const actions = { desc: '', columns: columns };
+  const warnings = [];
+  let inActions = false, mode = undefined, item = null;
+  for (const p of paragraphs) {
+    const heading = p.heading || 'NORMAL';
+    const full = String(p.text || '');
+    if (heading === 'HEADING1') { inActions = _norm(full) === 'acoes'; mode = undefined; item = null; continue; }
+    if (!inActions) continue;
+    for (const raw of full.split(/\r?\n/)) {
+      const t = raw.trim();
+      if (!t) continue;
+      const n = _norm(t);
+      if (Object.prototype.hasOwnProperty.call(ACT_SECTIONS, n)) { mode = ACT_SECTIONS[n]; item = null; continue; }
+      if (mode === 'desc') { actions.desc = (actions.desc ? actions.desc + ' ' : '') + t; continue; }
+      if (ACT_COL_KEYS.indexOf(mode) < 0) continue; // intro/Obs antes das colunas: ignora
+      const col = columns[mode];
+      if (ACT_NOTE_RE.test(t) && t.indexOf(':') < 0) { col.note = t; item = null; continue; }
+      const m = t.match(ACT_ITEM_RE);
+      if (m) { item = { name: m[1].trim(), cost: (m[2] || '').trim() || null, desc: m[3].trim() }; col.items.push(item); }
+      else if (item) { item.desc += ' ' + t; }
+      else { col.intro = (col.intro ? col.intro + ' ' : '') + t; }
+    }
+  }
+  return { actions: actions, warnings: warnings };
+}
+
+module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses, diffClasses, parseSubattrs, parseStatus, parseNatures, parseSystems, parseActions };

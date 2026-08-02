@@ -34,4 +34,34 @@ custo é **`especial`** — troque se você souber a ação certa (ex.: `padrão
 3. Se tinha uma **ação** (ex.: `(passiva)`), mantenha `(passiva)`.
 4. Colocar **`:`** logo após o `)` (ou após o `]`), antes da descrição.
 
-Depois disso, **Ponte ARC → Pré-visualizar** deve mostrar **14 classes** e **0 avisos**.
+## Subatributos (V2) — 1 linha
+
+Uma skill de subatributo não tem `(ação)` entre parênteses (só o `[colchete]`):
+
+| Antes (no Doc, em **Mente → Habilidade → Limit break**) | Depois |
+|---|---|
+| **Grande Artífice [1x por arco]:** Você pode escolher 1 arma... | **Grande Artífice (especial) [1x por arco]:** Você pode escolher 1 arma... |
+
+(troque `especial` pela ação real, se houver.)
+
+## Naturezas (V4) — 4 linhas (habilidade única)
+
+A **habilidade única** de cada natureza hoje é só `(custo) descrição`, sem nome nem ação.
+Para sincronizar tudo (nome + ação + custo + descrição), escreva-a no mesmo formato de skill.
+**Buff** e **Debuff** já estão no formato certo — não precisa mexer.
+
+| Natureza | Antes (no Doc) | Depois |
+|---|---|---|
+| Brutamontes | (4S) Você avança para frente... | **Avanço Brutal (especial) [4S]:** Você avança para frente... |
+| Guerreiro | (5S) 1x por luta, por 2 rodadas... | **Rajada de Golpes (especial) [5S]:** 1x por luta, por 2 rodadas... |
+| Atleta | (999S) 1x por cena você pode ficar... | **Limite Zero (especial) [999S]:** 1x por cena você pode ficar... |
+| Velocista | (15S) Você avança em direção... | **Investida Veloz (especial) [15S]:** Você avança em direção... |
+
+Os **nomes** acima são os que já existem embutidos no ARC (exceto Velocista, que não tinha — escolhi
+"Investida Veloz"; troque pelo que preferir). A **ação** sugerida é `especial`; ajuste se souber a real.
+Pode manter a habilidade única como **bullet** (`- Nome (ação)...`) ou inline após `Habilidade única:` — tanto faz.
+
+---
+
+Depois disso, **Ponte ARC → Pré-visualizar** deve mostrar **14 classes**, **8 subatributos**,
+**4 naturezas** (Vida/Stamina + Buff/Debuff/Hab. Única) e **0 avisos**.

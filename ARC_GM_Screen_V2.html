@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ARC — PAINEL DO MESTRE</title>
+  <title>ARC V2 — PAINEL DO MESTRE</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
     href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap"
@@ -26,9 +26,9 @@
       --txt: #e0f7ff;
       --txt-d: rgba(224, 247, 255, 0.45);
       --txt-lbl: rgba(0, 212, 255, 0.7);
-      --fs: 14px;
-      --fs-sm: 12px;
-      --fs-xs: 11px;
+      --fs: 20px;
+      --fs-sm: 18px;
+      --fs-xs: 14px;
       --hh: 52px;
     }
 
@@ -100,12 +100,13 @@
     .hdr-left {
       display: flex;
       align-items: center;
-      gap: 14px
+      gap: 14px;
+      flex-shrink: 0
     }
 
     .hdr-logo {
       font-family: 'Orbitron', monospace;
-      font-size: 18px;
+      font-size: 22px;
       font-weight: 900;
       color: var(--red);
       letter-spacing: 4px;
@@ -117,7 +118,7 @@
       border: 1px solid rgba(0, 212, 255, 0.25);
       color: var(--blue);
       font-family: 'Orbitron', monospace;
-      font-size: 9px;
+      font-size: 13px;
       letter-spacing: 2px;
       background: rgba(0, 212, 255, 0.04)
     }
@@ -139,7 +140,7 @@
 
     .hdr-online-txt {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--green);
       letter-spacing: 2px
     }
@@ -147,7 +148,8 @@
     .hdr-right {
       display: flex;
       gap: 7px;
-      align-items: center
+      align-items: center;
+      flex-shrink: 0
     }
 
     @keyframes pulse {
@@ -174,29 +176,33 @@
     }
 
     .icon-bar {
-      width: 44px;
-      flex-shrink: 0;
-      background: rgba(2, 4, 8, 0.85);
-      border-right: 1px solid rgba(239, 68, 68, 0.1);
+      flex: 1;
+      align-self: stretch;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      padding: 6px 0;
-      gap: 2px
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0;
+      margin: 0 16px;
+      gap: 3px
+    }
+
+    .icon-bar::-webkit-scrollbar {
+      height: 3px
     }
 
     .ic-btn {
-      width: 40px;
-      height: 46px;
+      flex-shrink: 0;
+      height: 36px;
+      padding: 0 12px;
       background: transparent;
       border: 1px solid transparent;
       color: var(--txt-d);
       cursor: pointer;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 2px;
+      gap: 7px;
       transition: all .15s
     }
 
@@ -213,13 +219,13 @@
     }
 
     .ic-sym {
-      font-size: 14px;
+      font-size: 20px;
       line-height: 1
     }
 
     .ic-lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 7px;
+      font-size: 12px;
       letter-spacing: 1px
     }
 
@@ -248,14 +254,14 @@
 
     .lp-title {
       font-family: 'Orbitron', monospace;
-      font-size: 9px;
+      font-size: 13px;
       letter-spacing: 2px;
       color: var(--blue)
     }
 
     .lp-count {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       color: var(--txt-d)
     }
 
@@ -270,7 +276,7 @@
       border: 1px solid var(--bd);
       color: var(--txt);
       padding: 5px 9px;
-      font-size: 11px;
+      font-size: 15px;
       font-family: 'Share Tech Mono', monospace;
       outline: none;
       letter-spacing: .5px
@@ -318,7 +324,7 @@
 
     .lp-item-name {
       font-weight: 600;
-      font-size: 13px;
+      font-size: 17px;
       color: var(--txt);
       line-height: 1.2;
       margin-bottom: 3px
@@ -338,7 +344,7 @@
       border: 1px dashed rgba(239, 68, 68, .18);
       color: rgba(239, 68, 68, .4);
       font-family: 'Orbitron', monospace;
-      font-size: 9px;
+      font-size: 13px;
       letter-spacing: 2px;
       cursor: pointer;
       transition: all .18s;
@@ -361,7 +367,7 @@
 
     .tg-lbl {
       font-family: 'Orbitron', monospace;
-      font-size: 8px;
+      font-size: 12px;
       letter-spacing: 2px
     }
 
@@ -369,7 +375,7 @@
       background: transparent;
       border: 1px solid rgba(255, 255, 255, .12);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       padding: 2px 7px;
       cursor: pointer;
       transition: all .12s;
@@ -416,14 +422,14 @@
 
     .em-text {
       font-family: 'Orbitron', monospace;
-      font-size: 11px;
+      font-size: 15px;
       letter-spacing: 3px;
       color: rgba(0, 212, 255, .25)
     }
 
     .em-sub {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       color: var(--txt-d);
       letter-spacing: 1px
     }
@@ -437,7 +443,7 @@
 
     .d-title {
       font-family: 'Orbitron', monospace;
-      font-size: 20px;
+      font-size: 24px;
       font-weight: 700;
       color: var(--txt)
     }
@@ -464,7 +470,7 @@
 
     .sb {
       font-family: 'Orbitron', monospace;
-      font-size: 9px;
+      font-size: 13px;
       letter-spacing: 3px;
       color: var(--red);
       display: flex;
@@ -542,7 +548,7 @@
 
     .lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       color: var(--txt-lbl);
       letter-spacing: 1.5px
     }
@@ -640,7 +646,7 @@
       border: 1px solid var(--bd);
       color: var(--txt-d);
       cursor: pointer;
-      font-size: 15px;
+      font-size: 19px;
       line-height: 1;
       transition: all .12s;
       display: flex;
@@ -656,7 +662,7 @@
 
     .c-val {
       font-family: 'Orbitron', monospace;
-      font-size: 17px;
+      font-size: 21px;
       font-weight: 700;
       min-width: 26px;
       text-align: center
@@ -664,7 +670,7 @@
 
     .c-bon {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--txt-d);
       min-width: 28px
     }
@@ -683,7 +689,7 @@
 
     .bar-lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       color: var(--txt-lbl);
       letter-spacing: 1px
     }
@@ -700,7 +706,7 @@
       border-bottom: 1px solid var(--bd-b);
       color: var(--txt);
       font-family: 'Orbitron', monospace;
-      font-size: 13px;
+      font-size: 17px;
       width: 48px;
       text-align: center;
       outline: none;
@@ -709,7 +715,7 @@
 
     .bar-sep {
       color: var(--txt-d);
-      font-size: 11px
+      font-size: 15px
     }
 
     .bar-track {
@@ -750,7 +756,7 @@
       border: 1px solid var(--bd);
       color: var(--blue);
       font-family: 'Orbitron', monospace;
-      font-size: 18px;
+      font-size: 22px;
       padding: 6px 10px;
       text-align: center;
       letter-spacing: 2px
@@ -804,7 +810,7 @@
       border: 1px solid var(--bd);
       color: var(--blue);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       padding: 2px 5px;
       outline: none;
       cursor: pointer
@@ -820,7 +826,7 @@
       border: 1px solid rgba(245, 158, 11, .3);
       color: var(--gold);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       padding: 2px 6px;
       outline: none;
       width: 58px;
@@ -837,7 +843,7 @@
 
     .thdr {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       color: var(--txt-d);
       letter-spacing: 1px;
       padding: 3px 0;
@@ -870,7 +876,7 @@
       border: none;
       color: rgba(239, 68, 68, .32);
       cursor: pointer;
-      font-size: 13px;
+      font-size: 17px;
       transition: color .12s;
       padding: 0 2px
     }
@@ -891,7 +897,7 @@
       background: transparent;
       color: var(--txt-d);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 8px;
+      font-size: 12px;
       letter-spacing: .5px;
       cursor: pointer;
       transition: all .12s
@@ -918,7 +924,7 @@
       display: inline-block;
       padding: 2px 7px;
       font-family: 'Share Tech Mono', monospace;
-      font-size: 8px;
+      font-size: 12px;
       letter-spacing: .5px;
       border: 1px solid
     }
@@ -970,7 +976,7 @@
       background: transparent;
       border: 1px solid;
       font-family: 'Orbitron', monospace;
-      font-size: 9px;
+      font-size: 13px;
       letter-spacing: 2px;
       cursor: pointer;
       transition: all .15s;
@@ -1024,7 +1030,7 @@
 
     .btn-sm {
       padding: 4px 10px;
-      font-size: 8px;
+      font-size: 12px;
       letter-spacing: 1px
     }
 
@@ -1080,7 +1086,7 @@
 
     .arc-cf-tag {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       letter-spacing: 3px;
       color: var(--red);
       margin-bottom: 10px;
@@ -1089,7 +1095,7 @@
 
     .arc-cf-msg {
       font-family: 'Orbitron', monospace;
-      font-size: 13px;
+      font-size: 17px;
       letter-spacing: 1px;
       color: var(--txt);
       margin-bottom: 22px;
@@ -1109,7 +1115,7 @@
       border: 1px dashed rgba(0, 212, 255, .18);
       color: rgba(0, 212, 255, .32);
       font-family: 'Orbitron', monospace;
-      font-size: 9px;
+      font-size: 13px;
       letter-spacing: 2px;
       cursor: pointer;
       transition: all .15s;
@@ -1158,7 +1164,7 @@
       border: 1px solid var(--bd);
       color: var(--txt-d);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       letter-spacing: 1px;
       cursor: pointer;
       transition: all .15s
@@ -1192,7 +1198,7 @@
 
     .gi-name {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 7px;
+      font-size: 11px;
       letter-spacing: .5px;
       margin-bottom: 3px;
       color: var(--txt-d)
@@ -1200,7 +1206,7 @@
 
     .gi-val {
       font-family: 'Orbitron', monospace;
-      font-size: 16px;
+      font-size: 20px;
       font-weight: 700
     }
 
@@ -1226,7 +1232,7 @@
       border: 1px solid var(--bd);
       color: var(--txt-d);
       cursor: pointer;
-      font-size: 11px;
+      font-size: 15px;
       line-height: 1;
       display: flex;
       align-items: center;
@@ -1307,7 +1313,7 @@
 
     .init-num {
       font-family: 'Orbitron', monospace;
-      font-size: 15px;
+      font-size: 19px;
       font-weight: 700;
       text-align: center
     }
@@ -1318,7 +1324,7 @@
       border-bottom: 1px solid rgba(239, 68, 68, .28);
       color: var(--red);
       font-family: 'Orbitron', monospace;
-      font-size: 12px;
+      font-size: 16px;
       width: 56px;
       text-align: center;
       outline: none
@@ -1378,7 +1384,7 @@
 
     .ph-name {
       font-family: 'Orbitron', monospace;
-      font-size: 13px;
+      font-size: 17px;
       font-weight: 700;
       color: var(--blue);
       flex: 0 0 auto;
@@ -1387,7 +1393,7 @@
 
     .ph-meta {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       color: var(--txt-d);
       letter-spacing: 1px;
       flex: 1
@@ -1402,18 +1408,18 @@
 
     .ph-hp {
       font-family: 'Orbitron', monospace;
-      font-size: 12px;
+      font-size: 16px;
       color: var(--red)
     }
 
     .ph-san {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       color: var(--purple-b)
     }
 
     .ph-chevron {
-      font-size: 10px;
+      font-size: 14px;
       color: var(--txt-d);
       transition: transform .18s
     }
@@ -1440,7 +1446,7 @@
 
     .empty-l {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       color: var(--txt-d);
       text-align: center;
       padding: 10px;
@@ -1493,7 +1499,7 @@
 
     .gm-sync-lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       color: var(--txt-d);
       letter-spacing: 1px;
       flex: 1
@@ -1504,7 +1510,7 @@
       border: 1px solid var(--bd);
       color: var(--txt);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 11px;
+      font-size: 15px;
       padding: 4px 10px;
       outline: none;
       width: 180px;
@@ -1521,7 +1527,7 @@
       border: 1px solid var(--red);
       color: var(--red);
       font-family: 'Orbitron', monospace;
-      font-size: 8px;
+      font-size: 12px;
       letter-spacing: 2px;
       cursor: pointer;
       transition: all .15s
@@ -1548,7 +1554,7 @@
       background: rgba(16, 185, 129, .08);
       border: 1px solid rgba(16, 185, 129, .3);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 8px;
+      font-size: 12px;
       color: var(--green);
       letter-spacing: .5px
     }
@@ -1594,7 +1600,7 @@
 
     .fb-modal-tag {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       letter-spacing: 3px;
       color: var(--red);
       margin-bottom: 12px;
@@ -1603,7 +1609,7 @@
 
     .fb-modal-title {
       font-family: 'Orbitron', monospace;
-      font-size: 16px;
+      font-size: 20px;
       font-weight: 700;
       color: var(--txt);
       margin-bottom: 6px;
@@ -1612,7 +1618,7 @@
 
     .fb-modal-sub {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 10px;
+      font-size: 14px;
       color: var(--txt-d);
       letter-spacing: .5px;
       line-height: 1.7;
@@ -1628,7 +1634,7 @@
 
     .fb-lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
+      font-size: 13px;
       color: var(--txt-lbl);
       letter-spacing: 1.5px
     }
@@ -1638,7 +1644,7 @@
       border: 1px solid var(--bd);
       color: var(--txt);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 12px;
+      font-size: 16px;
       padding: 8px 12px;
       outline: none;
       width: 100%;
@@ -1657,18 +1663,108 @@
     }
 
     /* ── MARKDOWN PREVIEW (Notas Gerais) ── */
-    .md-view{font-family:'Rajdhani',sans-serif;font-size:14px;line-height:1.7;color:var(--txt);word-wrap:break-word}
-    .md-view h1,.md-view h2,.md-view h3,.md-view h4,.md-view h5,.md-view h6{font-family:'Orbitron',monospace;color:var(--blue);margin:16px 0 8px;line-height:1.3}
-    .md-view h1{font-size:22px;color:var(--red);border-bottom:1px solid rgba(239,68,68,.25);padding-bottom:5px}
-    .md-view h2{font-size:18px}.md-view h3{font-size:15px}.md-view h4,.md-view h5,.md-view h6{font-size:13px;color:var(--txt-lbl)}
-    .md-view p{margin:0 0 10px}
-    .md-view ul,.md-view ol{margin:0 0 10px 22px}.md-view li{margin:2px 0}
-    .md-view code{font-family:'Share Tech Mono',monospace;font-size:12px;background:rgba(0,212,255,.08);border:1px solid var(--bd);padding:1px 5px;color:var(--blue)}
-    .md-view a{color:var(--gold);text-decoration:underline}
-    .md-view blockquote{border-left:3px solid var(--bd-b);margin:0 0 10px;padding:5px 12px;color:var(--txt-d);background:rgba(0,212,255,.025)}
-    .md-view hr{border:none;border-top:1px solid var(--bd);margin:16px 0}
-    .md-view strong{color:#fff;font-weight:700}.md-view em{color:var(--txt)}.md-view del{color:var(--txt-d)}
-    .md-empty{color:var(--txt-d);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px}
+    .md-view {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 19px;
+      line-height: 1.7;
+      color: var(--txt);
+      word-wrap: break-word
+    }
+
+    .md-view h1,
+    .md-view h2,
+    .md-view h3,
+    .md-view h4,
+    .md-view h5,
+    .md-view h6 {
+      font-family: 'Orbitron', monospace;
+      color: var(--blue);
+      margin: 16px 0 8px;
+      line-height: 1.3
+    }
+
+    .md-view h1 {
+      font-size: 28px;
+      color: var(--red);
+      border-bottom: 1px solid rgba(239, 68, 68, .25);
+      padding-bottom: 5px
+    }
+
+    .md-view h2 {
+      font-size: 22px
+    }
+
+    .md-view h3 {
+      font-size: 19px
+    }
+
+    .md-view h4,
+    .md-view h5,
+    .md-view h6 {
+      font-size: 17px;
+      color: var(--txt-lbl)
+    }
+
+    .md-view p {
+      margin: 0 0 10px
+    }
+
+    .md-view ul,
+    .md-view ol {
+      margin: 0 0 10px 22px
+    }
+
+    .md-view li {
+      margin: 2px 0
+    }
+
+    .md-view code {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 16px;
+      background: rgba(0, 212, 255, .08);
+      border: 1px solid var(--bd);
+      padding: 1px 5px;
+      color: var(--blue)
+    }
+
+    .md-view a {
+      color: var(--gold);
+      text-decoration: underline
+    }
+
+    .md-view blockquote {
+      border-left: 3px solid var(--bd-b);
+      margin: 0 0 10px;
+      padding: 5px 12px;
+      color: var(--txt-d);
+      background: rgba(0, 212, 255, .025)
+    }
+
+    .md-view hr {
+      border: none;
+      border-top: 1px solid var(--bd);
+      margin: 16px 0
+    }
+
+    .md-view strong {
+      color: #fff;
+      font-weight: 700
+    }
+
+    .md-view em {
+      color: var(--txt)
+    }
+
+    .md-view del {
+      color: var(--txt-d)
+    }
+
+    .md-empty {
+      color: var(--txt-d);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 15px;
+      letter-spacing: 1px
+    }
   </style>
 </head>
 
@@ -1678,12 +1774,13 @@
   <div class="scanline"></div>
   <header>
     <div class="hdr-left">
-      <div class="hdr-logo">ARC V1</div>
+      <div class="hdr-logo">ARC V2</div>
       <div class="hdr-tag">✦ PAINEL DO MESTRE</div>
       <div class="hdr-online">
         <div class="hdr-dot"></div><span class="hdr-online-txt">ONLINE</span>
       </div>
     </div>
+    <nav class="icon-bar" id="iconBar"></nav>
     <div class="hdr-right">
       <button class="btn btn-gold btn-sm" onclick="exportData()">[ EXPORTAR ]</button>
       <label class="btn btn-blue btn-sm" style="cursor:pointer">[ IMPORTAR ]<input type="file" accept=".json"
@@ -1692,13 +1789,12 @@
     </div>
   </header>
   <div class="app-shell">
-    <nav class="icon-bar" id="iconBar"></nav>
     <aside class="list-panel" id="listPanel"></aside>
     <main class="main" id="mainContent"></main>
   </div>
   <script>
 
-    const SECS = [{ id: 'combat', sym: '⚔', lbl: 'CMB' }, { id: 'npc', sym: '◈', lbl: 'NPC' }, { id: 'conceito', sym: '✦', lbl: 'CONC' }, { id: 'artefato', sym: '◆', lbl: 'ART' }, { id: 'armas', sym: '⌖', lbl: 'ARM' }, { id: 'jogadores', sym: '◉', lbl: 'JOG' }, { id: 'mundo', sym: '⊕', lbl: 'MND' }, { id: 'notas', sym: '✎', lbl: 'NOTAS' }];
+    const SECS = [{ id: 'combat', sym: '⚔', lbl: 'COMBATE' }, { id: 'npc', sym: '◈', lbl: 'NPCS' }, { id: 'conceito', sym: '✦', lbl: 'CONCEITOS' }, { id: 'artefato', sym: '◆', lbl: 'ARTEFATOS' }, { id: 'armas', sym: '⌖', lbl: 'ARSENAL' }, { id: 'jogadores', sym: '◉', lbl: 'JOGADORES' }, { id: 'mundo', sym: '⊕', lbl: 'MUNDO' }, { id: 'notas', sym: '✎', lbl: 'NOTAS' }];
     const NO_LIST = ['combat', 'npc', 'mundo'];
     const WCATS = ['Arma Branca', 'Arma de Fogo', 'Energia', 'Explosivo', 'Improvisada', 'Pesada', 'Arremesso'];
     const WTYPES = ['Normal', 'Verdadeiro', 'Absoluto'];
@@ -1706,8 +1802,8 @@
     const ISLOTS = ['Braço', 'Perna', 'Cabeça', 'Olho', 'Tronco', 'Coluna', 'Pele', 'Mão', 'Outro'];
     const ICATS = ['Cibernético', 'Biológico', 'Nano', 'Místico', 'Híbrido', 'Experimental'];
     const ACTS = ['Passiva', 'Padrão', 'Bônus', 'Movimento', 'Reação', 'Livre', 'Completa', 'Fala', 'Padrão+Bônus', 'Padrão+Movimento', 'Reação+Bônus', 'Especial'];
-    const SNEG = ['Morrendo', 'Terreno Difícil', 'Quebrado', 'Amedrontado', 'Atordoado', 'Membro Quebrado', 'Imobilizado', 'Em Choque', 'Vulnerável', 'Exaustão', 'Exaustão Grave', 'Fraqueza', 'Derrubado', 'Desprotegido', 'Exposto', 'Suprimido', 'Cegueira'];
-    const SPOS = ['Fortificado', 'Acelerado', 'Focado', 'Imparável', 'Blindado', 'Energizado', 'Fortalecido', 'Protegido'];
+    let SNEG = ['Morrendo', 'Terreno Difícil', 'Quebrado', 'Amedrontado', 'Atordoado', 'Membro Quebrado', 'Imobilizado', 'Em Choque', 'Vulnerável', 'Exaustão', 'Exaustão Grave', 'Fraqueza', 'Derrubado', 'Desprotegido', 'Exposto', 'Suprimido', 'Cegueira'];
+    let SPOS = ['Fortificado', 'Acelerado', 'Focado', 'Imparável', 'Blindado', 'Energizado', 'Fortalecido', 'Protegido'];
     const NATS = ['Brutamontes', 'Guerreiro', 'Atleta', 'Velocista'];
     const VIRTUES = ['Diligência', 'Generosidade', 'Temperança', 'Paciência', 'Castidade', 'Caridade', 'Humildade'];
     const SINS = ['Preguiça', 'Avareza', 'Gula', 'Ira', 'Luxúria', 'Inveja', 'Soberba'];
@@ -1760,13 +1856,44 @@
     let _ast;
     function autosave() { clearTimeout(_ast); _ast = setTimeout(() => { localStorage.setItem('arc_gm_v2', JSON.stringify(S)) }, 500) }
 
-    function init() {
+    // ── SYNC: efeitos do Doc → Firebase → GM Screen (fallback embutido/cache) ──
+    // effectNames = cópia fiel de tools/rules-parser/adapters.js. Mudou uma, mude nas duas.
+    const FB_RULES_URL = 'https://intitulations-default-rtdb.firebaseio.com/arc_rules.json';
+    function effectNames(section) {
+      if (!section || !Array.isArray(section.items)) return null;
+      const names = section.items.map(function (i) { return i.name; }).filter(Boolean);
+      return names.length ? names : null;
+    }
+    function applyEffects(sys) {
+      if (!sys) return;
+      const neg = effectNames(sys.efeitosNegativos), pos = effectNames(sys.efeitosPositivos);
+      if (neg) SNEG = neg;
+      if (pos) SPOS = pos;
+    }
+    async function loadRules() {
+      let data = null;
+      try {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 4000);
+        const resp = await fetch(FB_RULES_URL + '?t=' + Date.now(), { signal: ctrl.signal });
+        clearTimeout(tid);
+        if (resp.ok) { const d = await resp.json(); if (d) { data = d; localStorage.setItem('arc_gm_rules_cache', JSON.stringify(d)); } }
+      } catch (e) { /* offline/timeout: usa cache/embutido */ }
+      if (!data) { try { data = JSON.parse(localStorage.getItem('arc_gm_rules_cache') || 'null'); } catch (e) { } }
+      if (!data) return;
+      try { if (data.systems) applyEffects(data.systems); }
+      catch (e) { console.warn('[sync] falha ao aplicar efeitos, mantendo embutido:', e); }
+    }
+
+    async function init() {
+      await loadRules();
       const sv = localStorage.getItem('arc_gm_v2');
       if (sv) { try { S = { ...S, ...JSON.parse(sv) } } catch (e) { } }
       if (!S.armaLib) S.armaLib = { armas: [], implantes: [] };
       if (!S.armaLib.armas) S.armaLib.armas = [];
       if (!S.armaLib.implantes) S.armaLib.implantes = [];
       if (!Array.isArray(S.catalogNpcs)) S.catalogNpcs = [];
+      if (!Array.isArray(S.catalogGroups)) S.catalogGroups = [];
       renderApp();
     }
     function setSection(name) {
@@ -2667,9 +2794,10 @@
     window.addEventListener('message', e => {
       const d = e.data; if (!d || typeof d !== 'object') return;
       if (d.type === 'arc-npc-ready') {
-        if (e.source) e.source.postMessage({ type: 'arc-npc-load', npcs: S.catalogNpcs || [] }, '*');
+        if (e.source) e.source.postMessage({ type: 'arc-npc-load', npcs: S.catalogNpcs || [], groups: S.catalogGroups || [] }, '*');
       } else if (d.type === 'arc-npc-save') {
         S.catalogNpcs = Array.isArray(d.npcs) ? d.npcs : [];
+        S.catalogGroups = Array.isArray(d.groups) ? d.groups : [];
         autosave();
       }
     });

@@ -21,6 +21,12 @@ test('normalizeAction marca known=false para valor desconhecido', () => {
   assert.equal(normalizeAction('teleporte mágico').known, false);
 });
 
+test('normalizeAction tolera + sem espaços e ação com barra', () => {
+  assert.deepEqual(normalizeAction('reação+bônus'), { value: 'Reação+Bônus', known: true });
+  assert.deepEqual(normalizeAction('reação+movimento'), { value: 'Movimento+Reação', known: true });
+  assert.deepEqual(normalizeAction('padrão / completa'), { value: 'Padrão', known: true });
+});
+
 test('normalizeCost troca seta por + e preserva o resto', () => {
   assert.equal(normalizeCost('5S'), '5S');
   assert.equal(normalizeCost('1S -> 8S'), '1S+8S');
@@ -139,6 +145,72 @@ test('parseClasses emite warning para skill malformada dentro de classe', () => 
   assert.match(warnings[0], /Combatente/);
 });
 
+const { parseSubattrs, parseStatus } = require('./parser');
+const { SAMPLE_SUBATTR, SAMPLE_STATUS } = require('./fixtures');
+
+test('parseStatus: monta hp/sta por natureza (juntando os bullets)', () => {
+  const { natures } = parseStatus(SAMPLE_STATUS);
+  assert.equal(natures.Brutamontes.hp, '10 + 5d4 + 5*Corpo | Por nível: 5 + 3*Corpo');
+  assert.equal(natures.Brutamontes.sta, '5 + 3d6 + 3*Corpo | Por nível: 2 + Corpo | Rec: 5 > 7 > 10 > 15');
+  assert.equal(natures.Guerreiro.hp, '10 + 3d8 + 3*Corpo | Por nível: 5 + 2*Corpo');
+});
+
+test('parseStatus: mapeia "Brutamonte" → "Brutamontes" e ignora Sanidade/notas', () => {
+  const { natures } = parseStatus(SAMPLE_STATUS);
+  assert.deepEqual(Object.keys(natures).sort(), ['Brutamontes', 'Guerreiro']);
+  assert.equal(natures.Guerreiro.sta, undefined); // sem stamina no fixture pra Guerreiro
+});
+
+test('parseStatus: expõe fórmulas granulares por natureza (hpBase/hpNivel/staBase/staNivel/staRec)', () => {
+  const { natures } = parseStatus(SAMPLE_STATUS);
+  assert.equal(natures.Brutamontes.hpBase, '10 + 5d4 + 5*Corpo');
+  assert.equal(natures.Brutamontes.hpNivel, '5 + 3*Corpo');
+  assert.equal(natures.Brutamontes.staBase, '5 + 3d6 + 3*Corpo');
+  assert.equal(natures.Brutamontes.staNivel, '2 + Corpo');
+  assert.equal(natures.Brutamontes.staRec, '5 > 7 > 10 > 15');
+  // Guerreiro não tem stamina no fixture → granulares de stamina ausentes; hp continua
+  assert.equal(natures.Guerreiro.hpBase, '10 + 3d8 + 3*Corpo');
+  assert.equal(natures.Guerreiro.staBase, undefined);
+});
+
+test('parseSubattrs: extrai skills por subatributo (Corpo/Mente/Alma)', () => {
+  const { subattrs } = parseSubattrs(SAMPLE_SUBATTR);
+  assert.equal(subattrs.forca.length, 3);
+  assert.equal(subattrs.forca[0].name, 'Golpe Fortalecido');
+  assert.equal(subattrs.forca[1].action, 'Reação');
+  assert.equal(subattrs.vigor.length, 1);
+  assert.equal(subattrs.conexao.length, 1);
+  assert.equal(subattrs.conexao[0].name, 'Vínculo Astral');
+});
+
+test('parseSubattrs: marca lb e prefixa [LB] após "Limit break"', () => {
+  const { subattrs } = parseSubattrs(SAMPLE_SUBATTR);
+  const pf = subattrs.forca[2];
+  assert.equal(pf.name, 'Ponto Fraco');
+  assert.equal(pf.lb, true);
+  assert.ok(pf.desc.startsWith('[LB] '));
+  assert.equal(subattrs.forca[0].lb, undefined); // skill normal não tem lb
+});
+
+test('parseSubattrs: item com 2 skills na mesma string (quebra de linha interna) extrai ambas', () => {
+  const paras = [
+    { heading: 'HEADING1', text: 'Atributos' },
+    { heading: 'HEADING2', text: 'Corpo' },
+    { heading: 'NORMAL', text: 'Agilidade' },
+    { heading: 'NORMAL', text: 'Nível 2 — Passo Ágil (passiva): desloca +1\nNível 3 — Ímpeto (livre) [2S]: ação bônus' },
+  ];
+  const { subattrs } = parseSubattrs(paras);
+  assert.equal(subattrs.agilidade.length, 2);
+  assert.equal(subattrs.agilidade[0].name, 'Passo Ágil');
+  assert.equal(subattrs.agilidade[1].name, 'Ímpeto');
+});
+
+test('parseSubattrs: ignora texto narrativo da Alma e não cria subatributo fantasma', () => {
+  const { subattrs, warnings } = parseSubattrs(SAMPLE_SUBATTR);
+  assert.deepEqual(Object.keys(subattrs).sort(), ['conexao', 'forca', 'vigor']);
+  assert.equal(warnings.length, 0);
+});
+
 const { diffClasses } = require('./parser');
 
 test('diffClasses: sem mudanças → hasChanges false', () => {
@@ -179,4 +251,145 @@ test('diffClasses: ultimate com custo alterado', () => {
   const row = d.rows.find((r) => /ULT › cost/.test(r.path));
   assert.equal(row.old, '20S');
   assert.equal(row.new, '15S');
+});
+
+const { parseNatures } = require('./parser');
+const { SAMPLE_NATURES } = require('./fixtures');
+
+test('parseNatures extrai buff/debuff/habUnica por natureza', () => {
+  const { natures, warnings } = parseNatures(SAMPLE_NATURES);
+  assert.equal(warnings.length, 0);
+  assert.deepEqual(Object.keys(natures).sort(), ['Brutamontes', 'Guerreiro']);
+  const b = natures.Brutamontes;
+  assert.match(b.buff, /2 pontos de vida extra/);
+  assert.match(b.debuff, /CA é naturalmente menor/);
+  assert.deepEqual(b.habUnica, {
+    name: 'Avanço Brutal', action: 'Padrão+Movimento', cost: '4S',
+    desc: 'Você avança a mesma distância de seu movimento, atacando e empurrando todos na linha (inclui aliados), causando 2d6+(2*Corpo)',
+  });
+});
+
+test('parseNatures aceita hab. única com rótulo inline (compatibilidade)', () => {
+  const { natures } = parseNatures(SAMPLE_NATURES);
+  assert.deepEqual(natures.Guerreiro.habUnica, {
+    name: 'Rodada de Golpes', action: 'Bônus', cost: '5S',
+    desc: '1x por luta, por 2 rodadas, pode atacar uma vez a mais por ação padrão',
+  });
+});
+
+test('parseNatures ignora conteúdo fora da seção # Naturezas', () => {
+  const { natures } = parseNatures([
+    { heading: 'HEADING1', text: 'Classes' },
+    { heading: 'NORMAL', text: 'Buff: não deveria entrar' },
+  ]);
+  assert.deepEqual(natures, {});
+});
+
+test('parseNatures avisa quando a natureza fica sem hab. única em formato de skill', () => {
+  const { warnings } = parseNatures([
+    { heading: 'HEADING1', text: 'Naturezas' },
+    { heading: 'NORMAL', text: 'Brutamontes' },
+    { heading: 'NORMAL', text: 'Buff: x' },
+    { heading: 'NORMAL', text: '(4S) sem nome nem ação' },
+  ]);
+  assert.ok(warnings.some((w) => /habilidade única não reconhecida/i.test(w)));
+});
+
+test('parseNatures: hab. única de uma natureza não vaza para a próxima', () => {
+  const { natures } = parseNatures([
+    { heading: 'HEADING1', text: 'Naturezas' },
+    { heading: 'NORMAL', text: 'Brutamontes' },
+    { heading: 'NORMAL', text: 'Avanço (livre) [4S]: a' },
+    { heading: 'NORMAL', text: 'Guerreiro' },
+    { heading: 'NORMAL', text: 'Buff: x' },
+    { heading: 'NORMAL', text: 'Rajada (bônus) [5S]: b' },
+  ]);
+  assert.equal(natures.Brutamontes.habUnica.name, 'Avanço');
+  assert.equal(natures.Guerreiro.buff, 'x');
+  assert.equal(natures.Guerreiro.habUnica.name, 'Rajada');
+});
+
+const { parseSystems } = require('./parser');
+const { SAMPLE_SYSTEMS } = require('./fixtures');
+
+test('parseSystems extrai itens "Nome: desc" por seção', () => {
+  const { systems } = parseSystems(SAMPLE_SYSTEMS);
+  assert.equal(systems.distancias.intro, null);
+  assert.deepEqual(systems.distancias.items, [
+    { name: 'Adjacente', desc: '1 metro' },
+    { name: 'Curta', desc: '2 - 9 metros' },
+  ]);
+});
+
+test('parseSystems: intro antes do 1º item, note depois (DoT)', () => {
+  const { systems } = parseSystems(SAMPLE_SYSTEMS);
+  assert.match(systems.dot.intro, /Stacks do mesmo DoT/);
+  assert.equal(systems.dot.items.length, 1);
+  assert.equal(systems.dot.items[0].name, 'Sangramento');
+  assert.equal(systems.dot.items[0].note, 'Esse efeito pode stackar até 3x');
+});
+
+test('parseSystems ignora Combos/CA/Idades (não vazam p/ a seção anterior)', () => {
+  const { systems } = parseSystems(SAMPLE_SYSTEMS);
+  assert.ok(!('combos' in systems));
+  assert.ok(!('ca' in systems));
+  assert.ok(!('idades' in systems));
+  // conteúdo de CA (linha ignorada) não vaza para a seção anterior (dot)
+  assert.equal(systems.dot.items.length, 1);
+});
+
+test('parseSystems: seção só com intro fica sem itens', () => {
+  const { systems } = parseSystems(SAMPLE_SYSTEMS);
+  assert.match(systems.chance.intro, /Sempre que algo tiver uma chance/);
+  assert.deepEqual(systems.chance.items, []);
+});
+
+test('parseSystems ignora conteúdo fora da seção', () => {
+  const { systems } = parseSystems(SAMPLE_SYSTEMS);
+  const dump = JSON.stringify(systems);
+  assert.ok(!/fora da seção/.test(dump));
+});
+
+const { parseActions } = require('./parser');
+const { SAMPLE_ACTIONS } = require('./fixtures');
+
+test('parseActions extrai a descrição "Ofensiva VS. Defensiva"', () => {
+  const { actions } = parseActions(SAMPLE_ACTIONS);
+  assert.match(actions.desc, /Caso o atacante não passe da CA/);
+  assert.match(actions.desc, /vence o maior resultado total/);
+});
+
+test('parseActions extrai itens das 3 colunas', () => {
+  const { actions } = parseActions(SAMPLE_ACTIONS);
+  assert.equal(actions.columns.ofensivas.items[0].name, 'Atacar');
+  assert.equal(actions.columns.defensivas.items[0].name, 'Esquivar');
+  assert.equal(actions.columns.inspiradoras.items[0].name, 'Superar seus limites');
+});
+
+test('parseActions: linha solta vira continuação da desc do item', () => {
+  const { actions } = parseActions(SAMPLE_ACTIONS);
+  const ao = actions.columns.ofensivas.items[1];
+  assert.equal(ao.name, 'Ataque de oportunidade');
+  assert.match(ao.desc, /se move em distância adjacente/);
+});
+
+test('parseActions: custo "(1PI)" das Inspiradoras vira cost do item', () => {
+  const { actions } = parseActions(SAMPLE_ACTIONS);
+  const insp = actions.columns.inspiradoras.items;
+  assert.equal(insp[0].cost, '1PI');
+  assert.equal(insp[1].cost, '2PI');
+});
+
+test('parseActions: "custam 2S" e limite de PI viram nota da coluna', () => {
+  const { actions } = parseActions(SAMPLE_ACTIONS);
+  assert.match(actions.columns.ofensivas.note, /custam 2S/);
+  assert.match(actions.columns.defensivas.note, /custam 2S/);
+  assert.match(actions.columns.inspiradoras.note, /máximo de 3 pontos/);
+});
+
+test('parseActions: intro/Obs antes das colunas e conteúdo fora da seção são ignorados', () => {
+  const { actions } = parseActions(SAMPLE_ACTIONS);
+  const dump = JSON.stringify(actions);
+  assert.ok(!/Existem as ações/.test(dump));
+  assert.ok(!/fora da seção/.test(dump));
 });
