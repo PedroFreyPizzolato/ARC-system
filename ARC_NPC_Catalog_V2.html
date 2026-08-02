@@ -82,26 +82,16 @@
       overflow: hidden
     }
 
-    .sb-head {
-      padding: 10px 12px 8px;
-      border-bottom: 1px solid var(--bd);
-      flex-shrink: 0
+    .sb-resizer {
+      width: 5px;
+      flex-shrink: 0;
+      cursor: col-resize;
+      background: transparent;
+      transition: background .12s
     }
 
-    .sb-logo {
-      font-family: 'Orbitron', monospace;
-      font-size: 20px;
-      font-weight: 900;
-      color: var(--red);
-      letter-spacing: 3px
-    }
-
-    .sb-tag {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 14px;
-      color: var(--dim);
-      letter-spacing: 2px;
-      margin-top: 1px
+    .sb-resizer:hover {
+      background: rgba(0, 212, 255, 0.25)
     }
 
     .sb-list {
@@ -1619,8 +1609,28 @@
     let activeTab = 'status';
     let openLvIdx = null; // qual entry de levelHistory está expandida
     const EMBEDDED = window.parent !== window; // true quando rodando dentro do GM Screen (iframe)
+    let sbW = +localStorage.getItem('arc_npc_sbw') || 210; // largura da sidebar (arrastável)
+    let renderedView = null; // 'activeTab|selId' da última render, p/ saber se deve restaurar o scroll do conteúdo
 
     function npc() { return npcs.find(n => n.id === selId) || npcs[0] || null; }
+
+    // Arrasta a divisória para redimensionar a sidebar. Aplica direto no style
+    // (sem re-render durante o drag); render() relê sbW.
+    function startSbResize(e) {
+      e.preventDefault();
+      const sb = e.target.previousElementSibling;
+      const x0 = e.clientX, w0 = sb.offsetWidth;
+      const move = ev => { sbW = Math.min(600, Math.max(140, w0 + ev.clientX - x0)); sb.style.width = sbW + 'px'; };
+      const up = () => {
+        document.removeEventListener('mousemove', move);
+        document.removeEventListener('mouseup', up);
+        document.body.style.userSelect = '';
+        try { localStorage.setItem('arc_npc_sbw', sbW); } catch (err) { }
+      };
+      document.body.style.userSelect = 'none';
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', up);
+    }
 
     // ================================================================
     // GRUPOS / SUBGRUPOS — lógica pura
@@ -2259,12 +2269,18 @@
         else if (activeTab === 'info') tabContent = renderInfo();
       }
 
+      // render() troca todo o innerHTML: guarda o scroll das áreas roláveis e devolve depois.
+      // Só restaura o conteúdo se continua a mesma aba/NPC — trocar de aba começa do topo.
+      const scrollBefore = { content: document.querySelector('.content')?.scrollTop || 0, list: document.querySelector('.sb-list')?.scrollTop || 0 };
+      const sameView = renderedView === activeTab + '|' + selId;
+      renderedView = activeTab + '|' + selId;
+
       document.getElementById('app').innerHTML = `
-    <div class="sidebar">
-      <div class="sb-head"><div class="sb-logo">ARC V2</div><div class="sb-tag">CATÁLOGO DE NPCs</div></div>
+    <div class="sidebar" style="width:${sbW}px">
       <div class="sb-list">${sidebarItems}</div>
       <div class="sb-add"><button class="btn-dashed blue" style="margin-bottom:5px" onclick="addGroup(null)">+ NOVO GRUPO</button><button class="btn-dashed red" onclick="addNPC()">+ NOVO NPC</button></div>
     </div>
+    <div class="sb-resizer" onmousedown="startSbResize(event)"></div>
     <div class="main">
       ${n ? `
         <div class="main-hdr">
@@ -2286,6 +2302,9 @@
         <div class="content">${tabContent}</div>
       `: `<div class="empty-state"><div class="empty-icon">◈</div><div class="empty-txt">NENHUM NPC SELECIONADO</div><button class="btn-dashed blue" style="margin-top:10px;width:220px" onclick="addNPC()">+ CRIAR PRIMEIRO NPC</button></div>`}
     </div>`;
+
+      const list = document.querySelector('.sb-list'); if (list) list.scrollTop = scrollBefore.list;
+      const cont = document.querySelector('.content'); if (cont && sameView) cont.scrollTop = scrollBefore.content;
     }
 
     // ================================================================

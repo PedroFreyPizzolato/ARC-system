@@ -100,7 +100,8 @@
     .hdr-left {
       display: flex;
       align-items: center;
-      gap: 14px
+      gap: 14px;
+      flex-shrink: 0
     }
 
     .hdr-logo {
@@ -147,7 +148,8 @@
     .hdr-right {
       display: flex;
       gap: 7px;
-      align-items: center
+      align-items: center;
+      flex-shrink: 0
     }
 
     @keyframes pulse {
@@ -174,29 +176,33 @@
     }
 
     .icon-bar {
-      width: 44px;
-      flex-shrink: 0;
-      background: rgba(2, 4, 8, 0.85);
-      border-right: 1px solid rgba(239, 68, 68, 0.1);
+      flex: 1;
+      align-self: stretch;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      padding: 6px 0;
-      gap: 2px
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0;
+      margin: 0 16px;
+      gap: 3px
+    }
+
+    .icon-bar::-webkit-scrollbar {
+      height: 3px
     }
 
     .ic-btn {
-      width: 40px;
-      height: 46px;
+      flex-shrink: 0;
+      height: 36px;
+      padding: 0 12px;
       background: transparent;
       border: 1px solid transparent;
       color: var(--txt-d);
       cursor: pointer;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 2px;
+      gap: 7px;
       transition: all .15s
     }
 
@@ -213,13 +219,13 @@
     }
 
     .ic-sym {
-      font-size: 19px;
+      font-size: 20px;
       line-height: 1
     }
 
     .ic-lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 11px;
+      font-size: 12px;
       letter-spacing: 1px
     }
 
@@ -1774,6 +1780,7 @@
         <div class="hdr-dot"></div><span class="hdr-online-txt">ONLINE</span>
       </div>
     </div>
+    <nav class="icon-bar" id="iconBar"></nav>
     <div class="hdr-right">
       <button class="btn btn-gold btn-sm" onclick="exportData()">[ EXPORTAR ]</button>
       <label class="btn btn-blue btn-sm" style="cursor:pointer">[ IMPORTAR ]<input type="file" accept=".json"
@@ -1782,13 +1789,12 @@
     </div>
   </header>
   <div class="app-shell">
-    <nav class="icon-bar" id="iconBar"></nav>
     <aside class="list-panel" id="listPanel"></aside>
     <main class="main" id="mainContent"></main>
   </div>
   <script>
 
-    const SECS = [{ id: 'combat', sym: '⚔', lbl: 'CMB' }, { id: 'npc', sym: '◈', lbl: 'NPC' }, { id: 'conceito', sym: '✦', lbl: 'CONC' }, { id: 'artefato', sym: '◆', lbl: 'ART' }, { id: 'armas', sym: '⌖', lbl: 'ARM' }, { id: 'jogadores', sym: '◉', lbl: 'JOG' }, { id: 'mundo', sym: '⊕', lbl: 'MND' }, { id: 'notas', sym: '✎', lbl: 'NOTAS' }];
+    const SECS = [{ id: 'combat', sym: '⚔', lbl: 'COMBATE' }, { id: 'npc', sym: '◈', lbl: 'NPCS' }, { id: 'conceito', sym: '✦', lbl: 'CONCEITOS' }, { id: 'artefato', sym: '◆', lbl: 'ARTEFATOS' }, { id: 'armas', sym: '⌖', lbl: 'ARSENAL' }, { id: 'jogadores', sym: '◉', lbl: 'JOGADORES' }, { id: 'mundo', sym: '⊕', lbl: 'MUNDO' }, { id: 'notas', sym: '✎', lbl: 'NOTAS' }];
     const NO_LIST = ['combat', 'npc', 'mundo'];
     const WCATS = ['Arma Branca', 'Arma de Fogo', 'Energia', 'Explosivo', 'Improvisada', 'Pesada', 'Arremesso'];
     const WTYPES = ['Normal', 'Verdadeiro', 'Absoluto'];
