@@ -393,3 +393,42 @@ test('parseActions: intro/Obs antes das colunas e conteúdo fora da seção são
   assert.ok(!/Existem as ações/.test(dump));
   assert.ok(!/fora da seção/.test(dump));
 });
+
+// ── Durabilidade de Equipamentos (# Sistemas e Esclarecimentos) ──
+
+test('parseSystems reconhece "Durabilidade de Equipamentos"', () => {
+  const { systems } = parseSystems(SAMPLE_SYSTEMS);
+  assert.equal(systems.durabilidade.intro, 'Cada equipamento (arma/armadura/implante) possui uma quantidade X de pontos de durabilidade.');
+  assert.deepEqual(systems.durabilidade.items.map(i => i.name), ['Armas', 'Armaduras']);
+  assert.match(systems.durabilidade.items[0].desc, /10% do dano total e tem -1 no acerto$/);
+});
+
+// ── Tabela de sanidade (# Status) ──
+
+test('parseStatus: tabela de sanidade vira faixas {label,min,max,desc}', () => {
+  const { sanity } = parseStatus(SAMPLE_STATUS);
+  assert.deepEqual(sanity, [
+    { label: '90+', min: 90, max: null, desc: 'Todo dano mental que receber é reduzido pela metade' },
+    { label: '70-89', min: 70, max: 89, desc: 'Testes de Mente envolvendo foco/concentração são jogados com desvantagem' },
+    { label: '0', min: 0, max: 0, desc: 'Você enlouquece completamente' },
+  ]);
+});
+
+test('parseStatus: tabela de sanidade não contamina as naturezas', () => {
+  const { natures } = parseStatus(SAMPLE_STATUS);
+  assert.deepEqual(Object.keys(natures), ['Brutamontes', 'Guerreiro']);
+});
+
+test('parseStatus: sem tabela, sanity é lista vazia', () => {
+  const { sanity } = parseStatus([{ heading: 'HEADING1', text: 'Status' }, { heading: 'NORMAL', text: 'Sanidade' }]);
+  assert.deepEqual(sanity, []);
+});
+
+test('parseStatus: linhas de tabela fora de Sanidade são ignoradas', () => {
+  const { sanity } = parseStatus([
+    { heading: 'HEADING1', text: 'Status' },
+    { heading: 'NORMAL', text: 'Vida' },
+    { heading: 'NORMAL', text: '90+ | não é sanidade', cells: ['90+', 'não é sanidade'] },
+  ]);
+  assert.deepEqual(sanity, []);
+});

@@ -4,7 +4,7 @@
 //
 // Uso: node tools/rules-parser/verify-doc.js <caminho-do-doc-extraido.md>
 const fs = require('fs');
-const { parseClasses, parseSubattrs, parseStatus, parseNatures } = require('./parser');
+const { parseClasses, parseSubattrs, parseStatus, parseNatures, parseSystems } = require('./parser');
 
 const path = process.argv[2];
 if (!path) { console.error('uso: node verify-doc.js <arquivo.md>'); process.exit(1); }
@@ -25,6 +25,11 @@ for (const raw of fs.readFileSync(path, 'utf8').split(/\r?\n/)) {
   if ((m = line.match(/^###\s+(.*)$/))) paras.push({ heading: 'HEADING3', text: clean(m[1]) });
   else if ((m = line.match(/^##\s+(.*)$/))) paras.push({ heading: 'HEADING2', text: clean(m[1]) });
   else if ((m = line.match(/^#\s+(.*)$/))) paras.push({ heading: 'HEADING1', text: clean(m[1]) });
+  else if (/^\|.*\|$/.test(line.trim())) {
+    const cells = line.trim().slice(1, -1).split('|').map((c) => clean(c));
+    if (cells.every((c) => /^[:\-\s]*$/.test(c))) continue; // separador do markdown
+    paras.push({ heading: 'NORMAL', text: cells.join(' | '), cells });
+  }
   else paras.push({ heading: 'NORMAL', text: clean(line.replace(/^\s*[-*]\s+/, '')) });
 }
 
@@ -63,3 +68,14 @@ for (const n of Object.keys(nt.natures)) {
 }
 console.log('Avisos (naturezas):', nt.warnings.length);
 nt.warnings.forEach((w) => console.log('  ' + w));
+
+console.log('\nSanidade (faixas da tabela):', st.sanity.length, '(esperado 6)');
+st.sanity.forEach((f) => console.log(`  - ${f.label} [${f.min}..${f.max === null ? '+' : f.max}] ${f.desc}`));
+
+const sy = parseSystems(paras);
+const dur = sy.systems.durabilidade;
+console.log('\nDurabilidade:', dur ? `${dur.items.length} itens (esperado 3)` : 'NAO ENCONTRADA');
+if (dur) {
+  console.log('  intro:', dur.intro);
+  dur.items.forEach((i) => console.log(`  - ${i.name}: ${i.desc}`));
+}

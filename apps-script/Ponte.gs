@@ -235,10 +235,26 @@ const N0_RE = /^n[íi]vel\s*0\s*:\s*(.+)$/i;
 const PN_RE = /^por\s*n[íi]vel\s*:\s*(.+)$/i;
 const REC_RE = /^recupera[çc][ãa]o\s*:\s*(.+)$/i;
 
+// Faixa da tabela de sanidade: "90+", "70-89" ou "0".
+const SAN_RANGE_RE = /^(\d+)\s*(?:(\+)|[-–—]\s*(\d+))?$/;
+
+// Linha da tabela de sanidade -> { label, min, max, desc }; null se nao for uma faixa.
+function parseSanityRow(cells) {
+  if (!Array.isArray(cells) || cells.length < 2) return null;
+  const label = String(cells[0] || '').trim();
+  const desc = String(cells[1] || '').trim();
+  const m = label.match(SAN_RANGE_RE);
+  if (!m || !desc) return null;
+  const min = Number(m[1]);
+  return { label: label, min: min, max: m[2] ? null : (m[3] ? Number(m[3]) : min), desc: desc };
+}
+
+// A tabela sob "Sanidade" vira `sanity` (faixas do medidor do ARC).
 // Vida/Stamina por natureza (seção "# Status") → strings hp/sta exibidas no ARC.
 function parseStatus(paragraphs) {
   const acc = {};
   const warnings = [];
+  const sanity = [];
   let inStatus = false, mode = null, currentNat = null;
   function ensure(n) { if (!acc[n]) acc[n] = {}; return acc[n]; }
   for (const p of paragraphs) {
@@ -246,6 +262,10 @@ function parseStatus(paragraphs) {
     const full = String(p.text || '');
     if (heading === 'HEADING1') { inStatus = /^status$/i.test(full.trim()); mode = null; currentNat = null; continue; }
     if (!inStatus) continue;
+    if (p.cells) { // linha de tabela: so interessa a de sanidade
+      if (mode === 'sanidade') { const row = parseSanityRow(p.cells); if (row) sanity.push(row); }
+      continue;
+    }
     for (const raw of full.split(/\r?\n/)) {
       const t = raw.trim();
       if (!t) continue;
@@ -274,7 +294,7 @@ function parseStatus(paragraphs) {
     if (a.staR) o.staRec = a.staR;
     if (o.hp || o.sta) natures[n] = o;
   });
-  return { natures: natures, warnings: warnings };
+  return { natures: natures, sanity: sanity, warnings: warnings };
 }
 
 const NAT_BUFF_RE = /^buff\s*:\s*(.+)$/i;
@@ -330,6 +350,7 @@ const SYS_SECTIONS = {
   'dot': 'dot',
   'duas armas': 'duasArmas',
   'critico': 'critico',
+  'durabilidade de equipamentos': 'durabilidade',
   'categorias de dano e reducao': 'categoriasDano',
   'tipos de dano': 'tiposDano',
   'chance': 'chance',
@@ -422,7 +443,22 @@ function _headingName(h) {
   return 'NORMAL';
 }
 
-// Inclui PARAGRAPH e LIST_ITEM (as skills de subatributo estão em listas), na ordem do Doc.
+// Linhas de uma TABLE do Doc → parágrafos com `cells` (texto de cada célula).
+// A tabela de sanidade (# Status) é lida por parseStatus; as demais são ignoradas.
+function _linhasDaTabela(table) {
+  const out = [];
+  const nRows = table.getNumRows();
+  for (let r = 0; r < nRows; r++) {
+    const row = table.getRow(r);
+    const cells = [];
+    for (let c = 0; c < row.getNumCells(); c++) cells.push(row.getCell(c).getText().trim());
+    out.push({ heading: 'NORMAL', text: cells.join(' | '), cells: cells });
+  }
+  return out;
+}
+
+// Inclui PARAGRAPH, LIST_ITEM (as skills de subatributo estão em listas) e as linhas
+// das TABLEs, na ordem do Doc.
 function coletarParagrafos() {
   const body = DocumentApp.getActiveDocument().getBody();
   const ET = DocumentApp.ElementType;
@@ -434,6 +470,7 @@ function coletarParagrafos() {
     let p = null;
     if (type === ET.PARAGRAPH) p = el.asParagraph();
     else if (type === ET.LIST_ITEM) p = el.asListItem();
+    else if (type === ET.TABLE) _linhasDaTabela(el.asTable()).forEach(function (r) { out.push(r); });
     if (p) out.push({ heading: _headingName(p.getHeading()), text: p.getText() });
   }
   return out;
@@ -455,11 +492,12 @@ function construirArcRules() {
     if (src.habUnica) dst.habUnica = src.habUnica;
   });
   return {
-    rules: { _version: 1, _updatedAt: new Date().getTime(), classes: c.classes, subattrs: s.subattrs, status: { natures: st.natures }, systems: sy.systems, actions: ac.actions },
+    rules: { _version: 1, _updatedAt: new Date().getTime(), classes: c.classes, subattrs: s.subattrs, status: { natures: st.natures, sanity: st.sanity }, systems: sy.systems, actions: ac.actions },
     warnings: c.warnings.concat(s.warnings).concat(st.warnings).concat(nt.warnings).concat(sy.warnings).concat(ac.warnings),
     countClasses: Object.keys(c.classes).length,
     countSubattrs: Object.keys(s.subattrs).length,
     countNatures: Object.keys(st.natures).length,
+    countSanity: st.sanity.length,
     countSystems: Object.keys(sy.systems).length,
     countActions: ACT_COL_KEYS.reduce(function (acc, k) { return acc + (ac.actions.columns[k].items || []).length; }, 0),
   };
@@ -512,8 +550,10 @@ function _envActions(actions) {
   return o;
 }
 
-// Envelopa status {natureza:{hp,sta}} como pseudo-classes (Vida/Stamina como "skills") p/ reusar diffClasses.
-function _envStatus(natures) {
+// Envelopa status {natures,sanity} como pseudo-classes (Vida/Stamina/faixas como "skills") p/ reusar diffClasses.
+function _envStatus(status) {
+  status = status || {};
+  const natures = status.natures;
   const o = {};
   Object.keys(natures || {}).forEach(function (n) {
     const s = natures[n], skills = [];
@@ -524,6 +564,10 @@ function _envStatus(natures) {
     if (s.habUnica) skills.push({ name: 'Hab. Única', action: s.habUnica.action, cost: s.habUnica.cost, desc: s.habUnica.name + ' — ' + s.habUnica.desc });
     o[n] = { skills: skills, ultimate: null };
   });
+  const sanSk = (status.sanity || []).map(function (f) {
+    return { name: f.label, action: '', cost: null, desc: f.desc };
+  });
+  if (sanSk.length) o['Sanidade — faixas'] = { skills: sanSk, ultimate: null };
   return o;
 }
 
@@ -580,7 +624,7 @@ function mostrarPreview() {
   const atual = buscarRegrasAtuais();
   const diffCls = diffClasses(atual.classes, out.rules.classes);
   const diffSub = diffClasses(_envelope(atual.subattrs), _envelope(out.rules.subattrs));
-  const diffSt = diffClasses(_envStatus(atual.status && atual.status.natures), _envStatus(out.rules.status.natures));
+  const diffSt = diffClasses(_envStatus(atual.status), _envStatus(out.rules.status));
   const diffSy = diffClasses(_envSystems(atual.systems), _envSystems(out.rules.systems));
   const diffAc = diffClasses(_envActions(atual.actions), _envActions(out.rules.actions));
   const html = HtmlService.createHtmlOutput(_previewHtml(out, diffCls, diffSub, diffSt, diffSy, diffAc)).setWidth(860).setHeight(620);
@@ -593,12 +637,12 @@ function publicar() {
   const atual = buscarRegrasAtuais();
   const nMud = diffClasses(atual.classes, out.rules.classes).rows.length
     + diffClasses(_envelope(atual.subattrs), _envelope(out.rules.subattrs)).rows.length
-    + diffClasses(_envStatus(atual.status && atual.status.natures), _envStatus(out.rules.status.natures)).rows.length
+    + diffClasses(_envStatus(atual.status), _envStatus(out.rules.status)).rows.length
     + diffClasses(_envSystems(atual.systems), _envSystems(out.rules.systems)).rows.length
     + diffClasses(_envActions(atual.actions), _envActions(out.rules.actions)).rows.length;
   const aviso = out.warnings.length ? ('\n\n⚠️ ' + out.warnings.length + ' aviso(s)! Veja o Preview antes.') : '';
   const resp = ui.alert('Publicar no Firebase',
-    'Enviar ' + out.countClasses + ' classes + ' + out.countSubattrs + ' subatributos + ' + out.countNatures + ' naturezas + ' + out.countSystems + ' sistemas + ' + out.countActions + ' ações (' + nMud + ' mudança(s)) para o ARC?'
+    'Enviar ' + out.countClasses + ' classes + ' + out.countSubattrs + ' subatributos + ' + out.countNatures + ' naturezas + ' + out.countSystems + ' sistemas + ' + out.countActions + ' ações + ' + out.countSanity + ' faixas de sanidade (' + nMud + ' mudança(s)) para o ARC?'
     + '\nUse "Pré-visualizar" para ver o diff lado a lado.' + aviso,
     ui.ButtonSet.OK_CANCEL);
   if (resp !== ui.Button.OK) return;
