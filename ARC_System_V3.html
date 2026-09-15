@@ -30,11 +30,11 @@
       --txt-nsd: rgba(224, 247, 255, 0.65);
       --txt-d: rgba(224, 247, 255, 0.45);
       --txt-lbl: rgba(0, 212, 255, 0.7);
-      --fs: 15px;
-      --fs-sm: 13px;
-      --fs-xs: 11px;
-      --fs-lg: 17px;
-      --fs-xl: 20px;
+      --fs: 17px;
+      --fs-sm: 15px;
+      --fs-xs: 13px;
+      --fs-lg: 20px;
+      --fs-xl: 23px;
     }
 
     * {
@@ -120,7 +120,7 @@
 
     .hdr-logo {
       font-family: 'Orbitron', monospace;
-      font-size: 21px;
+      font-size: 24px;
       font-weight: 900;
       letter-spacing: 4px;
       color: var(--blue);
@@ -229,7 +229,7 @@
 
     .btn-sm {
       padding: 5px 12px;
-      font-size: 14px;
+      font-size: 16px;
       letter-spacing: 1px
     }
 
@@ -240,7 +240,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 19px;
+      font-size: 22px;
       clip-path: none;
       border-radius: 0
     }
@@ -668,7 +668,7 @@
       border-bottom: 1px solid var(--bd-b);
       color: var(--txt);
       font-family: 'Orbitron', monospace;
-      font-size: 18px;
+      font-size: 21px;
       width: 58px;
       text-align: center;
       outline: none;
@@ -677,7 +677,7 @@
 
     .bar-sep {
       color: var(--txt-d);
-      font-size: 17px
+      font-size: 20px
     }
 
     .bar-track {
@@ -734,7 +734,7 @@
       border: 1px solid var(--bd);
       color: var(--txt-d);
       cursor: pointer;
-      font-size: 20px;
+      font-size: 23px;
       line-height: 1;
       transition: all .15s;
       display: flex;
@@ -777,7 +777,7 @@
 
     .c-val {
       font-family: 'Orbitron', monospace;
-      font-size: 22px;
+      font-size: 25px;
       font-weight: 700;
       color: var(--blue);
       min-width: 30px;
@@ -809,7 +809,7 @@
 
     .pick-lv {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 14px;
+      font-size: 16px;
       color: var(--txt-d);
       width: 28px;
       flex-shrink: 0
@@ -823,7 +823,7 @@
       border: 1px solid rgba(0, 212, 255, .12);
       color: var(--txt-d);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 14px;
+      font-size: 16px;
       letter-spacing: .5px;
       cursor: pointer;
       transition: all .15s;
@@ -840,7 +840,7 @@
 
       color: var(--txt-nsd);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 13px;
+      font-size: 15px;
       letter-spacing: .5px;
       transition: all .25s;
       text-align: center;
@@ -978,7 +978,7 @@
 
     .subder-item {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 15px;
+      font-size: 17px;
       color: var(--txt-d)
     }
 
@@ -1060,7 +1060,7 @@
       border: 1px solid var(--bd);
       color: var(--blue);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 14px;
+      font-size: 16px;
       padding: 3px 6px;
       outline: none;
       cursor: pointer;
@@ -1077,7 +1077,7 @@
       border: 1px solid rgba(245, 158, 11, .3);
       color: var(--gold);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 14px;
+      font-size: 16px;
       padding: 3px 7px;
       outline: none;
       width: 70px;
@@ -1093,7 +1093,7 @@
       display: inline-block;
       padding: 2px 8px;
       font-family: 'Share Tech Mono', monospace;
-      font-size: 14px;
+      font-size: 16px;
       letter-spacing: .5px;
       border: 1px solid
     }
@@ -1131,7 +1131,7 @@
     /* ── PERICIAS ── */
     .per-row {
       display: grid;
-      grid-template-columns: 1fr 120px 60px 40px 60px;
+      grid-template-columns: 1fr 120px 60px 56px 66px;
       gap: 8px;
       align-items: center;
       padding: 7px 10px;
@@ -1140,13 +1140,21 @@
       font-size: var(--fs-sm)
     }
 
+    /* Cabeçalho: rótulos curtos podem quebrar em 2 linhas em fontes maiores, mas não
+       devem "vazar" (overflow) por cima da coluna vizinha — min-width:0 força o texto
+       a quebrar dentro da própria coluna em vez de quando o vizinho é uma coluna fixa. */
+    .per-row.hdr>*,
+    .weapon-row.hdr>* {
+      min-width: 0
+    }
+
     .per-row:hover {
       background: rgba(0, 212, 255, .03)
     }
 
     .per-row.hdr {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 14px;
+      font-size: 16px;
       color: var(--txt-d);
       letter-spacing: 1px;
       padding-bottom: 5px
@@ -1158,7 +1166,7 @@
 
     .per-sub {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 14px;
+      font-size: 16px;
       color: var(--txt-d)
     }
 
@@ -1168,7 +1176,7 @@
       border: none;
       border-bottom: 1px solid var(--bd);
       color: var(--txt);
-      font-size: 16px;
+      font-size: 18px;
       padding: 2px 4px;
       outline: none;
       text-align: center
@@ -1183,7 +1191,7 @@
 
     .per-bonus {
       font-family: 'Orbitron', monospace;
-      font-size: 17px;
+      font-size: 20px;
       color: var(--blue);
       text-align: center
     }
@@ -1201,7 +1209,7 @@
       background: transparent;
       color: var(--txt-d);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 14px;
+      font-size: 16px;
       letter-spacing: .5px;
       cursor: pointer;
       transition: all .2s
@@ -1237,7 +1245,7 @@
 
     .dot-name {
       font-family: 'Orbitron', monospace;
-      font-size: 16px;
+      font-size: 18px;
       letter-spacing: 2px;
       color: var(--red)
     }
@@ -1247,7 +1255,7 @@
       border: 1px solid rgba(255, 0, 0, .3);
       color: var(--red);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 13px;
+      font-size: 15px;
       padding: 2px 8px;
       cursor: pointer;
       letter-spacing: 1px
@@ -1332,7 +1340,7 @@
 
     .dot-lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 13px;
+      font-size: 15px;
       color: var(--txt-d);
       letter-spacing: 1px
     }
@@ -1390,7 +1398,7 @@
 
     .weapon-row.hdr {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 14px;
+      font-size: 16px;
       color: var(--txt-d);
       letter-spacing: 1px
     }
@@ -1416,6 +1424,14 @@
       color: var(--txt)
     }
 
+    /* Implantes: DUR/MÁX ficam numa linha flex (não numa coluna de grid), então
+       w-inp:width:100% os deixaria disputando o espaço com a descrição da penalidade. */
+    .col3>input[data-f="durCur"],
+    .col3>input[data-f="durMax"] {
+      flex: 0 0 46px;
+      width: 46px
+    }
+
     /* Penalidade acumulada por durabilidade faltando (ocupa a linha inteira) */
     .dur-pen {
       grid-column: 1 / -1;
@@ -1430,12 +1446,17 @@
       display: none
     }
 
+    .dur-pen.broken {
+      font-weight: 700;
+      letter-spacing: 1px
+    }
+
     .w-rem {
       background: transparent;
       border: none;
       color: rgba(239, 68, 68, .4);
       cursor: pointer;
-      font-size: 19px;
+      font-size: 22px;
       transition: color .2s
     }
 
@@ -1456,7 +1477,7 @@
 
     .impl-lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 14px;
+      font-size: 16px;
       color: var(--purple-b);
       letter-spacing: 1px;
       margin-bottom: 4px
@@ -1479,13 +1500,13 @@
 
     .death-label {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 14px;
+      font-size: 16px;
       letter-spacing: 2px
     }
 
     .death-num {
       font-family: 'Orbitron', monospace;
-      font-size: 36px;
+      font-size: 41px;
       font-weight: 900
     }
 
@@ -1514,7 +1535,7 @@
 
     .title-rank {
       font-family: 'Orbitron', monospace;
-      font-size: 14px;
+      font-size: 16px;
       letter-spacing: 3px;
       margin-bottom: 4px
     }
@@ -1537,7 +1558,7 @@
 
     .title-name {
       font-family: 'Orbitron', monospace;
-      font-size: 19px;
+      font-size: 22px;
       font-weight: 700;
       margin-bottom: 12px
     }
@@ -1624,7 +1645,7 @@
 
     .inv-grid {
       display: grid;
-      grid-template-columns: 1fr 90px 90px 90px 60px;
+      grid-template-columns: 1fr 130px 80px 130px 60px;
       gap: 8px;
       margin-bottom: 8px
     }
@@ -1680,7 +1701,7 @@
 
     .photo-placeholder {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 14px;
+      font-size: 16px;
       color: var(--txt-d);
       letter-spacing: 1px;
       text-align: center;
@@ -1741,7 +1762,7 @@
       border: 1px dashed rgba(0, 212, 255, .25);
       color: rgba(0, 212, 255, .4);
       font-family: 'Orbitron', monospace;
-      font-size: 14px;
+      font-size: 16px;
       letter-spacing: 2px;
       cursor: pointer;
       transition: all .2s;
@@ -1811,7 +1832,7 @@
       border: 1px solid var(--purple-b);
       color: var(--purple-b);
       font-family: 'Orbitron', monospace;
-      font-size: 15px;
+      font-size: 17px;
       letter-spacing: 2px;
       background: rgba(168, 85, 247, .06)
     }
@@ -1838,7 +1859,7 @@
 
     .action-display {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 14px;
+      font-size: 16px;
       padding: 2px 7px;
       border: 1px solid var(--blue);
       color: var(--blue);
@@ -1893,7 +1914,7 @@
 
     .sync-lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 14px;
+      font-size: 16px;
       color: var(--txt-d);
       letter-spacing: 1px;
       flex: 1
@@ -1904,7 +1925,7 @@
       border: 1px solid var(--bd);
       color: var(--txt);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 15px;
+      font-size: 17px;
       padding: 4px 10px;
       outline: none;
       width: 200px;
@@ -1921,7 +1942,7 @@
       border: 1px solid var(--blue);
       color: var(--blue);
       font-family: 'Orbitron', monospace;
-      font-size: 13px;
+      font-size: 15px;
       letter-spacing: 2px;
       cursor: pointer;
       transition: all .15s
@@ -1942,7 +1963,7 @@
 
     .sync-pid {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 13px;
+      font-size: 15px;
       color: rgba(0, 212, 255, .4);
       letter-spacing: 1px
     }
@@ -1982,7 +2003,7 @@
 
     .fb-modal-tag {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 13px;
+      font-size: 15px;
       letter-spacing: 3px;
       color: var(--blue);
       margin-bottom: 12px;
@@ -1991,7 +2012,7 @@
 
     .fb-modal-title {
       font-family: 'Orbitron', monospace;
-      font-size: 19px;
+      font-size: 22px;
       font-weight: 700;
       color: var(--txt);
       margin-bottom: 6px;
@@ -2000,7 +2021,7 @@
 
     .fb-modal-sub {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 14px;
+      font-size: 16px;
       color: var(--txt-d);
       letter-spacing: .5px;
       line-height: 1.7;
@@ -2016,7 +2037,7 @@
 
     .fb-lbl {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 13px;
+      font-size: 15px;
       color: var(--txt-lbl);
       letter-spacing: 1.5px
     }
@@ -2026,7 +2047,7 @@
       border: 1px solid var(--bd);
       color: var(--txt);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 16px;
+      font-size: 18px;
       padding: 8px 12px;
       outline: none;
       width: 100%;
@@ -2066,7 +2087,7 @@
       <div class="hdr-right">
         <div style="display:flex;gap:6px;align-items:center">
           <div class="dot-online"></div>
-          <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--green)">ONLINE</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:17px;color:var(--green)">ONLINE</span>
         </div>
         <button class="btn btn-gold btn-sm" onclick="exportChar()" title="Baixar personagem como arquivo .json">[
           EXPORTAR ]</button>
@@ -2147,7 +2168,7 @@
           <div style="margin-left:auto;text-align:right">
             <div class="lbl" style="margin-bottom:4px">PTS ATRIBUTO</div>
             <div
-              style="font-family:'Orbitron',monospace;font-size:28px;font-weight:900;color:var(--gold);text-shadow:0 0 16px rgba(245,158,11,.4)"
+              style="font-family:'Orbitron',monospace;font-size:32px;font-weight:900;color:var(--gold);text-shadow:0 0 16px rgba(245,158,11,.4)"
               id="attrPtsDisp">1</div>
           </div>
         </div>
@@ -2211,7 +2232,7 @@
             <div class="g3" style="gap:10px">
               <div class="field">
                 <span class="lbl">INICIATIVA</span>
-                <div class="computed" id="iniciativaDisp" style="font-size:20px">+0</div>
+                <div class="computed" id="iniciativaDisp" style="font-size:23px">+0</div>
               </div>
               <div class="field">
                 <span class="lbl">MOVIMENTO (m)</span>
@@ -2230,7 +2251,7 @@
             <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px">
               <div class="field" style="flex:1">
                 <span class="lbl">TOTAL</span>
-                <div class="computed" id="caTotal" style="font-size:32px">10</div>
+                <div class="computed" id="caTotal" style="font-size:37px">10</div>
               </div>
               <div class="col" style="gap:8px;flex:2">
                 <div class="info-row"><span class="info-key">Base Natural</span><span class="info-val" id="caBase"
@@ -2288,7 +2309,7 @@
                   <button class="c-btn" onclick="changeCobertura(-1)">−</button>
                   <div style="display:flex;gap:8px" id="coberturaDots"></div>
                   <button class="c-btn" onclick="changeCobertura(1)">+</button>
-                  <span style="font-family:'Orbitron',monospace;font-size:15px;color:var(--gold);letter-spacing:2px"
+                  <span style="font-family:'Orbitron',monospace;font-size:17px;color:var(--gold);letter-spacing:2px"
                     id="coberturaLabel">NENHUMA</span>
                 </div>
                 <div class="sk-desc mt8" id="coberturaDesc">Sem cobertura no momento.</div>
@@ -2354,9 +2375,9 @@
                 <div class="attr-ctrl">
                   <button class="c-btn" onclick="changeFala(-1)">−</button>
                   <span class="c-val" id="falaVal">1</span>
-                  <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d)">/</span>
+                  <span style="font-family:'Share Tech Mono',monospace;font-size:17px;color:var(--txt-d)">/</span>
                   <input type="number" id="falaMax" value="1" min="0" oninput="autosave()"
-                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:17px;text-align:center;outline:none">
+                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:20px;text-align:center;outline:none">
                   <button class="c-btn btn-sm" onclick="resetFala()" title="Resetar">↺</button>
                 </div>
               </div>
@@ -2365,9 +2386,9 @@
                 <div class="attr-ctrl">
                   <button class="c-btn" onclick="changeCoringa(-1)">−</button>
                   <span class="c-val" id="coringaVal" style="color:var(--purple-b)">0</span>
-                  <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d)">/</span>
+                  <span style="font-family:'Share Tech Mono',monospace;font-size:17px;color:var(--txt-d)">/</span>
                   <input type="number" id="coringaMax" value="0" min="0" oninput="autosave()"
-                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:17px;text-align:center;outline:none">
+                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:20px;text-align:center;outline:none">
                   <button class="c-btn btn-sm" onclick="resetCoringa()" title="Resetar">↺</button>
                 </div>
               </div>
@@ -2386,12 +2407,12 @@
                 <div class="death-row">
                   <div class="death-col">
                     <button class="c-btn" onclick="changeDeath('suc',-1)"
-                      style="width:36px;height:36px;font-size:24px">-</button>
+                      style="width:36px;height:36px;font-size:28px">-</button>
                   </div>
                   <div class="death-num suc" class="death-col" id="deathSucVal">0</div>
                   <div class="death-col">
                     <button class="c-btn" onclick="changeDeath('suc',1)"
-                      style="width:36px;height:36px;font-size:24px">+</button>
+                      style="width:36px;height:36px;font-size:28px">+</button>
                   </div>
                 </div>
               </div>
@@ -2400,12 +2421,12 @@
                 <div class="death-row">
                   <div class="death-col">
                     <button class="c-btn" onclick="changeDeath('mort',-1)"
-                      style="width:36px;height:36px;font-size:24px">-</button>
+                      style="width:36px;height:36px;font-size:28px">-</button>
                   </div>
                   <div class="death-num mort" class="death-col" id="deathMortVal">0</div>
                   <div class="death-col">
                     <button class="c-btn" onclick="changeDeath('mort',1)"
-                      style="width:36px;height:36px;font-size:24px">+</button>
+                      style="width:36px;height:36px;font-size:28px">+</button>
                   </div>
                 </div>
               </div>
@@ -2417,7 +2438,7 @@
               <div class="degradpip" id="deg1" onclick="toggleDeg(1)"></div>
               <div class="degradpip" id="deg2" onclick="toggleDeg(2)"></div>
               <div class="degradpip" id="deg3" onclick="toggleDeg(3)"></div>
-              <span style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);margin-left:6px"
+              <span style="font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--txt-d);margin-left:6px"
                 id="degLabel">Nenhuma queda</span>
             </div>
           </div>
@@ -2487,9 +2508,9 @@
           <div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
               <div>
-                <div style="font-family:'Orbitron',monospace;font-size:20px;color:var(--blue);letter-spacing:2px">CORPO
+                <div style="font-family:'Orbitron',monospace;font-size:23px;color:var(--blue);letter-spacing:2px">CORPO
                 </div>
-                <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d)">Força · Vigor ·
+                <div style="font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--txt-d)">Força · Vigor ·
                   Agilidade</div>
               </div>
               <div class="attr-ctrl">
@@ -2506,9 +2527,9 @@
           <div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
               <div>
-                <div style="font-family:'Orbitron',monospace;font-size:20px;color:var(--purple-b);letter-spacing:2px">
+                <div style="font-family:'Orbitron',monospace;font-size:23px;color:var(--purple-b);letter-spacing:2px">
                   MENTE</div>
-                <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d)">Habilidade ·
+                <div style="font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--txt-d)">Habilidade ·
                   Sincronia · Intelecto</div>
               </div>
               <div class="attr-ctrl">
@@ -2527,12 +2548,12 @@
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
               <div>
                 <div
-                  style="font-family:'Orbitron',monospace;font-size:20px;color:var(--gold);letter-spacing:2px;display:flex;align-items:center;gap:10px">
+                  style="font-family:'Orbitron',monospace;font-size:23px;color:var(--gold);letter-spacing:2px;display:flex;align-items:center;gap:10px">
                   ALMA
                   <span
-                    style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--gold);border:1px solid rgba(245,158,11,.4);padding:2px 7px;letter-spacing:1px">DESBLOQUEADO</span>
+                    style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--gold);border:1px solid rgba(245,158,11,.4);padding:2px 7px;letter-spacing:1px">DESBLOQUEADO</span>
                 </div>
-                <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d)">Conexão ·
+                <div style="font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--txt-d)">Conexão ·
                   Entendimento</div>
               </div>
               <div class="attr-ctrl">
@@ -2550,9 +2571,9 @@
             style="grid-column:span 2;border-top:1px solid rgba(0,212,255,0.08);padding-top:14px">
             <div style="display:flex;align-items:center;gap:14px">
               <div
-                style="font-family:'Orbitron',monospace;font-size:20px;color:rgba(245,158,11,.25);letter-spacing:2px">
+                style="font-family:'Orbitron',monospace;font-size:23px;color:rgba(245,158,11,.25);letter-spacing:2px">
                 ALMA</div>
-              <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);letter-spacing:1px">
+              <div style="font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--txt-d);letter-spacing:1px">
                 Bloqueado — requer <span id="almaReqText" style="color:rgba(245,158,11,.5)">Corpo 7 e Mente 7</span>
               </div>
               <div style="flex:1;height:4px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden">
@@ -2721,8 +2742,8 @@
         <div>
           <span class="lbl">RANK DO PERSONAGEM:</span>
           <span id="rankDisplay" class="rank-C"
-            style="font-family:'Orbitron',monospace;font-size:22px;margin-left:10px">C</span>
-          <span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d);margin-left:12px"
+            style="font-family:'Orbitron',monospace;font-size:25px;margin-left:10px">C</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:17px;color:var(--txt-d);margin-left:12px"
             id="titleCountDisp">0/4 títulos</span>
         </div>
         <button class="btn btn-gold btn-sm" onclick="addTitle()">+ ADICIONAR TÍTULO</button>
@@ -2797,7 +2818,7 @@
           <div class="panel" style="flex:1">
             <div class="panel-title">ANOTAÇÕES</div>
             <div
-              style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);margin-bottom:8px;letter-spacing:1px">
+              style="font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--txt-d);margin-bottom:8px;letter-spacing:1px">
               — lista de marcadores · 1. lista numerada (auto-formata ao pressionar Enter)
             </div>
             <textarea class="notes-ta" id="notesMain" oninput="autosave()"
@@ -3651,8 +3672,8 @@
     function pickDescHtml(sk) {
       if (!sk) return '<span class="desc-row">Sem habilidade</span>';
       const cost = sk.cost ? ' [' + sk.cost + ']' : '';
-      return '<span class="desc-row" style="color: var(--txt); font-size: 15px; letter-spacing: 0.75px; padding-top: 8px; padding-bottom: 0; padding-left: 2%">' + sk.name + '</span>'
-        + '<span class="desc-row" style="color: var(--txt-d); font-size: 13px; border-bottom: 1px solid rgba(0, 212, 255, .25);">(' + sk.action + ')' + cost + '</span>'
+      return '<span class="desc-row" style="color: var(--txt); font-size: 17px; letter-spacing: 0.75px; padding-top: 8px; padding-bottom: 0; padding-left: 2%">' + sk.name + '</span>'
+        + '<span class="desc-row" style="color: var(--txt-d); font-size: 15px; border-bottom: 1px solid rgba(0, 212, 255, .25);">(' + sk.action + ')' + cost + '</span>'
         + '<span class="desc-row">' + sk.desc + '</span>';
     }
 
@@ -3678,7 +3699,7 @@
           });
           html += `</div>`;
         }
-        container.innerHTML = html || '<div style="font-family:\'Share Tech Mono\',monospace;font-size:14px;color:var(--txt-d);padding:4px">Aumente o atributo para distribuir pontos.</div>';
+        container.innerHTML = html || '<div style="font-family:\'Share Tech Mono\',monospace;font-size:16px;color:var(--txt-d);padding:4px">Aumente o atributo para distribuir pontos.</div>';
         const counts = {}; subs.forEach(s => counts[s] = 0);
         (S[attr + 'Picks'] || []).forEach(p => { if (p && counts[p] !== undefined) counts[p]++; });
         const dEl = document.getElementById(attr + '-derived');
@@ -3721,7 +3742,7 @@
             });
             html += `</div>`;
           }
-          almaCont.innerHTML = html || '<div style="font-family:\'Share Tech Mono\',monospace;font-size:14px;color:rgba(245,158,11,.4);padding:4px">Aumente Alma para distribuir pontos.</div>';
+          almaCont.innerHTML = html || '<div style="font-family:\'Share Tech Mono\',monospace;font-size:16px;color:rgba(245,158,11,.4);padding:4px">Aumente Alma para distribuir pontos.</div>';
         }
         const almaCounts = {}; SUBS_ALMA.forEach(s => almaCounts[s] = 0);
         (S.almaPicks || []).forEach(p => { if (p && almaCounts[p] !== undefined) almaCounts[p]++; });
@@ -3973,8 +3994,8 @@
     <div class="sep"></div>
     ${renderSkillCard(nd.habUnica, true)}
     <div class="sep"></div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);letter-spacing:1px">HP: ${nd.hp}</div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--txt-d);letter-spacing:1px;margin-top:4px">STA: ${nd.sta}</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--txt-d);letter-spacing:1px">HP: ${nd.hp}</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--txt-d);letter-spacing:1px;margin-top:4px">STA: ${nd.sta}</div>
   `;
     }
 
@@ -4000,7 +4021,7 @@
       if (!cls || !CLASS_DATA[cls]) { wrap.innerHTML = '<div class="empty-msg">Selecione uma classe.</div>'; return; }
       const data = CLASS_DATA[cls];
       wrap.innerHTML = data.skills.map(sk => renderSkillCard(sk, false, '', cls + ':' + sk.name)).join('') +
-        `<div class="sep"></div><div style="font-family:'Orbitron',monospace;font-size:14px;color:var(--gold);letter-spacing:2px;margin-bottom:8px">ULTIMATE — ${data.ultimate.limit || ''}</div>` +
+        `<div class="sep"></div><div style="font-family:'Orbitron',monospace;font-size:16px;color:var(--gold);letter-spacing:2px;margin-bottom:8px">ULTIMATE — ${data.ultimate.limit || ''}</div>` +
         renderSkillCard(data.ultimate, false, 'ultimate', cls + ':' + data.ultimate.name);
       S.classeGeralSel = cls;
       localStorage.setItem('arc_v1', JSON.stringify(S));
@@ -4012,7 +4033,7 @@
       if (!cls || !CLASS_DATA[cls]) { wrap.innerHTML = '<div class="empty-msg">Selecione uma classe específica.</div>'; return; }
       const data = CLASS_DATA[cls];
       wrap.innerHTML = data.skills.map(sk => renderSkillCard(sk, false, '', cls + ':' + sk.name)).join('') +
-        `<div class="sep"></div><div style="font-family:'Orbitron',monospace;font-size:14px;color:var(--gold);letter-spacing:2px;margin-bottom:8px">ULTIMATE — ${data.ultimate.limit || ''}</div>` +
+        `<div class="sep"></div><div style="font-family:'Orbitron',monospace;font-size:16px;color:var(--gold);letter-spacing:2px;margin-bottom:8px">ULTIMATE — ${data.ultimate.limit || ''}</div>` +
         renderSkillCard(data.ultimate, false, 'ultimate', cls + ':' + data.ultimate.name);
       S.classeEspSel = cls;
       localStorage.setItem('arc_v1', JSON.stringify(S));
@@ -4027,7 +4048,7 @@
     <div class="sk-header">
       <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
         ${chk}
-        <span class="sk-name">${sk.name}${sk.lb ? '<span style="color:var(--gold);font-size:14px;margin-left:6px">[LIMIT BREAK]</span>' : ''}</span>
+        <span class="sk-name">${sk.name}${sk.lb ? '<span style="color:var(--gold);font-size:16px;margin-left:6px">[LIMIT BREAK]</span>' : ''}</span>
       </div>
       <div class="sk-meta">
         <select class="action-sel" onchange="toggleCostField(this)">${actionOpts}</select>
@@ -4173,17 +4194,25 @@
       armor: m => `-${m * 10}% de RD e -${m} na CA`,
       implant: m => `${m * 10}% de chance de falhar ao ativar`,
     };
-    function durPenaltyText(kind, cur, max) {
-      if (cur === '' || cur == null || max === '' || max == null) return '';
-      const miss = Math.max(0, (+max || 0) - (+cur || 0));
-      return miss > 0 ? DUR_PENALTY[kind](miss) : '';
+    const DUR_BROKEN = 'QUEBRADO — inutilizável até ser consertado';
+    // 0 de durabilidade quebra o equipamento (Doc): a penalidade numérica some,
+    // vira só o aviso de que está inutilizável.
+    function durPenaltyInfo(kind, cur, max) {
+      if (cur === '' || cur == null || max === '' || max == null) return { text: '', broken: false };
+      const c = +cur || 0, mx = +max || 0;
+      if (mx > 0 && c <= 0) return { text: DUR_BROKEN, broken: true };
+      const miss = Math.max(0, mx - c);
+      return { text: miss > 0 ? DUR_PENALTY[kind](miss) : '', broken: false };
     }
+    function durPenaltyText(kind, cur, max) { return durPenaltyInfo(kind, cur, max).text; }
     // Atualiza só o texto da linha editada (re-render destruiria o campo em foco).
     function updateDurPen(el) {
       const host = el.closest('.dur-host'); if (!host) return;
       const out = host.querySelector('.dur-pen'); if (!out) return;
-      out.textContent = durPenaltyText(host.dataset.dur,
+      const info = durPenaltyInfo(host.dataset.dur,
         host.querySelector('[data-f=durCur]')?.value, host.querySelector('[data-f=durMax]')?.value);
+      out.textContent = info.text;
+      out.classList.toggle('broken', info.broken);
     }
     function durInputs(o) {
       return `<input class="w-inp" type="number" min="0" data-f="durCur" value="${o.durCur ?? ''}" title="Durabilidade atual" oninput="autosave();updateDurPen(this)">
@@ -4199,14 +4228,14 @@
       <input class="w-inp" data-f="name" value="${w.name}" oninput="autosave()" placeholder="Nome">
       <input class="w-inp" data-f="dmg" value="${w.dmg}" oninput="autosave()" placeholder="1d6">
       <input class="w-inp" data-f="crit" value="${w.crit || 20}" oninput="autosave()" placeholder="20">
-      <select class="w-inp" data-f="type" onchange="autosave()" style="font-size:16px">
+      <select class="w-inp" data-f="type" onchange="autosave()" style="font-size:18px">
         <option value="Normal"${(w.type || 'Normal') === 'Normal' ? ' selected' : ''}>Normal</option>
         <option value="Verdadeiro"${w.type === 'Verdadeiro' ? ' selected' : ''}>Verdadeiro</option>
         <option value="Absoluto"${w.type === 'Absoluto' ? ' selected' : ''}>Absoluto</option>
       </select>
       ${durInputs(w)}
       <button class="w-rem" onclick="removeWeapon(${i})">✕</button>
-      <div class="dur-pen">${durPenaltyText('weapon', w.durCur, w.durMax)}</div>
+      <div class="dur-pen${durPenaltyInfo('weapon', w.durCur, w.durMax).broken ? ' broken' : ''}">${durPenaltyText('weapon', w.durCur, w.durMax)}</div>
     </div>`).join('');
     }
 
@@ -4224,7 +4253,7 @@
       <input class="w-inp" data-f="type" value="${a.type}" oninput="autosave()" placeholder="Tipo">
       ${durInputs(a)}
       <button class="w-rem" onclick="removeArmor(${i})">✕</button>
-      <div class="dur-pen">${durPenaltyText('armor', a.durCur, a.durMax)}</div>
+      <div class="dur-pen${durPenaltyInfo('armor', a.durCur, a.durMax).broken ? ' broken' : ''}">${durPenaltyText('armor', a.durCur, a.durMax)}</div>
     </div>`).join('');
     }
     function addArmor() { S.armors.push({ name: '', ca: '0', type: '' , durCur: '', durMax: '' }); renderArmors(); autosave(); }
@@ -4250,7 +4279,7 @@
         <div class="col3" style="grid-column:span 2;flex-direction:row;align-items:center;gap:6px">
           <span class="impl-lbl" style="margin:0">DUR</span>
           ${durInputs(im)}
-          <div class="dur-pen" style="flex:1;padding-top:0">${durPenaltyText('implant', im.durCur, im.durMax)}</div>
+          <div class="dur-pen${durPenaltyInfo('implant', im.durCur, im.durMax).broken ? ' broken' : ''}" style="flex:1;padding-top:0">${durPenaltyText('implant', im.durCur, im.durMax)}</div>
         </div>
         <button class="w-rem" onclick="removeImplant('${t}',${i})" style="grid-column:span 2;justify-self:end">✕</button>
       </div>`).join('');
@@ -4465,18 +4494,18 @@
           <div class="title-rank rank-${t.rank}">RANK ${t.rank}</div>
           <div class="title-name">${t.name}</div>
         </div>
-        <button class="w-rem" onclick="S.titles.splice(${ti},1);renderTitles();autosave()" style="font-size:22px">✕</button>
+        <button class="w-rem" onclick="S.titles.splice(${ti},1);renderTitles();autosave()" style="font-size:25px">✕</button>
       </div>
       ${reqLevel ? `<div class="progress-wrap mb8">
-        <div style="display:flex;justify-content:space-between"><span class="lbl">PROMOÇÃO PARA RANK SUPERIOR</span><span style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--txt-d)">${playerLevel}/${reqLevel}</span></div>
+        <div style="display:flex;justify-content:space-between"><span class="lbl">PROMOÇÃO PARA RANK SUPERIOR</span><span style="font-family:'Share Tech Mono',monospace;font-size:17px;color:var(--txt-d)">${playerLevel}/${reqLevel}</span></div>
         <div class="progress-bar"><div class="progress-fill" style="width:${levelPct}%"></div></div>
-      </div>`: '<div style="font-size:15px;color:var(--gold);font-family:\'Share Tech Mono\',monospace;letter-spacing:1px;margin-bottom:10px">RANK MÁXIMO</div>'}
+      </div>`: '<div style="font-size:17px;color:var(--gold);font-family:\'Share Tech Mono\',monospace;letter-spacing:1px;margin-bottom:10px">RANK MÁXIMO</div>'}
       <div class="sep"></div>
       ${skills}
       <div class="sep"></div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--gold);letter-spacing:1px;margin-bottom:6px">MISSÕES DE RANK UP</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:17px;color:var(--gold);letter-spacing:1px;margin-bottom:6px">MISSÕES DE RANK UP</div>
       ${quests}
-      <button class="dashed-btn dashed-gold mt4" style="font-size:13px" onclick="S.titles[${ti}].quests.push({desc:'',total:0,cur:0});renderTitles();autosave()">+ MISSÃO</button>
+      <button class="dashed-btn dashed-gold mt4" style="font-size:15px" onclick="S.titles[${ti}].quests.push({desc:'',total:0,cur:0});renderTitles();autosave()">+ MISSÃO</button>
     </div>`;
       }).join('');
     }
@@ -4493,11 +4522,11 @@
     <div class="inv-card inv-entry">
       <div class="inv-grid">
         <input class="inp" data-f="name" value="${item.name}" oninput="autosave()" placeholder="Nome do item">
-        <select class="inp" data-f="type" onchange="autosave()" style="font-size:16px">
+        <select class="inp" data-f="type" onchange="autosave()" style="font-size:18px">
           ${['Arma', 'Utilizável', 'Armadura', 'Munição', 'Implante', 'Artefato', 'Outro'].map(t => `<option${item.type === t ? ' selected' : ''}>${t}</option>`).join('')}
         </select>
         <input class="inp" data-f="dmg" value="${item.dmg}" oninput="autosave()" placeholder="Dano">
-        <select class="inp" data-f="action" onchange="autosave()" style="font-size:16px">
+        <select class="inp" data-f="action" onchange="autosave()" style="font-size:18px">
           ${ACTIONS_LIST.map(a => `<option${item.action === a ? ' selected' : ''}>${a}</option>`).join('')}
         </select>
         <input class="inp" data-f="qty" value="${item.qty || 1}" oninput="autosave()" placeholder="Qtd" type="number" min="1">
@@ -4515,7 +4544,7 @@
       wrap.innerHTML = S.relations.map((r, i) => `
     <div class="relation-card rel-entry">
       <input class="inp" data-f="name" value="${r.name}" oninput="autosave()" placeholder="Nome">
-      <select class="inp" data-f="rel" onchange="autosave()" style="font-size:16px">
+      <select class="inp" data-f="rel" onchange="autosave()" style="font-size:18px">
         ${['Aliado', 'Neutro', 'Inimigo', 'Desconhecido', 'Rival', 'Mentor', 'Dependente'].map(t => `<option${r.rel === t ? ' selected' : ''}>${t}</option>`).join('')}
       </select>
       <input class="inp" data-f="desc" value="${r.desc}" oninput="autosave()" placeholder="Descrição">
