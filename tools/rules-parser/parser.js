@@ -224,10 +224,26 @@ const N0_RE = /^n[íi]vel\s*0\s*:\s*(.+)$/i;
 const PN_RE = /^por\s*n[íi]vel\s*:\s*(.+)$/i;
 const REC_RE = /^recupera[çc][ãa]o\s*:\s*(.+)$/i;
 
+// Faixa da tabela de sanidade: "90+", "70-89" ou "0".
+const SAN_RANGE_RE = /^(\d+)\s*(?:(\+)|[-–—]\s*(\d+))?$/;
+
+// Linha da tabela de sanidade -> { label, min, max, desc }; null se nao for uma faixa.
+function parseSanityRow(cells) {
+  if (!Array.isArray(cells) || cells.length < 2) return null;
+  const label = String(cells[0] || '').trim();
+  const desc = String(cells[1] || '').trim();
+  const m = label.match(SAN_RANGE_RE);
+  if (!m || !desc) return null;
+  const min = Number(m[1]);
+  return { label: label, min: min, max: m[2] ? null : (m[3] ? Number(m[3]) : min), desc: desc };
+}
+
+// A tabela sob "Sanidade" vira `sanity` (faixas do medidor do ARC).
 // Vida/Stamina por natureza (seção "# Status") → strings hp/sta exibidas no ARC.
 function parseStatus(paragraphs) {
   const acc = {};
   const warnings = [];
+  const sanity = [];
   let inStatus = false, mode = null, currentNat = null;
   function ensure(n) { if (!acc[n]) acc[n] = {}; return acc[n]; }
   for (const p of paragraphs) {
@@ -235,6 +251,10 @@ function parseStatus(paragraphs) {
     const full = String(p.text || '');
     if (heading === 'HEADING1') { inStatus = /^status$/i.test(full.trim()); mode = null; currentNat = null; continue; }
     if (!inStatus) continue;
+    if (p.cells) { // linha de tabela: so interessa a de sanidade
+      if (mode === 'sanidade') { const row = parseSanityRow(p.cells); if (row) sanity.push(row); }
+      continue;
+    }
     for (const raw of full.split(/\r?\n/)) {
       const t = raw.trim();
       if (!t) continue;
@@ -263,7 +283,7 @@ function parseStatus(paragraphs) {
     if (a.staR) o.staRec = a.staR;
     if (o.hp || o.sta) natures[n] = o;
   });
-  return { natures: natures, warnings: warnings };
+  return { natures: natures, sanity: sanity, warnings: warnings };
 }
 
 const NAT_BUFF_RE = /^buff\s*:\s*(.+)$/i;
@@ -320,6 +340,7 @@ const SYS_SECTIONS = {
   'dot': 'dot',
   'duas armas': 'duasArmas',
   'critico': 'critico',
+  'durabilidade de equipamentos': 'durabilidade',
   'categorias de dano e reducao': 'categoriasDano',
   'tipos de dano': 'tiposDano',
   'chance': 'chance',
@@ -403,4 +424,4 @@ function parseActions(paragraphs) {
   return { actions: actions, warnings: warnings };
 }
 
-module.exports = { normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses, diffClasses, parseSubattrs, parseStatus, parseNatures, parseSystems, parseActions };
+module.exports = { parseSanityRow, normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses, diffClasses, parseSubattrs, parseStatus, parseNatures, parseSystems, parseActions };

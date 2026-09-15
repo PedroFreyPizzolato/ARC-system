@@ -4,6 +4,8 @@ const N = (text) => ({ heading: 'NORMAL', text });
 const H1 = (text) => ({ heading: 'HEADING1', text });
 const H2 = (text) => ({ heading: 'HEADING2', text });
 const H3 = (text) => ({ heading: 'HEADING3', text });
+// Linha de tabela do Doc: Apps Script devolve as células e o texto já unido.
+const ROW = (cells) => ({ heading: 'NORMAL', text: cells.join(' | '), cells });
 
 const SAMPLE = [
   H1('Classes'),
@@ -69,6 +71,11 @@ const SAMPLE_STATUS = [
   N('Recuperação: 5 > 7 > 10 > 15'),
   N('Sanidade'),
   N('100, podendo variar até entre 90 e 110 de acordo com a sua lore'),
+  // A tabela do Doc vem sem cabeçalho (1ª linha vazia) — deve ser ignorada.
+  ROW(['', '']),
+  ROW(['90+', 'Todo dano mental que receber é reduzido pela metade']),
+  ROW(['70-89', 'Testes de Mente envolvendo foco/concentração são jogados com desvantagem']),
+  ROW(['0', 'Você enlouquece completamente']),
 ];
 
 // Seção "# Naturezas": buff/debuff (strings) + habilidade única no formato de skill
@@ -100,6 +107,10 @@ const SAMPLE_SYSTEMS = [
   N('Esse efeito pode stackar até 3x'),
   N('Combos'),
   N('Combo solo: isto deve ser ignorado'),
+  N('Durabilidade de Equipamentos'),
+  N('Cada equipamento (arma/armadura/implante) possui uma quantidade X de pontos de durabilidade.'),
+  N('Armas: Para cada ponto de durabilidade faltando, reduz 10% do dano total e tem -1 no acerto'),
+  N('Armaduras: Para cada ponto de durabilidade faltando, reduz 10% a RD e tem -1 na CA'),
   N('CA'),
   N('10 + Bônus de Corpo e Mente ± Implantes - Armadura'),
   N('Chance'),
