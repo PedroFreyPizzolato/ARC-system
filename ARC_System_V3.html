@@ -32,7 +32,7 @@
       --txt-lbl: rgba(0, 212, 255, 0.7);
       --fs: 17px;
       --fs-sm: 15px;
-      --fs-xs: 13px;
+      --fs-xs: 14px;
       --fs-lg: 20px;
       --fs-xl: 23px;
     }
@@ -1131,7 +1131,7 @@
     /* ── PERICIAS ── */
     .per-row {
       display: grid;
-      grid-template-columns: 1fr 120px 60px 56px 66px;
+      grid-template-columns: 1fr 128px 62px 92px 88px;
       gap: 8px;
       align-items: center;
       padding: 7px 10px;
@@ -1141,11 +1141,15 @@
     }
 
     /* Cabeçalho: rótulos curtos podem quebrar em 2 linhas em fontes maiores, mas não
-       devem "vazar" (overflow) por cima da coluna vizinha — min-width:0 força o texto
-       a quebrar dentro da própria coluna em vez de quando o vizinho é uma coluna fixa. */
+       devem "vazar" (overflow) por cima da coluna vizinha — min-width:0 força o grid
+       a permitir encolher a coluna, e overflow-wrap/word-break força a quebra dentro
+       da própria coluna mesmo em palavras sem espaço (ex: "TREINADO", "SUBATRIBUTO"),
+       que antes vazavam por cima da coluna seguinte por não terem onde quebrar. */
     .per-row.hdr>*,
     .weapon-row.hdr>* {
-      min-width: 0
+      min-width: 0;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .per-row:hover {
@@ -1156,7 +1160,7 @@
       font-family: 'Share Tech Mono', monospace;
       font-size: 16px;
       color: var(--txt-d);
-      letter-spacing: 1px;
+      letter-spacing: .5px;
       padding-bottom: 5px
     }
 
@@ -1179,6 +1183,14 @@
       font-size: 18px;
       padding: 2px 4px;
       outline: none;
+      text-align: center
+    }
+
+    .per-trained {
+      text-align: center
+    }
+
+    .per-cell {
       text-align: center
     }
 
@@ -1389,7 +1401,7 @@
     /* ── WEAPONS ── */
     .weapon-row {
       display: grid;
-      grid-template-columns: 1fr 80px 56px 86px 52px 52px 30px;
+      grid-template-columns: 1fr 80px 56px 110px 100px 42px 42px 30px;
       gap: 8px;
       align-items: center;
       padding: 7px 0;
@@ -1467,7 +1479,7 @@
     /* ── IMPLANTS ── */
     .impl-slot {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 10fr 10fr 1fr;
       gap: 8px;
       padding: 8px 10px;
       border: 1px solid var(--bd);
@@ -2616,7 +2628,7 @@
         <div class="panel">
           <div class="panel-title">ARMAS</div>
           <div class="weapon-row hdr"><span>NOME</span><span>DANO
-              BASE</span><span>CRIT</span><span>TIPO</span><span>DUR</span><span>MÁX</span><span></span></div>
+              BASE</span><span>CRIT</span><span>CATEGORIA</span><span>TIPO</span><span>DUR</span><span>MÁX</span><span></span></div>
           <div id="weaponsWrap"></div>
           <button class="dashed-btn" onclick="addWeapon()">+ ARMA</button>
           <div class="sep"></div>
@@ -3466,7 +3478,7 @@
       });
       // collect weapons
       S.weapons = []; document.querySelectorAll('.weapon-entry').forEach(r => {
-        S.weapons.push({ name: r.querySelector('[data-f=name]')?.value || '', dmg: r.querySelector('[data-f=dmg]')?.value || '', crit: r.querySelector('[data-f=crit]')?.value || '20', type: r.querySelector('[data-f=type]')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' });
+        S.weapons.push({ name: r.querySelector('[data-f=name]')?.value || '', dmg: r.querySelector('[data-f=dmg]')?.value || '', crit: r.querySelector('[data-f=crit]')?.value || '20', category: r.querySelector('[data-f=category]')?.value || '', type: r.querySelector('[data-f=type]')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' });
       });
       S.armors = []; document.querySelectorAll('.armor-entry').forEach(r => {
         S.armors.push({ name: r.querySelector('[data-f=name]')?.value || '', ca: r.querySelector('[data-f=ca]')?.value || '0', type: r.querySelector('[data-f=type]')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' });
@@ -4171,7 +4183,7 @@
     <div class="per-row">
       <span class="per-name">${p.name}</span>
       <span class="per-sub">${SUB_LABEL[p.sub]}</span>
-      <div><input type="number" class="per-extra" id="extra_${p.name}" value="${S.periciaExtra?.[p.name] || 0}" oninput="autosave()" title="Bônus extra" style="width:60px;text-align:center"></div>
+      <div class="per-cell"><input type="number" class="per-extra" id="extra_${p.name}" value="${S.periciaExtra?.[p.name] || 0}" oninput="autosave()" title="Bônus extra" style="width:60px;text-align:center"></div>
       <div class="per-trained"><input type="checkbox" id="trained_${p.name}" ${S.periciaTrained?.[p.name] ? 'checked' : ''} onchange="autosave()"></div>
       <div class="per-bonus" id="pbonus_${p.name}">+0</div>
     </div>`).join('');
@@ -4179,7 +4191,7 @@
     <div class="per-row">
       <span class="per-name">${p.name}</span>
       <span class="per-sub">${SUB_LABEL[p.sub]}</span>
-      <div><input type="number" class="per-extra" id="extra_${p.name}" value="${S.periciaExtra?.[p.name] || 0}" oninput="autosave()" title="Bônus extra" style="width:60px;text-align:center"></div>
+      <div class="per-cell"><input type="number" class="per-extra" id="extra_${p.name}" value="${S.periciaExtra?.[p.name] || 0}" oninput="autosave()" title="Bônus extra" style="width:60px;text-align:center"></div>
       <div class="per-trained"><input type="checkbox" id="trained_${p.name}" ${S.periciaTrained?.[p.name] ? 'checked' : ''} onchange="autosave()"></div>
       <div class="per-bonus" id="pbonus_${p.name}">+0</div>
     </div>`).join('');
@@ -4217,21 +4229,32 @@
     function durInputs(o) {
       return `<input class="w-inp" type="number" min="0" data-f="durCur" value="${o.durCur ?? ''}" title="Durabilidade atual" oninput="autosave();updateDurPen(this)">
       <input class="w-inp" type="number" min="0" data-f="durMax" value="${o.durMax ?? ''}" title="Durabilidade máxima" oninput="autosave();updateDurPen(this)">`;
+    } 
+
+    function isEditingFocus(wrap) {
+      const el = document.activeElement;
+      return !!el && wrap.contains(el) && ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName);
     }
 
     function renderWeapons() {
       const wrap = document.getElementById('weaponsWrap'); if (!wrap) return;
-      if (wrap.contains(document.activeElement)) return;
+      if (isEditingFocus(wrap)) return;
       if (S.weapons.length === 0) { wrap.innerHTML = ''; return; }
       wrap.innerHTML = S.weapons.map((w, i) => `
     <div class="weapon-row weapon-entry dur-host" data-dur="weapon">
       <input class="w-inp" data-f="name" value="${w.name}" oninput="autosave()" placeholder="Nome">
       <input class="w-inp" data-f="dmg" value="${w.dmg}" oninput="autosave()" placeholder="1d6">
       <input class="w-inp" data-f="crit" value="${w.crit || 20}" oninput="autosave()" placeholder="20">
+      <select class="w-inp" data-f="category" onchange="autosave()" style="font-size:18px">
+        <option value="Normal"${(w.category || 'Normal') === 'Normal' ? ' selected' : ''}>Normal</option>
+        <option value="Verdadeiro"${w.category === 'Verdadeiro' ? ' selected' : ''}>Verdadeiro</option>
+        <option value="Absoluto"${w.category === 'Absoluto' ? ' selected' : ''}>Absoluto</option>
+      </select>
       <select class="w-inp" data-f="type" onchange="autosave()" style="font-size:18px">
-        <option value="Normal"${(w.type || 'Normal') === 'Normal' ? ' selected' : ''}>Normal</option>
-        <option value="Verdadeiro"${w.type === 'Verdadeiro' ? ' selected' : ''}>Verdadeiro</option>
-        <option value="Absoluto"${w.type === 'Absoluto' ? ' selected' : ''}>Absoluto</option>
+        <option value="Balístico"${(w.type || 'Balístico') === 'Balístico' ? ' selected' : ''}>Balístico</option>
+        <option value="Energia"${w.type === 'Energia' ? ' selected' : ''}>Energia</option>
+        <option value="Explosivo"${w.type === 'Explosivo' ? ' selected' : ''}>Explosivo</option>
+        <option value="Físico"${w.type === 'Físico' ? ' selected' : ''}>Físico</option>
       </select>
       ${durInputs(w)}
       <button class="w-rem" onclick="removeWeapon(${i})">✕</button>
@@ -4244,7 +4267,7 @@
 
     function renderArmors() {
       const wrap = document.getElementById('armorsWrap'); if (!wrap) return;
-      if (wrap.contains(document.activeElement)) return;
+      if (isEditingFocus(wrap)) return;
       if (S.armors.length === 0) { wrap.innerHTML = ''; return; }
       wrap.innerHTML = S.armors.map((a, i) => `
     <div class="weapon-row armor-entry dur-host" data-dur="armor" style="grid-template-columns:1fr 60px 1fr 52px 52px 30px">
@@ -4264,7 +4287,7 @@
         const wrap = document.getElementById('impl' + t.charAt(0).toUpperCase() + t.slice(1) + 'Wrap');
         if (!wrap) return;
         // Não reconstrói se um campo dentro deste container estiver em foco
-        if (wrap.contains(document.activeElement)) return;
+        if (isEditingFocus(wrap)) return;
         const arr = S[_implKey(t)] || [];
         wrap.innerHTML = arr.map((im, i) => `
       <div class="impl-slot impl-${t} dur-host" data-dur="implant">
@@ -4276,12 +4299,14 @@
           <span class="impl-lbl">EFEITO</span>
           <input class="inp impl-eff" value="${im.eff || ''}" oninput="autosave()" placeholder="Descrição do efeito">
         </div>
+        <div class="col3">
+          <button class="w-rem" onclick="removeImplant('${t}',${i})">✕</button>
+        </div>
         <div class="col3" style="grid-column:span 2;flex-direction:row;align-items:center;gap:6px">
           <span class="impl-lbl" style="margin:0">DUR</span>
           ${durInputs(im)}
           <div class="dur-pen${durPenaltyInfo('implant', im.durCur, im.durMax).broken ? ' broken' : ''}" style="flex:1;padding-top:0">${durPenaltyText('implant', im.durCur, im.durMax)}</div>
         </div>
-        <button class="w-rem" onclick="removeImplant('${t}',${i})" style="grid-column:span 2;justify-self:end">✕</button>
       </div>`).join('');
       });
       updateImplantDetail();
@@ -4516,7 +4541,7 @@
     function addInventory() { S.inventory.push({ name: '', type: '', dmg: '', action: '', qty: '1', desc: '' }); renderInventory(); autosave(); }
     function renderInventory() {
       const wrap = document.getElementById('inventoryWrap'); if (!wrap) return;
-      if (wrap.contains(document.activeElement)) return;
+      if (isEditingFocus(wrap)) return;
       if ((S.inventory || []).length === 0) { wrap.innerHTML = '<div class="empty-msg">Inventário vazio.</div>'; return; }
       wrap.innerHTML = S.inventory.map((item, i) => `
     <div class="inv-card inv-entry">
@@ -4539,7 +4564,7 @@
     function addRelation() { S.relations.push({ name: '', rel: '', desc: '' }); renderRelations(); autosave(); }
     function renderRelations() {
       const wrap = document.getElementById('relationsWrap'); if (!wrap) return;
-      if (wrap.contains(document.activeElement)) return;
+      if (isEditingFocus(wrap)) return;
       if ((S.relations || []).length === 0) { wrap.innerHTML = '<div class="empty-msg">Nenhuma relação registrada.</div>'; return; }
       wrap.innerHTML = S.relations.map((r, i) => `
     <div class="relation-card rel-entry">
