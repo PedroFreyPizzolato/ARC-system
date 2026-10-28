@@ -1220,6 +1220,110 @@
     .req-warn {
       color: var(--gold)
     }
+
+    /* Modal própria, no lugar de alert/prompt/confirm do navegador */
+    .dlg-ov {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: rgba(2, 4, 8, .88);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px
+    }
+
+    .dlg {
+      background: rgba(8, 12, 20, .98);
+      border: 1px solid rgba(0, 212, 255, .35);
+      padding: 28px 32px;
+      max-width: 520px;
+      width: 100%;
+      position: relative;
+      clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))
+    }
+
+    .dlg::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--blue), rgba(0, 212, 255, .2), transparent)
+    }
+
+    .dlg-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 15px;
+      letter-spacing: 3px;
+      color: var(--blue);
+      margin-bottom: 12px;
+      opacity: .7
+    }
+
+    .dlg-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 6px
+    }
+
+    .dlg-sub {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 16px;
+      color: var(--dim);
+      line-height: 1.7;
+      margin-bottom: 20px;
+      white-space: pre-line
+    }
+
+    .dlg-err {
+      display: block;
+      min-height: 20px;
+      margin-top: 4px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 16px;
+      color: var(--red)
+    }
+
+    .dlg-acts {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 16px
+    }
+
+    .dlg-btn {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--blue);
+      color: var(--blue);
+      font-family: 'Orbitron', monospace;
+      font-size: 15px;
+      letter-spacing: 2px;
+      cursor: pointer
+    }
+
+    .dlg-btn:hover {
+      background: rgba(0, 212, 255, .1)
+    }
+
+    .dlg-btn.gray {
+      border-color: rgba(255, 255, 255, .18);
+      color: rgba(255, 255, 255, .4)
+    }
+
+    .dlg-btn.red {
+      border-color: var(--red);
+      color: var(--red)
+    }
+
+    .dlg-btn.red:hover {
+      background: rgba(239, 68, 68, .1)
+    }
   </style>
   <link
     href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap"
@@ -2209,7 +2313,7 @@
     <div><label class="lbl">GRUPO (PASTA DA BARRA LATERAL)</label><select class="sel" onchange="setGroup(this.value)">${groupOpts(n.groupId)}</select></div>
     <div class="g2" style="gap:8px">
       <div><label class="lbl">NÍVEL</label><div style="display:flex;gap:5px;align-items:center"><button style="width:24px;height:30px;background:transparent;border:1px solid var(--bd);color:var(--dim);cursor:pointer;font-size:23px" onclick="changeLevel(-1)">−</button><span style="font-family:'Orbitron',monospace;font-size:23px;font-weight:700;color:var(--blue);min-width:28px;text-align:center">${n.level || 0}</span><button style="width:24px;height:30px;background:transparent;border:1px solid var(--bd);color:var(--dim);cursor:pointer;font-size:23px" onclick="changeLevel(1)">+</button></div></div>
-      <div><label class="lbl">RANK</label><select class="sel" onchange="su('rank',this.value)">${['C', 'B', 'A', 'S'].map(r => `<option${n.rank === r ? ' selected' : ''}>${r}</option>`).join('')}</select></div>
+      <div><label class="lbl">RANK</label><select class="sel" onchange="su('rank',this.value)">${['C', 'B', 'A', 'S', 'Z'].map(r => `<option${n.rank === r ? ' selected' : ''}>${r}</option>`).join('')}</select></div>
     </div>
     <div><label class="lbl">NATUREZA</label><select class="sel" onchange="setNatureza(this.value)"><option value="">— Selecionar —</option>${['Brutamontes', 'Guerreiro', 'Atleta', 'Velocista'].map(v => `<option${n.natureza === v ? ' selected' : ''}>${v}</option>`).join('')}</select></div>
   </div>`;
@@ -2321,21 +2425,69 @@
     function addNPC() { const n = mkNPC(); npcs.push(n); selId = n.id; activeTab = 'info'; save(); render(); }
     function deleteNPC(id) { npcs = npcs.filter(n => n.id !== id); if (selId === id) selId = npcs[0]?.id || null; save(); render(); }
 
-    function addGroup(parentId) {
-      const name = prompt(parentId ? 'Nome do subgrupo:' : 'Nome do grupo:');
-      if (!name || !name.trim()) return;
-      groups.push({ id: gid(), name: name.trim(), parentId: parentId || null, collapsed: false });
+    // Modal própria no lugar de prompt/confirm. Devolve uma Promise: texto digitado (com input),
+    // true (sem input) ou null (cancelou, Esc, clique fora).
+    function arcDialog({ tag, title, sub = '', input = null, ok = 'OK', danger = false }) {
+      return new Promise(resolve => {
+        const prev = document.activeElement;
+        const ov = document.createElement('div');
+        ov.className = 'dlg-ov';
+        ov.innerHTML = `<div class="dlg" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+          <div class="dlg-tag">${esc(tag)}</div>
+          <div class="dlg-title">${esc(title)}</div>
+          ${sub ? `<div class="dlg-sub">${esc(sub)}</div>` : ''}
+          ${input ? `<label class="lbl">${esc(input.label)}</label><input class="inp" maxlength="60" value="${esc(input.value || '')}"><span class="dlg-err"></span>` : ''}
+          <div class="dlg-acts"><button class="dlg-btn gray dlg-cancel">CANCELAR</button><button class="dlg-btn dlg-ok${danger ? ' red' : ''}">${esc(ok)}</button></div>
+        </div>`;
+        const box = ov.firstElementChild, inp = ov.querySelector('input'), err = ov.querySelector('.dlg-err');
+        const close = v => { ov.remove(); removeEventListener('keydown', onKey, true); if (prev && prev.focus) prev.focus(); resolve(v); };
+        const submit = () => {
+          if (!input) return close(true);
+          const v = inp.value.trim();
+          if (!v) { err.textContent = 'Preencha este campo.'; inp.focus(); return; }
+          close(v);
+        };
+        const onKey = e => {
+          if (e.key === 'Escape') { e.preventDefault(); close(null); }
+          else if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') { e.preventDefault(); submit(); }
+          else if (e.key === 'Tab') { // mantém o foco dentro da modal
+            const f = box.querySelectorAll('input,button'), first = f[0], last = f[f.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+          }
+        };
+        addEventListener('keydown', onKey, true);
+        ov.addEventListener('mousedown', e => { if (e.target === ov) close(null); });
+        ov.querySelector('.dlg-ok').onclick = submit;
+        ov.querySelector('.dlg-cancel').onclick = () => close(null);
+        if (inp) inp.addEventListener('input', () => { err.textContent = ''; });
+        document.body.appendChild(ov);
+        (inp || ov.querySelector('.dlg-cancel')).focus();
+      });
+    }
+
+    async function addGroup(parentId) {
+      const name = await arcDialog({
+        tag: parentId ? '[ NOVO SUBGRUPO ]' : '[ NOVO GRUPO ]', title: parentId ? 'Adicionar Subgrupo' : 'Adicionar Grupo',
+        input: { label: parentId ? 'NOME DO SUBGRUPO' : 'NOME DO GRUPO' }, ok: 'ADICIONAR'
+      });
+      if (!name) return;
+      groups.push({ id: gid(), name, parentId: parentId || null, collapsed: false });
       save(); render();
     }
-    function renameGroup(id) {
+    async function renameGroup(id) {
       const g = groups.find(x => x.id === id); if (!g) return;
-      const name = prompt('Novo nome:', g.name);
-      if (!name || !name.trim()) return;
-      g.name = name.trim(); save(); render();
+      const name = await arcDialog({ tag: '[ GRUPO ]', title: 'Renomear', input: { label: 'NOVO NOME', value: g.name }, ok: 'SALVAR' });
+      if (!name) return;
+      g.name = name; save(); render();
     }
-    function delGroup(id) {
+    async function delGroup(id) {
       const g = groups.find(x => x.id === id); if (!g) return;
-      if (!confirm(`Apagar o grupo "${g.name}"?\n\nOs subgrupos dele somem junto e os NPCs voltam para "sem grupo". Nenhum NPC é apagado.`)) return;
+      const sure = await arcDialog({
+        tag: '[ APAGAR GRUPO ]', title: `Apagar "${g.name}"?`, danger: true, ok: 'APAGAR',
+        sub: 'Os subgrupos dele somem junto e os NPCs voltam para "sem grupo". Nenhum NPC é apagado.'
+      });
+      if (!sure) return;
       const r = removeGroup(groups, npcs, id);
       groups = r.groups; npcs = r.npcs;
       save(); render();

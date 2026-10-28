@@ -11,7 +11,16 @@
     rel="stylesheet">
   <style>
     :root {
-      --blue: #00d4ff;
+      /* cor principal = Rank do personagem (data-rank no <html>); tons do Miro clareados p/ contraste no fundo escuro */
+      --blue: #5088f1;
+      --acc-rgb: 80, 136, 241;
+      --cyan: #00d4ff;
+      --cyan-rgb: 0, 212, 255;
+      --rk-C: #5088f1;
+      --rk-B: #e33bf5;
+      --rk-A: #f65151;
+      --rk-S: #c97b10;
+      --rk-Z: #09a43a;
       --blue-dim: #0099bb;
       --purple: #7c3aed;
       --purple-b: #a855f7;
@@ -22,19 +31,39 @@
       --bg: #020408;
       --bg-purple: #050009;
       --bg-yellow: #090703;
-      --bg-panel: rgba(0, 212, 255, 0.03);
-      --bg-hover: rgba(0, 212, 255, 0.07);
-      --bd: rgba(0, 212, 255, 0.15);
-      --bd-b: rgba(0, 212, 255, 0.4);
+      --bg-panel: rgba(var(--acc-rgb), 0.03);
+      --bg-hover: rgba(var(--acc-rgb), 0.07);
+      --bd: rgba(var(--acc-rgb), 0.15);
+      --bd-b: rgba(var(--acc-rgb), 0.4);
       --txt: #e0f7ff;
       --txt-nsd: rgba(224, 247, 255, 0.65);
       --txt-d: rgba(224, 247, 255, 0.45);
-      --txt-lbl: rgba(0, 212, 255, 0.7);
+      --txt-lbl: rgba(var(--acc-rgb), 0.7);
       --fs: 17px;
       --fs-sm: 15px;
       --fs-xs: 14px;
       --fs-lg: 20px;
       --fs-xl: 23px;
+    }
+
+    :root[data-rank="B"] {
+      --blue: #e33bf5;
+      --acc-rgb: 227, 59, 245
+    }
+
+    :root[data-rank="A"] {
+      --blue: #f65151;
+      --acc-rgb: 246, 81, 81
+    }
+
+    :root[data-rank="S"] {
+      --blue: #c97b10;
+      --acc-rgb: 201, 123, 16
+    }
+
+    :root[data-rank="Z"] {
+      --blue: #09a43a;
+      --acc-rgb: 9, 164, 58
     }
 
     * {
@@ -65,7 +94,7 @@
       position: fixed;
       inset: 0;
       z-index: 0;
-      background-image: linear-gradient(rgba(0, 212, 255, 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 212, 255, 0.025) 1px, transparent 1px);
+      background-image: linear-gradient(rgba(var(--acc-rgb), 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--acc-rgb), 0.025) 1px, transparent 1px);
       background-size: 44px 44px;
       pointer-events: none
     }
@@ -75,7 +104,7 @@
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      background: radial-gradient(ellipse 60% 40% at 15% 15%, rgba(124, 58, 237, 0.07) 0%, transparent 60%), radial-gradient(ellipse 50% 50% at 85% 85%, rgba(0, 212, 255, 0.05) 0%, transparent 60%)
+      background: radial-gradient(ellipse 60% 40% at 15% 15%, rgba(124, 58, 237, 0.07) 0%, transparent 60%), radial-gradient(ellipse 50% 50% at 85% 85%, rgba(var(--acc-rgb), 0.05) 0%, transparent 60%)
     }
 
     .scanline {
@@ -83,7 +112,7 @@
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 212, 255, 0.008) 2px, rgba(0, 212, 255, 0.008) 4px)
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(var(--acc-rgb), 0.008) 2px, rgba(var(--acc-rgb), 0.008) 4px)
     }
 
     /* ── LAYOUT ── */
@@ -104,7 +133,7 @@
       padding: 14px 20px;
       margin-bottom: 14px;
       border: 1px solid var(--bd);
-      background: linear-gradient(135deg, rgba(0, 212, 255, 0.04), rgba(124, 58, 237, 0.04));
+      background: linear-gradient(135deg, rgba(var(--acc-rgb), 0.04), rgba(124, 58, 237, 0.04));
       clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
       position: sticky;
       top: 0;
@@ -124,7 +153,7 @@
       font-weight: 900;
       letter-spacing: 4px;
       color: var(--blue);
-      text-shadow: 0 0 18px rgba(0, 212, 255, 0.5)
+      text-shadow: 0 0 18px rgba(var(--acc-rgb), 0.5)
     }
 
     .hdr-sep {
@@ -194,14 +223,19 @@
       clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)
     }
 
+    .btn:disabled {
+      opacity: .35;
+      cursor: not-allowed
+    }
+
     .btn-blue {
       border-color: var(--blue);
       color: var(--blue)
     }
 
     .btn-blue:hover {
-      background: rgba(0, 212, 255, .1);
-      box-shadow: 0 0 14px rgba(0, 212, 255, .3)
+      background: rgba(var(--acc-rgb), .1);
+      box-shadow: 0 0 14px rgba(var(--acc-rgb), .3)
     }
 
     .btn-blue.saved {
@@ -272,10 +306,10 @@
     }
 
     .tab.active {
-      background: rgba(0, 212, 255, .08);
+      background: rgba(var(--acc-rgb), .08);
       border-color: var(--blue);
       color: var(--blue);
-      box-shadow: 0 0 12px rgba(0, 212, 255, .12)
+      box-shadow: 0 0 12px rgba(var(--acc-rgb), .12)
     }
 
     .tab-content {
@@ -297,7 +331,7 @@
     }
 
     .panel:hover {
-      border-color: rgba(0, 212, 255, .22)
+      border-color: rgba(var(--acc-rgb), .22)
     }
 
     .panel-title {
@@ -511,15 +545,15 @@
     }
 
     .act-row-defensivas .act-row-head {
-      color: var(--blue)
+      color: var(--cyan)
     }
 
     .act-row-defensivas .act-row-head::before {
-      background: linear-gradient(90deg, transparent, var(--blue))
+      background: linear-gradient(90deg, transparent, var(--cyan))
     }
 
     .act-row-defensivas .act-row-head::after {
-      background: linear-gradient(90deg, var(--blue), transparent)
+      background: linear-gradient(90deg, var(--cyan), transparent)
     }
 
     .act-row-inspiradoras .act-row-head {
@@ -593,7 +627,7 @@
     }
 
     .inp {
-      background: rgba(0, 212, 255, 0.04);
+      background: rgba(var(--acc-rgb), 0.04);
       border: 1px solid var(--bd);
       color: var(--txt);
       font-size: var(--fs);
@@ -605,8 +639,8 @@
 
     .inp:focus {
       border-color: var(--blue);
-      box-shadow: 0 0 10px rgba(0, 212, 255, .12);
-      background: rgba(0, 212, 255, .07)
+      box-shadow: 0 0 10px rgba(var(--acc-rgb), .12);
+      background: rgba(var(--acc-rgb), .07)
     }
 
     .inp:disabled {
@@ -626,7 +660,7 @@
     }
 
     .computed {
-      background: rgba(0, 212, 255, 0.06);
+      background: rgba(var(--acc-rgb), 0.06);
       border: 1px solid var(--bd);
       color: var(--blue);
       font-family: 'Orbitron', monospace;
@@ -743,7 +777,7 @@
     }
 
     .c-btn.cor {
-      color: var(--blue);
+      color: var(--cyan);
       font-weight: 700
     }
 
@@ -758,9 +792,9 @@
     }
 
     .c-btn.cor:hover {
-      border-color: var(--blue);
-      color: var(--blue);
-      background: rgba(0, 212, 255, .08)
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(var(--cyan-rgb), .08)
     }
 
     .c-btn.men:hover {
@@ -782,7 +816,7 @@
       color: var(--blue);
       min-width: 30px;
       text-align: center;
-      text-shadow: 0 0 10px rgba(0, 212, 255, .4)
+      text-shadow: 0 0 10px rgba(var(--acc-rgb), .4)
     }
 
     .c-bonus {
@@ -820,7 +854,7 @@
       position: relative;
       padding: 5px 4px;
       background: transparent;
-      border: 1px solid rgba(0, 212, 255, .12);
+      border: 1px solid rgba(var(--acc-rgb), .12);
       color: var(--txt-d);
       font-family: 'Share Tech Mono', monospace;
       font-size: 16px;
@@ -865,24 +899,24 @@
 
     .pick-btn.cor {
       background: transparent;
-      border-color: rgba(0, 212, 255, .12);
+      border-color: rgba(var(--cyan-rgb), .12);
       color: var(--txt-d)
     }
 
     .pick-desc.cor {
       background: var(--bg);
-      border: 1px solid rgba(0, 212, 255, .5);
+      border: 1px solid rgba(var(--cyan-rgb), .5);
     }
 
     .pick-btn.cor:hover {
-      border-color: var(--blue);
+      border-color: var(--cyan);
       color: var(--txt)
     }
 
     .pick-btn.cor.sel {
-      background: rgba(0, 212, 255, .12);
-      border-color: var(--blue);
-      color: var(--blue);
+      background: rgba(var(--cyan-rgb), .12);
+      border-color: var(--cyan);
+      color: var(--cyan);
       box-shadow: 0 0 6px rgba(85, 123, 247, 0.2)
     }
 
@@ -983,7 +1017,7 @@
     }
 
     .subder-item span.cor {
-      color: var(--blue);
+      color: var(--cyan);
       font-weight: 700
     }
 
@@ -999,7 +1033,7 @@
 
     /* ── SKILL CARD ── */
     .skill-card {
-      background: rgba(0, 212, 255, .02);
+      background: rgba(var(--acc-rgb), .02);
       border: 1px solid var(--bd);
       padding: 12px;
       margin-bottom: 8px;
@@ -1007,7 +1041,7 @@
     }
 
     .skill-card:hover {
-      border-color: rgba(0, 212, 255, .25)
+      border-color: rgba(var(--acc-rgb), .25)
     }
 
     .skill-card.ultimate {
@@ -1056,7 +1090,7 @@
     }
 
     .action-sel {
-      background: rgba(0, 212, 255, .05);
+      background: rgba(var(--acc-rgb), .05);
       border: 1px solid var(--bd);
       color: var(--blue);
       font-family: 'Share Tech Mono', monospace;
@@ -1101,7 +1135,7 @@
     .badge-blue {
       border-color: var(--blue);
       color: var(--blue);
-      background: rgba(0, 212, 255, .06)
+      background: rgba(var(--acc-rgb), .06)
     }
 
     .badge-purple {
@@ -1135,7 +1169,7 @@
       gap: 8px;
       align-items: center;
       padding: 7px 10px;
-      border-bottom: 1px solid rgba(0, 212, 255, .04);
+      border-bottom: 1px solid rgba(var(--acc-rgb), .04);
       transition: background .15s;
       font-size: var(--fs-sm)
     }
@@ -1153,7 +1187,7 @@
     }
 
     .per-row:hover {
-      background: rgba(0, 212, 255, .03)
+      background: rgba(var(--acc-rgb), .03)
     }
 
     .per-row.hdr {
@@ -1405,7 +1439,7 @@
       gap: 8px;
       align-items: center;
       padding: 7px 0;
-      border-bottom: 1px solid rgba(0, 212, 255, .05)
+      border-bottom: 1px solid rgba(var(--acc-rgb), .05)
     }
 
     .weapon-row.hdr {
@@ -1484,7 +1518,7 @@
       padding: 8px 10px;
       border: 1px solid var(--bd);
       margin-bottom: 6px;
-      background: rgba(0, 212, 255, .02)
+      background: rgba(var(--acc-rgb), .02)
     }
 
     .impl-lbl {
@@ -1541,6 +1575,11 @@
       clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))
     }
 
+    .title-card.artifact-card {
+      background: rgba(168, 85, 247, .04);
+      border-color: rgba(168, 85, 247, .3)
+    }
+
     .title-card:hover {
       border-color: rgba(245, 158, 11, .35)
     }
@@ -1553,19 +1592,23 @@
     }
 
     .rank-S {
-      color: var(--gold)
+      color: var(--rk-S)
     }
 
     .rank-A {
-      color: #e879f9
+      color: var(--rk-A)
     }
 
     .rank-B {
-      color: #38bdf8
+      color: var(--rk-B)
     }
 
     .rank-C {
-      color: var(--green)
+      color: var(--rk-C)
+    }
+
+    .rank-Z {
+      color: var(--rk-Z)
     }
 
     .title-name {
@@ -1604,7 +1647,7 @@
       align-items: center;
       gap: 8px;
       padding: 6px 0;
-      border-bottom: 1px solid rgba(0, 212, 255, .05)
+      border-bottom: 1px solid rgba(var(--acc-rgb), .05)
     }
 
     .quest-desc {
@@ -1644,12 +1687,12 @@
       gap: 8px;
       align-items: center;
       padding: 8px 0;
-      border-bottom: 1px solid rgba(0, 212, 255, .04)
+      border-bottom: 1px solid rgba(var(--acc-rgb), .04)
     }
 
     /* ── INVENTORY ── */
     .inv-card {
-      background: rgba(0, 212, 255, .02);
+      background: rgba(var(--acc-rgb), .02);
       border: 1px solid var(--bd);
       padding: 12px;
       margin-bottom: 8px
@@ -1669,7 +1712,7 @@
     /* ── NOTES ── */
     .notes-ta {
       width: 100%;
-      background: rgba(0, 212, 255, .03);
+      background: rgba(var(--acc-rgb), .03);
       border: 1px solid var(--bd);
       color: var(--txt);
       font-family: 'Rajdhani', sans-serif;
@@ -1739,7 +1782,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 5px 0;
-      border-bottom: 1px solid rgba(0, 212, 255, .05)
+      border-bottom: 1px solid rgba(var(--acc-rgb), .05)
     }
 
     .info-key {
@@ -1771,8 +1814,8 @@
       width: 100%;
       padding: 10px;
       background: transparent;
-      border: 1px dashed rgba(0, 212, 255, .25);
-      color: rgba(0, 212, 255, .4);
+      border: 1px dashed rgba(var(--acc-rgb), .25);
+      color: rgba(var(--acc-rgb), .4);
       font-family: 'Orbitron', monospace;
       font-size: 16px;
       letter-spacing: 2px;
@@ -1875,7 +1918,7 @@
       padding: 2px 7px;
       border: 1px solid var(--blue);
       color: var(--blue);
-      background: rgba(0, 212, 255, .06);
+      background: rgba(var(--acc-rgb), .06);
       white-space: nowrap
     }
 
@@ -1933,7 +1976,7 @@
     }
 
     .sync-inp {
-      background: rgba(0, 212, 255, .04);
+      background: rgba(var(--acc-rgb), .04);
       border: 1px solid var(--bd);
       color: var(--txt);
       font-family: 'Share Tech Mono', monospace;
@@ -1961,7 +2004,7 @@
     }
 
     .sync-btn:hover {
-      background: rgba(0, 212, 255, .1)
+      background: rgba(var(--acc-rgb), .1)
     }
 
     .sync-btn.red {
@@ -1976,7 +2019,7 @@
     .sync-pid {
       font-family: 'Share Tech Mono', monospace;
       font-size: 15px;
-      color: rgba(0, 212, 255, .4);
+      color: rgba(var(--acc-rgb), .4);
       letter-spacing: 1px
     }
 
@@ -1995,7 +2038,7 @@
 
     .fb-modal {
       background: rgba(8, 12, 20, .98);
-      border: 1px solid rgba(0, 212, 255, .35);
+      border: 1px solid rgba(var(--acc-rgb), .35);
       padding: 28px 32px;
       max-width: 520px;
       width: 100%;
@@ -2010,7 +2053,7 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, var(--blue), rgba(0, 212, 255, .2), transparent)
+      background: linear-gradient(90deg, var(--blue), rgba(var(--acc-rgb), .2), transparent)
     }
 
     .fb-modal-tag {
@@ -2055,7 +2098,7 @@
     }
 
     .fb-inp {
-      background: rgba(0, 212, 255, .04);
+      background: rgba(var(--acc-rgb), .04);
       border: 1px solid var(--bd);
       color: var(--txt);
       font-family: 'Share Tech Mono', monospace;
@@ -2076,6 +2119,160 @@
       justify-content: flex-end;
       margin-top: 20px
     }
+
+    .arc-dlg-err {
+      min-height: 18px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 15px;
+      color: var(--red)
+    }
+  /* ═══════════ ANIMAÇÃO DE RANK UP — cópia de ARC-rankup-demo.html. Mudou uma, mude nas duas. ═══════════ */
+  .ru { position:fixed; inset:0; z-index:9999; overflow:hidden; cursor:pointer; display:grid; place-items:center;
+    --c-rgb:80,136,241; --hit:900ms; font-family:'Rajdhani',sans-serif; color:#fff; user-select:none }
+  .ru * { pointer-events:none }
+  .ru-bg { position:absolute; inset:0; opacity:0; background:radial-gradient(ellipse 70% 55% at 50% 50%, rgba(var(--c-rgb),.22), transparent 70%), rgba(2,4,8,.93);
+    animation:ru-fade .35s cubic-bezier(.2,.8,.2,1) forwards }
+  .ru-shake { position:absolute; inset:0; display:grid; place-items:center }
+
+  /* faixa horizontal (VICTORY) */
+  .ru-band { position:absolute; left:0; right:0; top:50%; height:260px; margin-top:-130px; transform:scaleY(0);
+    background:linear-gradient(90deg, transparent, rgba(var(--c-rgb),.28) 18%, rgba(var(--c-rgb),.42) 50%, rgba(var(--c-rgb),.28) 82%, transparent);
+    animation:ru-scaleY .5s cubic-bezier(.16,1,.3,1) calc(var(--hit) - 650ms) forwards }
+  .ru-band::before, .ru-band::after { content:''; position:absolute; left:0; right:0; height:2px; transform:scaleX(0);
+    background:linear-gradient(90deg, transparent, rgb(var(--c-rgb)) 30%, #fff 50%, rgb(var(--c-rgb)) 70%, transparent);
+    animation:ru-scaleX .7s cubic-bezier(.16,1,.3,1) calc(var(--hit) - 500ms) forwards }
+  .ru-band::before { top:0 } .ru-band::after { bottom:0 }
+
+  /* varrida diagonal de cor no impacto (MATCH FOUND) */
+  .ru-wipe { position:absolute; top:-20%; bottom:-20%; left:-20%; width:140%; opacity:.9; background:rgb(var(--c-rgb));
+    transform:translateX(-130%) skewX(-18deg); animation:ru-wipe .55s cubic-bezier(.7,0,.3,1) calc(var(--hit) - 275ms) forwards }
+  .ru-flash { position:absolute; inset:0; background:#fff; opacity:0; animation:ru-flash .6s cubic-bezier(.2,.8,.2,1) var(--hit) forwards }
+
+  /* letra + textos */
+  .ru-stage { position:relative; display:grid; justify-items:center; animation:ru-drift 4s linear var(--hit) forwards }
+  .ru-kicker { font-weight:700; font-size:clamp(18px,2.6vw,30px); letter-spacing:.45em; margin-right:-.45em; opacity:0;
+    text-shadow:0 0 18px rgba(var(--c-rgb),.9); animation:ru-track .6s cubic-bezier(.16,1,.3,1) calc(var(--hit) + 80ms) both }
+  .ru-letter { font-family:'Orbitron',monospace; font-weight:900; font-size:clamp(150px,24vw,300px); line-height:1; opacity:0;
+    text-shadow:0 0 28px rgba(var(--c-rgb),.95), 0 0 90px rgba(var(--c-rgb),.6);
+    animation:ru-slam .35s cubic-bezier(.55,0,.9,.3) calc(var(--hit) - 350ms) both }
+  .ru-sub { font-family:'Share Tech Mono',monospace; font-size:clamp(14px,1.6vw,18px); letter-spacing:.25em; color:rgba(255,255,255,.75); text-align:center; opacity:0;
+    animation:ru-up .5s cubic-bezier(.16,1,.3,1) calc(var(--hit) + 260ms) both }
+  .ru-sub b { color:rgb(var(--c-rgb)); font-weight:400 }
+
+  /* nível 2+ : ondas de choque, chevrons, rastros */
+  .ru-ring { position:absolute; left:50%; top:50%; width:220px; height:220px; border:2px solid rgb(var(--c-rgb)); border-radius:50%; opacity:0;
+    transform:translate(-50%,-50%); animation:ru-ring .9s cubic-bezier(.16,1,.3,1) var(--hit) forwards }
+  .ru-ring + .ru-ring { border-width:1px; animation-delay:calc(var(--hit) + 140ms) }
+  .ru-chev { position:absolute; top:50%; height:220px; width:80px; margin-top:-110px; opacity:0; background:rgba(var(--c-rgb),.85);
+    clip-path:polygon(0 0, 38% 0, 100% 50%, 38% 100%, 0 100%, 62% 50%);
+    animation:ru-chev .45s cubic-bezier(.16,1,.3,1) calc(var(--hit) - 350ms) both }
+  .ru-chev.l { --dir:1; left:calc(50% - 330px) } .ru-chev.r { --dir:-1; left:calc(50% + 250px) }
+  .ru-streak { position:absolute; bottom:0; width:2px; opacity:0; background:linear-gradient(transparent, rgb(var(--c-rgb)), transparent);
+    animation:ru-rise var(--dur) cubic-bezier(.3,0,.2,1) var(--d) forwards }
+
+  /* nível 3 : raios girando, faíscas, tremor */
+  .ru-rays { position:absolute; left:50%; top:50%; width:170vmax; height:170vmax; opacity:0; transform:translate(-50%,-50%);
+    background:repeating-conic-gradient(rgba(var(--c-rgb),.32) 0deg 3deg, transparent 3deg 15deg);
+    -webkit-mask-image:radial-gradient(circle, #000 0%, transparent 42%); mask-image:radial-gradient(circle, #000 0%, transparent 42%);
+    animation:ru-fade .8s ease-out var(--hit) forwards, ru-spin 14s linear var(--hit) infinite }
+  .ru-spark { position:absolute; left:50%; top:50%; width:var(--s); height:var(--s); border-radius:50%; opacity:0; background:var(--col);
+    box-shadow:0 0 8px rgb(var(--c-rgb)); animation:ru-spark 1.2s cubic-bezier(.16,1,.3,1) var(--hit) forwards }
+  .ru[data-tier="3"] .ru-shake { animation:ru-shake .45s linear var(--hit) }
+
+  /* Z : corrupção / glitch */
+  .ru-scan { position:absolute; inset:0; opacity:.55; background:repeating-linear-gradient(0deg, rgba(0,0,0,.45) 0 2px, transparent 2px 4px);
+    animation:ru-flicker 1.3s steps(1,end) infinite }
+  .ru-slice { position:absolute; left:0; right:0; opacity:0; background:rgb(var(--c-rgb)); mix-blend-mode:screen;
+    animation:ru-slice .2s steps(2,end) var(--d) forwards }
+  .ru[data-z] .ru-bg { background:radial-gradient(ellipse 70% 55% at 50% 50%, rgba(var(--c-rgb),.18), transparent 70%), rgba(1,6,3,.95) }
+  .ru-lw { display:grid; place-items:center } .ru-lw > * { grid-area:1/1 }
+  /* chuva de glifos corrompidos */
+  .ru-rain { position:absolute; top:0; white-space:pre; line-height:1.05; font-family:'Share Tech Mono',monospace; opacity:0;
+    color:rgb(var(--c-rgb)); text-shadow:0 0 6px rgba(var(--c-rgb),.8); animation:ru-fall var(--dur) linear var(--d) forwards }
+  /* o Rank atual aparece antes da troca: recolhe quando a nova letra cai (no Z, é corrompido) */
+  .ru-old { font-family:'Orbitron',monospace; font-weight:900; font-size:clamp(150px,24vw,300px); line-height:1; opacity:0;
+    color:rgba(255,255,255,.85); text-shadow:0 0 26px rgba(var(--o-rgb),.9), 0 0 70px rgba(var(--o-rgb),.45);
+    animation:ru-oldIn .45s cubic-bezier(.16,1,.3,1) 120ms both, ru-oldGone .35s cubic-bezier(.4,0,1,1) calc(var(--hit) - 350ms) forwards }
+  .ru[data-z] .ru-old { animation:ru-oldOut calc(var(--hit) - 250ms) steps(1,end) both }
+  /* cópias vermelha/ciano que convergem no impacto e explodem para fora */
+  .ru-ghost { font-family:'Orbitron',monospace; font-weight:900; font-size:clamp(150px,24vw,300px); line-height:1; opacity:0;
+    animation:ru-ghost .55s cubic-bezier(.55,0,.9,.3) calc(var(--hit) - 550ms) both, ru-ghostOut .7s cubic-bezier(.16,1,.3,1) var(--hit) forwards }
+  .ru-ghost.r { --gx:-70px; color:rgba(255,0,70,.75) } .ru-ghost.c { --gx:70px; color:rgba(0,255,210,.65) }
+  /* rachaduras saindo da letra */
+  .ru-cracks { position:absolute; inset:0; width:100%; height:100%; opacity:0;
+    animation:ru-fade .05s linear var(--hit) forwards, ru-out 1.4s ease-in calc(var(--hit) + 1900ms) forwards }
+  .ru-cracks polyline { fill:none; stroke:rgb(var(--c-rgb)); stroke-width:2.5; stroke-dasharray:1400; stroke-dashoffset:1400;
+    filter:drop-shadow(0 0 5px rgb(var(--c-rgb))); animation:ru-draw .4s cubic-bezier(.16,1,.3,1) var(--hit) forwards }
+  .ru[data-z] .ru-bg { background:radial-gradient(ellipse 70% 55% at 50% 50%, rgba(var(--c-rgb),.2), transparent 70%), rgba(1,6,3,.95) }
+  .ru[data-z] .ru-band { height:200px; margin-top:-100px;
+    background:linear-gradient(90deg, transparent, rgba(var(--c-rgb),.2) 15%, rgba(var(--c-rgb),.32) 50%, rgba(var(--c-rgb),.2) 85%, transparent);
+    animation:ru-scaleY .24s steps(3,end) calc(var(--hit) - 120ms) forwards, ru-tear 1.3s steps(1,end) calc(var(--hit) + 150ms) infinite }
+  .ru[data-z] .ru-ring { border-style:dashed; border-width:3px }
+  .ru[data-z] .ru-flash { background:rgb(var(--c-rgb)) }
+  .ru[data-z] .ru-shake { animation:ru-gshake .7s steps(1,end) var(--hit) }
+  .ru[data-z] .ru-letter { color:#d9ffe4; text-shadow:-5px 0 rgba(255,0,70,.75), 5px 0 rgba(0,255,210,.6), 0 0 40px rgba(var(--c-rgb),.9);
+    animation:ru-slam .3s cubic-bezier(.55,0,.9,.3) calc(var(--hit) - 300ms) both, ru-glitch .55s steps(1,end) var(--hit),
+      ru-jitter 1.7s steps(1,end) calc(var(--hit) + 900ms) infinite }
+  .ru[data-z] .ru-kicker { animation:ru-glitch .5s steps(1,end) calc(var(--hit) + 120ms) both }
+  .ru[data-z] .ru-sub { animation:ru-glitch .5s steps(1,end) calc(var(--hit) + 380ms) both }
+
+  /* saída: mais curta e discreta que a entrada */
+  .ru.ru-out { animation:ru-out .4s cubic-bezier(.4,0,1,1) forwards }
+
+  /* movimento reduzido: só o cartão final, sem varrida/flash/tremor */
+  .ru[data-reduce] *, .ru[data-reduce] *::before, .ru[data-reduce] *::after { animation:none !important }
+  .ru[data-reduce]:not(.ru-out) { animation:ru-fade .3s ease-out both }
+  .ru[data-reduce] .ru-bg, .ru[data-reduce] .ru-kicker, .ru[data-reduce] .ru-letter, .ru[data-reduce] .ru-sub { opacity:1 }
+  .ru[data-reduce] .ru-band, .ru[data-reduce] .ru-band::before, .ru[data-reduce] .ru-band::after { transform:none }
+
+  @keyframes ru-fall { 0% { opacity:0; transform:translateY(-100%) } 10%, 85% { opacity:var(--o) } 100% { opacity:0; transform:translateY(110vh) } }
+  @keyframes ru-oldOut {
+    0% { opacity:0 } 18% { opacity:1; clip-path:inset(-40%); transform:none }
+    58% { clip-path:inset(20% 0 55% 0); transform:translateX(-18px) }
+    66% { clip-path:inset(60% 0 10% 0); transform:translateX(14px) }
+    74% { opacity:.75; clip-path:inset(5% 0 75% 0); transform:translateX(-8px) }
+    84% { opacity:.4; clip-path:inset(40% 0 40% 0); transform:translateX(22px) }
+    100% { opacity:0 } }
+  @keyframes ru-oldIn { from { opacity:0; transform:scale(.92); filter:blur(8px) } to { opacity:1; transform:none; filter:blur(0) } }
+  @keyframes ru-oldGone { from { opacity:1; transform:none; filter:blur(0) } to { opacity:0; transform:scale(.6); filter:blur(10px) } }
+  @keyframes ru-ghost { from { opacity:0; transform:translateX(var(--gx)) scale(1.5); filter:blur(10px) } to { opacity:.9; transform:none; filter:blur(0) } }
+  @keyframes ru-ghostOut { from { opacity:.9; transform:none } to { opacity:0; transform:translateX(calc(var(--gx) * 2.5)) scale(1.3) } }
+  @keyframes ru-draw { to { stroke-dashoffset:0 } }
+  @keyframes ru-tear {
+    0%, 100% { transform:scaleY(1); clip-path:inset(0) }
+    20% { transform:scaleY(1) translateX(-30px); clip-path:inset(0 0 55% 0) }
+    23% { transform:scaleY(1); clip-path:inset(0) }
+    58% { transform:scaleY(1) translateX(24px); clip-path:inset(40% 0 0 0) }
+    61% { transform:scaleY(1); clip-path:inset(0) } }
+  @keyframes ru-gshake { 0%, 100% { transform:none } 10% { transform:translate(-14px,6px) } 20% { transform:translate(12px,-8px) skewX(4deg) }
+    32% { transform:translate(-8px,0) } 45% { transform:translate(10px,4px) skewX(-3deg) } 60% { transform:translate(-4px,-2px) } 75% { transform:translate(3px,1px) } }
+  @keyframes ru-fade { to { opacity:1 } }
+  @keyframes ru-out { to { opacity:0 } }
+  @keyframes ru-scaleY { to { transform:scaleY(1) } }
+  @keyframes ru-scaleX { to { transform:scaleX(1) } }
+  @keyframes ru-wipe { 0% { transform:translateX(-130%) skewX(-18deg) } 50% { transform:translateX(0) skewX(-18deg) } 100% { transform:translateX(130%) skewX(-18deg) } }
+  @keyframes ru-flash { 0% { opacity:.7 } 100% { opacity:0 } }
+  @keyframes ru-slam { 0% { opacity:0; transform:scale(1.9); filter:blur(18px) } 40% { opacity:1 } 100% { opacity:1; transform:scale(1); filter:blur(0) } }
+  @keyframes ru-drift { from { transform:scale(1) } to { transform:scale(1.045) } }
+  @keyframes ru-track { from { opacity:0; letter-spacing:.95em; filter:blur(6px) } to { opacity:1; letter-spacing:.45em; filter:blur(0) } }
+  @keyframes ru-up { from { opacity:0; transform:translateY(14px); filter:blur(4px) } to { opacity:1; transform:none; filter:blur(0) } }
+  @keyframes ru-ring { 0% { opacity:.9; transform:translate(-50%,-50%) scale(.4) } 100% { opacity:0; transform:translate(-50%,-50%) scale(4.5) } }
+  @keyframes ru-chev { from { opacity:0; transform:translateX(calc(var(--dir) * -45vw)) scaleX(var(--dir)) } to { opacity:.85; transform:translateX(0) scaleX(var(--dir)) } }
+  @keyframes ru-rise { 0% { opacity:0; transform:translateY(20vh) } 25% { opacity:1 } 100% { opacity:0; transform:translateY(-110vh) } }
+  @keyframes ru-spin { from { transform:translate(-50%,-50%) rotate(0) } to { transform:translate(-50%,-50%) rotate(360deg) } }
+  @keyframes ru-spark { 0% { opacity:1; transform:translate(-50%,-50%) } 100% { opacity:0; transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.3) } }
+  @keyframes ru-shake { 0%,100% { transform:none } 15% { transform:translate(-8px,4px) } 30% { transform:translate(7px,-5px) } 45% { transform:translate(-5px,3px) } 60% { transform:translate(4px,-2px) } 80% { transform:translate(-2px,1px) } }
+  @keyframes ru-flicker { 0% { opacity:.55 } 7% { opacity:.2 } 9% { opacity:.7 } 40% { opacity:.45 } 42% { opacity:.8 } 70% { opacity:.55 } }
+  @keyframes ru-slice { 0% { opacity:.85; transform:translateX(-8%) } 100% { opacity:0; transform:translateX(6%) } }
+  @keyframes ru-glitch {
+    0% { opacity:0 }
+    12% { opacity:1; clip-path:inset(10% 0 60% 0); transform:translateX(-14px) }
+    24% { clip-path:inset(52% 0 18% 0); transform:translateX(12px) }
+    36% { clip-path:inset(0 0 82% 0); transform:translateX(-5px) }
+    48% { clip-path:inset(68% 0 4% 0); transform:translateX(9px) }
+    62% { clip-path:inset(-40%); transform:translateX(-6px) }
+    74%, 100% { opacity:1; clip-path:inset(-40%); transform:none } }
+  @keyframes ru-jitter { 0%, 100% { transform:none; clip-path:inset(-40%) } 31% { transform:translateX(-6px); clip-path:inset(40% 0 35% 0) } 33% { transform:none; clip-path:inset(-40%) } 78% { transform:translateX(4px) } 80% { transform:none } }
   </style>
 </head>
 
@@ -2166,15 +2363,6 @@
             <select class="inp" id="charClasseEsp"
               onchange="S.classeEsp=this.value;S.classeEspSel=this.value;const o=document.getElementById('classeEspSel');if(o)o.value=this.value;renderClasseEsp();autosave()">
               <option value="">—</option>
-            </select>
-          </div>
-          <div class="field" style="min-width:80px">
-            <span class="lbl">RANK</span>
-            <select class="inp" id="charRank" onchange="autosave();updateTitlesUI()">
-              <option value="C">C</option>
-              <option value="B">B</option>
-              <option value="A">A</option>
-              <option value="S">S</option>
             </select>
           </div>
           <div style="margin-left:auto;text-align:right">
@@ -2269,7 +2457,7 @@
                 <div class="info-row"><span class="info-key">Base Natural</span><span class="info-val" id="caBase"
                     style="color:var(--txt-d)">10</span></div>
                 <div class="info-row"><span class="info-key">Corpo+Mente</span><span class="info-val" id="caCM"
-                    style="color:var(--blue)">+0</span></div>
+                    style="color:var(--cyan)">+0</span></div>
                 <div class="info-row">
                   <span class="info-key">Armadura (−)</span>
                   <input class="bar-inp" type="number" id="caArmadura" value="0" oninput="calcCA();autosave()"
@@ -2520,14 +2708,14 @@
           <div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
               <div>
-                <div style="font-family:'Orbitron',monospace;font-size:23px;color:var(--blue);letter-spacing:2px">CORPO
+                <div style="font-family:'Orbitron',monospace;font-size:23px;color:var(--cyan);letter-spacing:2px">CORPO
                 </div>
                 <div style="font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--txt-d)">Força · Vigor ·
                   Agilidade</div>
               </div>
               <div class="attr-ctrl">
                 <button class="c-btn cor" onclick="changeMainAttr('corpo',-1)">−</button>
-                <span class="c-val" id="val-corpo">0</span>
+                <span class="c-val" id="val-corpo" style="color:var(--cyan)">0</span>
                 <button class="c-btn cor" onclick="changeMainAttr('corpo',1)">+</button>
                 <span class="c-bonus" id="bon-corpo">+0</span>
               </div>
@@ -2580,7 +2768,7 @@
           </div>
           <!-- ALMA LOCKED -->
           <div id="almaLockedBlock"
-            style="grid-column:span 2;border-top:1px solid rgba(0,212,255,0.08);padding-top:14px">
+            style="grid-column:span 2;border-top:1px solid rgba(var(--acc-rgb),0.08);padding-top:14px">
             <div style="display:flex;align-items:center;gap:14px">
               <div
                 style="font-family:'Orbitron',monospace;font-size:23px;color:rgba(245,158,11,.25);letter-spacing:2px">
@@ -2628,12 +2816,14 @@
         <div class="panel">
           <div class="panel-title">ARMAS</div>
           <div class="weapon-row hdr"><span>NOME</span><span>DANO
-              BASE</span><span>CRIT</span><span>CATEGORIA</span><span>TIPO</span><span>DUR</span><span>MÁX</span><span></span></div>
+              BASE</span><span>CRIT</span><span>CATEGORIA</span><span>TIPO</span><span>DUR</span><span>MÁX</span><span></span>
+          </div>
           <div id="weaponsWrap"></div>
           <button class="dashed-btn" onclick="addWeapon()">+ ARMA</button>
           <div class="sep"></div>
           <div class="panel-title" style="margin-top:0">ARMADURAS</div>
-          <div class="weapon-row hdr" style="grid-template-columns:1fr 60px 1fr 52px 52px 30px"><span>NOME</span><span>CA
+          <div class="weapon-row hdr" style="grid-template-columns:1fr 60px 1fr 52px 52px 30px">
+            <span>NOME</span><span>CA
               (−)</span><span>TIPO</span><span>DUR</span><span>MÁX</span><span></span></div>
           <div id="armorsWrap"></div>
           <button class="dashed-btn" onclick="addArmor()">+ ARMADURA</button>
@@ -2645,7 +2835,7 @@
           <div id="implSupWrap"></div>
           <button class="dashed-btn" onclick="addImplant('sup')">+ SUPERIOR</button>
           <div class="sep"></div>
-          <div class="lbl mb8" style="color:var(--blue)">INFERIORES (Agilidade)</div>
+          <div class="lbl mb8" style="color:var(--cyan)">INFERIORES (Agilidade)</div>
           <div id="implInfWrap"></div>
           <button class="dashed-btn" onclick="addImplant('inf')">+ INFERIOR</button>
           <div class="sep"></div>
@@ -2758,11 +2948,40 @@
           <span style="font-family:'Share Tech Mono',monospace;font-size:17px;color:var(--txt-d);margin-left:12px"
             id="titleCountDisp">0/4 títulos</span>
         </div>
-        <button class="btn btn-gold btn-sm" onclick="addTitle()">+ ADICIONAR TÍTULO</button>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+          <!-- ponytail: "modo Mestre" só esconde o seletor (Ctrl+Alt+M); proteção por honra, não por segurança -->
+          <div id="gmRankBar" style="display:none;gap:6px;align-items:center">
+            <span class="lbl">MESTRE · RANK</span>
+            <select class="inp" id="charRank" style="width:auto" onchange="gmSetRank(this.value)">
+              <option value="C">C</option>
+              <option value="B">B</option>
+              <option value="A">A</option>
+              <option value="S">S</option>
+              <option value="Z">Z</option>
+            </select>
+          </div>
+          <button class="btn btn-blue btn-sm" id="rankUpBtn" style="white-space:nowrap" onclick="openRankUp()"
+            disabled>▲ RANK UP</button>
+          <button class="btn btn-gold btn-sm" id="addTitleBtn" style="white-space:nowrap" onclick="addTitle()">+ ADICIONAR
+            TÍTULO</button>
+        </div>
       </div>
+      <div id="rankUpInfo"
+        style="font-family:'Share Tech Mono',monospace;font-size:var(--fs-sm);color:var(--txt-d);margin:-6px 0 12px">
+      </div>
+      <div id="rankLevelBar" class="progress-wrap" style="margin-bottom:14px"></div>
+      <div id="rankUpPanel" class="title-card" hidden style="border-color:var(--blue);margin-bottom:14px"></div>
       <div id="titlesWrap">
         <div class="empty-msg">Nenhum título registrado.</div>
       </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin:28px 0 12px">
+        <div>
+          <span class="lbl" style="color:var(--purple-b)">TÍTULOS DE ARTEFATO MÍTICO</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:var(--fs-sm);color:var(--txt-d);margin-left:12px">sem limite · não contam para o Rank Up</span>
+        </div>
+        <button class="btn btn-gold btn-sm" style="white-space:nowrap" onclick="addArtifactTitle()">+ TÍTULO DE ARTEFATO</button>
+      </div>
+      <div id="artifactTitlesWrap"></div>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════
@@ -2860,7 +3079,7 @@
     <button class="sync-btn" onclick="syncConnect()">[ CONECTAR ]</button>
     <button class="sync-btn red" id="syncDisconnectBtn" style="display:none" onclick="syncDisconnect()">[ DESCONECTAR
       ]</button>
-    <!--  <button class="sync-btn" style="border-color:rgba(0,212,255,.4);color:rgba(0,212,255,.7)" onclick="openFbConfig()">[ CONFIGURAR ]</button> -->
+    <!--  <button class="sync-btn" style="border-color:rgba(var(--acc-rgb),.4);color:rgba(var(--acc-rgb),.7)" onclick="openFbConfig()">[ CONFIGURAR ]</button> -->
   </div>
 
   <!-- FIREBASE SETUP MODAL -->
@@ -3289,9 +3508,11 @@
       ]
     };
 
-    const RANK_TITLE_LIMITS = { C: 4, B: 3, A: 2, S: 1 };
-    const RANK_SKILL_COUNTS = { C: 1, B: 2, A: 3, S: 5 };
+    const RANK_TITLE_LIMITS = { C: 4, B: 3, A: 2, S: 1, Z: 1 }; // Z (amaldiçoado) = regras do S
+    const RANK_SKILL_COUNTS = { C: 1, B: 2, A: 3, S: 5, Z: 5 };
     const RANK_LEVEL_REQ = { B: 4, A: 9, S: 16 };
+    // S.rank pode vir de JSON importado: só aceita um Rank conhecido antes de ir para HTML
+    const validRank = r => Object.prototype.hasOwnProperty.call(RANK_TITLE_LIMITS, r) ? r : 'C';
 
     // ═══════════════════════════════════════════════════════════════
     // STATE
@@ -3315,7 +3536,7 @@
       dotEnv: { on: false, dmg: '', efeito: '' },
       dotExtras: [],
       statusNeg: {}, statusPos: {},
-      titles: [],
+      titles: [], artifactTitles: [],
       fullName: '', age: '', gender: '', height: '', weight: '', hair: '', eyes: '', skin: '', marks: '', photo: '',
       personality: '', dream: '', bonds: '', qualities: '', flaws: '',
       classeGeralSel: '', classeEspSel: '',
@@ -3572,7 +3793,7 @@
             weapons: [], armors: [], implSup: [], implInf: [], implInt: [],
             dotSang: { on: false, stacks: 0, dmg: '', dur: '' }, dotQueim: { on: false, stacks: 0, dmg: '', dur: '' },
             dotEnv: { on: false, dmg: '', efeito: '' }, dotExtras: [], statusNeg: {}, statusPos: {},
-            titles: [], fullName: '', age: '', gender: '', height: '', weight: '', hair: '',
+            titles: [], artifactTitles: [], fullName: '', age: '', gender: '', height: '', weight: '', hair: '',
             eyes: '', skin: '', marks: '', photo: '', personality: '', dream: '', bonds: '',
             qualities: '', flaws: '', classeGeralSel: '', classeEspSel: '',
             multiclass: [{ cls: '', sk: -1 }, { cls: '', sk: -1 }],
@@ -3580,6 +3801,7 @@
             inventory: [], relations: [], notes: ''
           };
           S = { ...defaults, ...data };
+          S.rank = validRank(S.rank);
           localStorage.setItem('arc_v1', JSON.stringify(S));
           buildPericiasTable(); buildDotStacks(); buildMulticlasse();
           loadDOM(); updateAll();
@@ -3589,7 +3811,7 @@
             const orig = lbl.textContent.trim(); lbl.style.borderColor = 'var(--green)'; lbl.style.color = 'var(--green)';
             setTimeout(() => { lbl.style.borderColor = ''; lbl.style.color = ''; }, 2000);
           }
-        } catch (err) { alert('Erro ao importar: arquivo inválido ou corrompido.'); }
+        } catch (err) { arcDialog({ tag: '[ IMPORTAR ]', title: 'Arquivo inválido', sub: 'Não foi possível importar: o arquivo está inválido ou corrompido.', cancel: null }); }
         e.target.value = ''; // reset input para permitir reimportar o mesmo arquivo
       };
       reader.readAsText(file);
@@ -3641,6 +3863,8 @@
       // sync rank display in titles tab
       const rd = document.getElementById('rankDisplay');
       if (rd) { rd.textContent = rank; rd.className = 'rank-' + rank; }
+      document.documentElement.dataset.rank = rankThemeHold || rank; // durante a animação, a cor antiga fica até o impacto
+      renderRankUp();
     }
 
     function updateBars() {
@@ -3685,7 +3909,7 @@
       if (!sk) return '<span class="desc-row">Sem habilidade</span>';
       const cost = sk.cost ? ' [' + sk.cost + ']' : '';
       return '<span class="desc-row" style="color: var(--txt); font-size: 17px; letter-spacing: 0.75px; padding-top: 8px; padding-bottom: 0; padding-left: 2%">' + sk.name + '</span>'
-        + '<span class="desc-row" style="color: var(--txt-d); font-size: 15px; border-bottom: 1px solid rgba(0, 212, 255, .25);">(' + sk.action + ')' + cost + '</span>'
+        + '<span class="desc-row" style="color: var(--txt-d); font-size: 15px; border-bottom: 1px solid rgba(var(--acc-rgb), .25);">(' + sk.action + ')' + cost + '</span>'
         + '<span class="desc-row">' + sk.desc + '</span>';
     }
 
@@ -4229,7 +4453,7 @@
     function durInputs(o) {
       return `<input class="w-inp" type="number" min="0" data-f="durCur" value="${o.durCur ?? ''}" title="Durabilidade atual" oninput="autosave();updateDurPen(this)">
       <input class="w-inp" type="number" min="0" data-f="durMax" value="${o.durMax ?? ''}" title="Durabilidade máxima" oninput="autosave();updateDurPen(this)">`;
-    } 
+    }
 
     function isEditingFocus(wrap) {
       const el = document.activeElement;
@@ -4279,7 +4503,7 @@
       <div class="dur-pen${durPenaltyInfo('armor', a.durCur, a.durMax).broken ? ' broken' : ''}">${durPenaltyText('armor', a.durCur, a.durMax)}</div>
     </div>`).join('');
     }
-    function addArmor() { S.armors.push({ name: '', ca: '0', type: '' , durCur: '', durMax: '' }); renderArmors(); autosave(); }
+    function addArmor() { S.armors.push({ name: '', ca: '0', type: '', durCur: '', durMax: '' }); renderArmors(); autosave(); }
     function removeArmor(i) { S.armors.splice(i, 1); renderArmors(); autosave(); }
 
     function renderImplants() {
@@ -4467,11 +4691,283 @@
       renderTitles();
     }
 
-    function addTitle() {
+    // ═══════════ ANIMAÇÃO DE RANK UP ═══════════ cópia de ARC-rankup-demo.html. Mudou uma, mude nas duas.
+    const RU_RGB = { C: '80,136,241', B: '227,59,245', A: '246,81,81', S: '201,123,16', Z: '9,164,58' };
+    const RU_TIER = { B: 1, A: 2, S: 3 };
+    const RU_SUB = {
+      B: '3 TÍTULOS · 2 SKILLS POR TÍTULO',
+      A: '2 TÍTULOS · 3 SKILLS POR TÍTULO',
+      S: 'RANK MÁXIMO · 1 TÍTULO · 5 SKILLS',
+      Z: 'O TÍTULO FOI RENEGADO'
+    };
+
+    // onImpact(to) é chamado no instante do impacto — é ali que o tema do ARC troca de cor.
+    function playRankUp(from, to, onImpact, forceReduce) {
+      document.querySelector('.ru')?.remove();
+      const z = to === 'Z', tier = z ? 0 : RU_TIER[to] || 1;
+      const reduce = forceReduce || matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const hit = reduce ? 0 : z ? 1300 : [0, 1300, 1400, 1600][tier];
+      const total = reduce ? 1800 : z ? 4800 : [0, 3300, 3900, 4900][tier];
+      const rnd = (a, b) => a + Math.random() * (b - a);
+      const old = from ? `<div class="ru-old">${from}</div>` : '';
+      let letter = `<div class="ru-lw">${old}<div class="ru-letter">${to}</div></div>`;
+
+      const el = document.createElement('div');
+      el.className = 'ru';
+      el.dataset.tier = tier;
+      if (z) el.dataset.z = '';
+      if (reduce) el.dataset.reduce = '';
+      el.style.setProperty('--c-rgb', RU_RGB[to]);
+      el.style.setProperty('--o-rgb', RU_RGB[from] || RU_RGB[to]);
+      el.style.setProperty('--hit', hit + 'ms');
+
+      let fx = '';
+      if (z) {
+        const glyphs = 'ΖΩ†‡ØÆ01アカサタナᚱᚦᛟ#%$';
+        for (let i = 0; i < 26; i++) {
+          const col = Array.from({ length: Math.round(rnd(10, 22)) }, () => glyphs[Math.floor(Math.random() * glyphs.length)]).join('\n');
+          fx += `<div class="ru-rain" style="left:${rnd(0, 98)}%;font-size:${Math.round(rnd(13, 24))}px;--o:${rnd(.2, .55).toFixed(2)};--dur:${Math.round(rnd(1800, 3400))}ms;--d:${Math.round(rnd(-1500, hit + 1000))}ms">${col}</div>`;
+        }
+        fx += '<div class="ru-band"></div><div class="ru-scan"></div>';
+        for (let i = 0; i < 30; i++)
+          fx += `<div class="ru-slice" style="top:${rnd(3, 97)}%;height:${rnd(2, 22)}px;--d:${Math.round(rnd(0, hit + 1200))}ms"></div>`;
+        fx += `<div class="ru-ring"></div><div class="ru-ring"></div><div class="ru-ring" style="animation-delay:calc(var(--hit) + 320ms)"></div>`;
+        // rachaduras: passeio aleatório do centro para fora (viewBox centrado na tela)
+        let cracks = '';
+        for (let i = 0; i < 9; i++) {
+          let a = (i / 9) * Math.PI * 2 + rnd(-.3, .3), r = rnd(150, 190);
+          const pts = [];
+          while (r < 900) { pts.push(`${(Math.cos(a) * r).toFixed(0)},${(Math.sin(a) * r).toFixed(0)}`); r += rnd(50, 110); a += rnd(-.28, .28); }
+          cracks += `<polyline points="${pts.join(' ')}" style="animation-delay:calc(var(--hit) + ${Math.round(rnd(0, 120))}ms)"/>`;
+        }
+        fx += `<svg class="ru-cracks" viewBox="-500 -500 1000 1000" preserveAspectRatio="xMidYMid slice">${cracks}</svg>`;
+        letter = `<div class="ru-lw">${old}<div class="ru-ghost r">Z</div><div class="ru-ghost c">Z</div><div class="ru-letter">Z</div></div>`;
+      } else {
+        fx += '<div class="ru-band"></div>';
+        if (tier >= 3) {
+          fx += '<div class="ru-rays"></div>';
+          for (let i = 0; i < 28; i++) {
+            const a = rnd(0, Math.PI * 2), d = rnd(180, 460);
+            fx += `<div class="ru-spark" style="--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d}px;--s:${rnd(3, 7)}px;--col:${i % 3 ? 'rgb(var(--c-rgb))' : '#fff'}"></div>`;
+          }
+        }
+        if (tier >= 2) {
+          fx += '<div class="ru-ring"></div><div class="ru-ring"></div><div class="ru-chev l"></div><div class="ru-chev r"></div>';
+          for (let i = 0; i < 14; i++)
+            fx += `<div class="ru-streak" style="left:${rnd(2, 98)}%;height:${rnd(80, 220)}px;--dur:${Math.round(rnd(700, 1200))}ms;--d:${Math.round(hit + rnd(0, 450))}ms"></div>`;
+        }
+      }
+
+      el.innerHTML = `<div class="ru-bg"></div>
+        <div class="ru-shake">${fx}
+          <div class="ru-stage">
+            <div class="ru-kicker">${z ? 'TÍTULO ABDICADO' : 'RANK UP'}</div>
+            ${letter}
+            <div class="ru-sub">${z ? `${from ? `${from} ▸ ` : ''}<b>AMALDIÇOADO</b>` : `${from} ▸ <b>${to}</b>`}<br>${RU_SUB[to] || ''}</div>
+          </div>
+        </div>
+        ${z ? '' : '<div class="ru-wipe"></div>'}<div class="ru-flash"></div>`;
+      document.body.appendChild(el);
+
+      let impacted = false;
+      const impact = () => { if (!impacted) { impacted = true; onImpact && onImpact(to); } };
+      const tHit = setTimeout(impact, hit);
+      const close = () => {
+        if (el.classList.contains('ru-out')) return;
+        impact(); clearTimeout(tHit); clearTimeout(tEnd);
+        removeEventListener('keydown', onKey);
+        el.classList.add('ru-out');
+        setTimeout(() => el.remove(), 400);
+      };
+      const onKey = e => { if (e.key === 'Escape') close(); };
+      const tEnd = setTimeout(close, total);
+      el.addEventListener('click', close);
+      addEventListener('keydown', onKey);
+    }
+
+
+    // ── RANK UP ── cópia fiel das funções de tools/rank-up/rankup.js. Mudou uma, mude nas duas.
+    const NEXT_RANK = { C: 'B', B: 'A', A: 'S' }; // S e Z não sobem
+
+    function isTitleComplete(t) {
+      const qs = (t && t.quests) || [];
+      return qs.length > 0 && qs.every(q => q.total > 0 && (q.cur || 0) >= q.total);
+    }
+
+    // Libera com o conjunto completo de títulos do Rank (C: 4), (limite − 1) deles
+    // concluídos e o nível do próximo Rank.
+    // mustDiscard > 0 quando sobram concluídos além do limite do novo Rank.
+    function rankUpStatus(rank, nivel, titles) {
+      const next = NEXT_RANK[rank] || null;
+      const have = (titles || []).length;
+      const done = (titles || []).filter(isTitleComplete).length;
+      if (!next) return { next, have, limit: RANK_TITLE_LIMITS[rank], haveAll: false, done, needed: 0, reqLevel: null, levelOk: false, ready: false, mustDiscard: 0 };
+      const limit = RANK_TITLE_LIMITS[rank];
+      const needed = limit - 1;
+      const reqLevel = RANK_LEVEL_REQ[next];
+      const levelOk = (nivel || 0) >= reqLevel;
+      const haveAll = have >= limit;
+      return { next, have, limit, haveAll, done, needed, reqLevel, levelOk, ready: haveAll && levelOk && done >= needed, mustDiscard: Math.max(0, done - RANK_TITLE_LIMITS[next]) };
+    }
+
+    function applyRankUp(titles, rank, discardIdx) {
+      const next = NEXT_RANK[rank];
+      const s = rankUpStatus(rank, Infinity, titles);
+      if (!next || !s.ready) throw new Error('Rank Up não liberado');
+      const discard = new Set(discardIdx || []);
+      if (discard.size !== s.mustDiscard || [...discard].some(i => !isTitleComplete(titles[i])))
+        throw new Error(`Escolha ${s.mustDiscard} título(s) concluído(s) para descartar`);
+      const nSkills = RANK_SKILL_COUNTS[next];
+      return titles
+        .map((t, i) => ({ t, i }))
+        .filter(({ t, i }) => isTitleComplete(t) && !discard.has(i))
+        .map(({ t }) => {
+          const skills = t.skills.map(sk => ({ ...sk }));
+          for (let k = skills.length; k < nSkills; k++) skills.push({ name: `Skill ${k + 1}`, action: 'Passiva', cost: '', desc: '' });
+          return { ...t, rank: next, skills, quests: [{ desc: '', total: 0, cur: 0 }] };
+        });
+    }
+    // ── fim da cópia ──
+
+    const escH = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    let rankUndo = null, rankUndoTimer = null, rankThemeHold = null;
+
+    function releaseRankTheme() { rankThemeHold = null; document.documentElement.dataset.rank = S.rank || 'C'; }
+
+    // Seletor do Mestre: correções são silenciosas; só a ida para Z toca a animação.
+    function gmSetRank(v) {
+      const prev = validRank(S.rank), anim = v === 'Z' && prev !== 'Z';
+      if (anim) rankThemeHold = prev;
+      autosave(); updateTitlesUI();
+      if (anim) playRankUp(prev, 'Z', releaseRankTheme);
+    }
+
+    // Atualiza só o botão e a linha de progresso (chamado a cada autosave via updateHeader).
+    function renderRankUp() {
+      const btn = document.getElementById('rankUpBtn'), info = document.getElementById('rankUpInfo');
+      if (!btn || !info) return;
+      const rank = S.rank || 'C', s = rankUpStatus(rank, S.nivel, S.titles);
+      btn.style.display = s.next ? '' : 'none';
+      btn.disabled = !s.ready;
+      const add = document.getElementById('addTitleBtn'), full = (S.titles || []).length >= RANK_TITLE_LIMITS[rank];
+      if (add) { add.disabled = full; add.title = full ? `Máximo de ${RANK_TITLE_LIMITS[rank]} títulos para Rank ${rank}` : ''; }
+      btn.textContent = s.next ? `▲ RANK UP → ${s.next}` : '';
+      const ok = c => c ? 'color:var(--green)' : '';
+      const undo = rankUndo ? ` <button class="btn btn-gold btn-sm" style="margin-left:10px" onclick="undoRankUp()">DESFAZER RANK UP</button>` : '';
+      info.innerHTML = s.next
+        ? `PRÓXIMO RANK (${s.next}): <span style="${ok(s.done >= s.needed)}">${s.done}/${s.needed} concluídos</span> · <span style="${ok(s.haveAll)}">${s.have}/${s.limit} títulos</span>${undo}`
+        : (rank === 'Z' ? 'Amaldiçoado — sem Rank Up.' : 'Rank máximo alcançado.') + undo;
+      // barra de nível única (antes havia uma por título)
+      const bar = document.getElementById('rankLevelBar');
+      if (bar) {
+        bar.style.display = s.next ? '' : 'none';
+        const lvl = Number(S.nivel) || 0; // S vem de JSON importado: nunca interpolar bruto em innerHTML
+        if (s.next) bar.innerHTML =`<div style="display:flex;justify-content:space-between"><span class="lbl">PROMOÇÃO PARA RANK ${s.next} — NÍVEL</span><span style="font-family:'Share Tech Mono',monospace;font-size:17px;${ok(s.levelOk) || 'color:var(--txt-d)'}">${lvl}/${s.reqLevel}</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100, (lvl / s.reqLevel) * 100)}%"></div></div>`;
+      }
+    }
+
+    function openRankUp() {
+      const rank = S.rank || 'C', s = rankUpStatus(rank, S.nivel, S.titles);
+      const panel = document.getElementById('rankUpPanel');
+      if (!s.ready || !panel) return;
+      const all = S.titles.map((t, i) => ({ t, i }));
+      const lost = all.filter(x => !isTitleComplete(x.t)), kept = all.filter(x => isTitleComplete(x.t));
+      const names = xs => xs.map(x => escH(x.t.name)).join(', ');
+      const pick = s.mustDiscard
+        ? `<div class="lbl mt4" style="color:var(--gold)">TODOS CONCLUÍDOS — ESCOLHA ${s.mustDiscard} PARA DESCARTAR:</div>`
+        + kept.map(x => `<label style="display:block;margin:6px 0;cursor:pointer"><input type="${s.mustDiscard === 1 ? 'radio' : 'checkbox'}" name="rankDiscard" value="${x.i}"> ${escH(x.t.name)}</label>`).join('')
+        : `<div class="mt4">Sobem para Rank ${s.next}: <b>${names(kept)}</b></div>`;
+      panel.innerHTML = `<div class="title-rank rank-${s.next}">RANK UP ${rank} → ${s.next}</div>
+        ${lost.length ? `<div class="mt4" style="color:var(--red)">Descartados (incompletos): ${names(lost)}</div>` : ''}
+        ${pick}
+        <div class="mt4" style="color:var(--txt-d)">As missões dos títulos que sobem serão zeradas e as skills completadas até ${RANK_SKILL_COUNTS[s.next]}.</div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-blue btn-sm" onclick="confirmRankUp()">CONFIRMAR RANK UP</button>
+          <button class="btn btn-red btn-sm" onclick="document.getElementById('rankUpPanel').hidden=true">CANCELAR</button>
+        </div>`;
+      panel.hidden = false;
+    }
+
+    function confirmRankUp() {
+      const rank = S.rank || 'C', next = NEXT_RANK[rank];
+      const discard = [...document.querySelectorAll('#rankUpPanel input[name=rankDiscard]:checked')].map(i => +i.value);
+      let titles;
+      try { titles = applyRankUp(S.titles, rank, discard); } catch (e) { arcDialog({ tag: '[ RANK UP ]', title: 'Não foi possível subir de Rank', sub: e.message, cancel: null }); return; }
+      rankUndo = { rank, titles: S.titles, artifactTitles: JSON.parse(JSON.stringify(S.artifactTitles || [])) }; // applyRankUp não muta a lista antiga
+      S.titles = titles; S.rank = next; sv('charRank', next);
+      document.getElementById('rankUpPanel').hidden = true;
+      clearTimeout(rankUndoTimer);
+      rankUndoTimer = setTimeout(() => { rankUndo = null; renderRankUp(); }, 15000);
+      rankThemeHold = rank;
+      autosave(); updateTitlesUI();
+      playRankUp(rank, next, releaseRankTheme);
+    }
+
+    function undoRankUp() {
+      if (!rankUndo) return;
+      S.titles = rankUndo.titles; S.artifactTitles = rankUndo.artifactTitles; S.rank = rankUndo.rank; sv('charRank', rankUndo.rank);
+      rankUndo = null; clearTimeout(rankUndoTimer);
+      autosave(); updateTitlesUI();
+    }
+
+    window.addEventListener('keydown', e => {
+      if (e.ctrlKey && e.altKey && e.code === 'KeyM') {
+        const bar = document.getElementById('gmRankBar');
+        bar.style.display = bar.style.display === 'none' ? 'flex' : 'none';
+      }
+    });
+
+    // Modal do ARC no lugar de alert/prompt/confirm (mesmo visual do modal do Firebase).
+    // Devolve uma Promise: o texto digitado (com input), true (sem input) ou null (cancelou, Esc, clique fora).
+    function arcDialog({ tag = '[ ARC ]', title, sub = '', input = null, ok = 'OK', cancel = 'CANCELAR', danger = false }) {
+      return new Promise(resolve => {
+        const prev = document.activeElement;
+        const ov = document.createElement('div');
+        ov.className = 'fb-modal-ov arc-dlg'; ov.style.zIndex = 600;
+        ov.innerHTML = `<div class="fb-modal" role="dialog" aria-modal="true" aria-label="${escH(title)}">
+          <div class="fb-modal-tag">${escH(tag)}</div>
+          <div class="fb-modal-title">${escH(title)}</div>
+          ${sub ? `<div class="fb-modal-sub" style="white-space:pre-line">${escH(sub)}</div>` : ''}
+          ${input ? `<div class="fb-field"><span class="fb-lbl">${escH(input.label)}</span><input class="fb-inp" maxlength="60" placeholder="${escH(input.placeholder || '')}" value="${escH(input.value || '')}"><span class="arc-dlg-err"></span></div>` : ''}
+          <div class="fb-acts">${cancel ? `<button class="sync-btn arc-dlg-cancel" style="border-color:rgba(255,255,255,.18);color:rgba(255,255,255,.4)">${escH(cancel)}</button>` : ''}<button class="sync-btn arc-dlg-ok${danger ? ' red' : ''}">${escH(ok)}</button></div>
+        </div>`;
+        const box = ov.firstElementChild, inp = ov.querySelector('input'), err = ov.querySelector('.arc-dlg-err');
+        const close = v => { ov.remove(); removeEventListener('keydown', onKey, true); if (prev && prev.focus) prev.focus(); resolve(v); };
+        const submit = () => {
+          if (!input) return close(true);
+          const v = inp.value.trim();
+          if (!v) { err.textContent = 'Preencha este campo.'; inp.focus(); return; }
+          close(v);
+        };
+        const onKey = e => {
+          if (e.key === 'Escape') { e.preventDefault(); close(null); }
+          else if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') { e.preventDefault(); submit(); }
+          else if (e.key === 'Tab') { // mantém o foco dentro da modal
+            const f = box.querySelectorAll('input,button'), first = f[0], last = f[f.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+          }
+        };
+        addEventListener('keydown', onKey, true);
+        ov.addEventListener('mousedown', e => { if (e.target === ov) close(null); });
+        ov.querySelector('.arc-dlg-ok').onclick = submit;
+        const c = ov.querySelector('.arc-dlg-cancel'); if (c) c.onclick = () => close(null);
+        if (inp) inp.addEventListener('input', () => { err.textContent = ''; });
+        document.body.appendChild(ov);
+        (inp || ov.querySelector('.arc-dlg-ok')).focus();
+      });
+    }
+
+    async function addTitle() {
       const rank = S.rank || 'C'; const limit = RANK_TITLE_LIMITS[rank];
-      if ((S.titles || []).length >= limit) { alert(`Máximo de ${limit} títulos para Rank ${rank}.`); return; }
+      if ((S.titles || []).length >= limit) return; // o botão já fica desabilitado no limite
       const skillCount = RANK_SKILL_COUNTS[rank] || 1;
-      const name = prompt('Nome do título:'); if (!name) return;
+      const name = await arcDialog({
+        tag: '[ NOVO TÍTULO ]', title: 'Adicionar Título', sub: `Rank ${rank} · ${(S.titles || []).length + 1}/${limit} títulos`,
+        input: { label: 'NOME DO TÍTULO', placeholder: 'Ex.: Lâmina Rubra' }, ok: 'ADICIONAR'
+      });
+      if (!name) return;
       const skills = [];
       for (let i = 0; i < skillCount; i++) {
         skills.push({ name: `Skill ${i + 1}`, action: 'Passiva', cost: '', desc: '' });
@@ -4480,26 +4976,61 @@
       renderTitles(); autosave();
     }
 
-    function renderTitles() {
-      const wrap = document.getElementById('titlesWrap'); if (!wrap) return;
-      if ((S.titles || []).length === 0) { wrap.innerHTML = '<div class="empty-msg">Nenhum título. Clique em "+ Adicionar Título".</div>'; return; }
-      const playerLevel = S.nivel || 0;
-      wrap.innerHTML = S.titles.map((t, ti) => {
-        const reqLevel = RANK_LEVEL_REQ[t.rank];
-        const levelPct = reqLevel ? Math.min(100, (playerLevel / reqLevel) * 100) : 100;
-        const skills = t.skills.map((sk, si) => `
+    // Skills editáveis de um título; list = 'titles' ou 'artifactTitles'.
+    function titleSkillsHtml(list, ti, skills) {
+      return skills.map((sk, si) => `
       <div class="skill-card mt4">
         <div class="sk-header">
-          <input style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt);font-size:var(--fs);font-weight:700;outline:none;padding:2px" value="${sk.name}" oninput="S.titles[${ti}].skills[${si}].name=this.value;autosave()">
+          <input style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt);font-size:var(--fs);font-weight:700;outline:none;padding:2px" value="${escH(sk.name)}" oninput="S.${list}[${ti}].skills[${si}].name=this.value;autosave()">
           <div class="sk-meta">
-            <select class="action-sel" onchange="S.titles[${ti}].skills[${si}].action=this.value;toggleCostField(this)">
+            <select class="action-sel" onchange="S.${list}[${ti}].skills[${si}].action=this.value;toggleCostField(this)">
               ${ACTIONS_LIST.map(a => `<option${a === sk.action ? ' selected' : ''}>${a}</option>`).join('')}
             </select>
-            <input class="cost-inp" type="text" value="${sk.cost || ''}" placeholder="—S" ${sk.action === 'Passiva' ? 'disabled' : ''} oninput="S.titles[${ti}].skills[${si}].cost=this.value;autosave()">
+            <input class="cost-inp" type="text" value="${escH(sk.cost || '')}" placeholder="—S" ${sk.action === 'Passiva' ? 'disabled' : ''} oninput="S.${list}[${ti}].skills[${si}].cost=this.value;autosave()">
           </div>
         </div>
-        <textarea class="inp mt4" style="min-height:50px" oninput="S.titles[${ti}].skills[${si}].desc=this.value;autosave()" placeholder="Descrição da skill...">${sk.desc || ''}</textarea>
+        <textarea class="inp mt4" style="min-height:50px" oninput="S.${list}[${ti}].skills[${si}].desc=this.value;autosave()" placeholder="Descrição da skill...">${escH(sk.desc || '')}</textarea>
       </div>`).join('');
+    }
+
+    // Títulos de Artefato Mítico: fora do limite e do Rank Up; seguem o Rank atual do personagem
+    // (e ganham as skills dele quando o personagem sobe de Rank).
+    function renderArtifactTitles() {
+      const wrap = document.getElementById('artifactTitlesWrap'); if (!wrap) return;
+      const rank = validRank(S.rank), list = S.artifactTitles || [];
+      if (!list.length) { wrap.innerHTML = '<div class="empty-msg">Nenhum título de Artefato Mítico.</div>'; return; }
+      for (const t of list)
+        for (let k = t.skills.length; k < RANK_SKILL_COUNTS[rank]; k++) t.skills.push({ name: `Skill ${k + 1}`, action: 'Passiva', cost: '', desc: '' });
+      wrap.innerHTML = list.map((t, ti) => `<div class="title-card artifact-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="title-rank rank-${rank}">ARTEFATO MÍTICO · RANK ${rank}</div>
+          <div class="title-name">${escH(t.name)}</div>
+        </div>
+        <button class="w-rem" onclick="S.artifactTitles.splice(${ti},1);renderTitles();autosave()" style="font-size:25px">✕</button>
+      </div>
+      <div class="sep"></div>
+      ${titleSkillsHtml('artifactTitles', ti, t.skills)}
+    </div>`).join('');
+    }
+
+    async function addArtifactTitle() {
+      const rank = S.rank || 'C';
+      const name = await arcDialog({
+        tag: '[ ARTEFATO MÍTICO ]', title: 'Título de Artefato', sub: `Segue o Rank atual (${rank}) e não conta para o limite de títulos.`,
+        input: { label: 'NOME DO TÍTULO', placeholder: 'Ex.: Portador da Lança' }, ok: 'ADICIONAR'
+      });
+      if (!name) return;
+      (S.artifactTitles ||= []).push({ name, skills: [] }); // as skills vêm do Rank, no render
+      renderTitles(); autosave();
+    }
+
+    function renderTitles() {
+      renderArtifactTitles();
+      const wrap = document.getElementById('titlesWrap'); if (!wrap) return;
+      if ((S.titles || []).length === 0) { wrap.innerHTML = '<div class="empty-msg">Nenhum título. Clique em "+ Adicionar Título".</div>'; return; }
+      wrap.innerHTML = S.titles.map((t, ti) => {
+        const skills = titleSkillsHtml('titles', ti, t.skills);
         const quests = (t.quests || []).map((q, qi) => `
       <div class="quest-row">
         <input style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:var(--fs-sm);outline:none;padding:2px" value="${q.desc || ''}" placeholder="Descrição da missão..." oninput="S.titles[${ti}].quests[${qi}].desc=this.value;autosave()">
@@ -4521,10 +5052,6 @@
         </div>
         <button class="w-rem" onclick="S.titles.splice(${ti},1);renderTitles();autosave()" style="font-size:25px">✕</button>
       </div>
-      ${reqLevel ? `<div class="progress-wrap mb8">
-        <div style="display:flex;justify-content:space-between"><span class="lbl">PROMOÇÃO PARA RANK SUPERIOR</span><span style="font-family:'Share Tech Mono',monospace;font-size:17px;color:var(--txt-d)">${playerLevel}/${reqLevel}</span></div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${levelPct}%"></div></div>
-      </div>`: '<div style="font-size:17px;color:var(--gold);font-family:\'Share Tech Mono\',monospace;letter-spacing:1px;margin-bottom:10px">RANK MÁXIMO</div>'}
       <div class="sep"></div>
       ${skills}
       <div class="sep"></div>
@@ -4773,7 +5300,7 @@
     }
 
     function buildGMPayload(playerName) {
-      const titleNames = (S.titles || []).map(t => t.name).join(', ');
+      const titleNames = [...(S.titles || []).map(t => t.name), ...(S.artifactTitles || []).map(t => t.name + ' (Artefato)')].join(', ');
 
       return {
         _playerName: playerName,
