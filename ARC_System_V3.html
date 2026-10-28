@@ -3511,6 +3511,8 @@
     const RANK_TITLE_LIMITS = { C: 4, B: 3, A: 2, S: 1, Z: 1 }; // Z (amaldiçoado) = regras do S
     const RANK_SKILL_COUNTS = { C: 1, B: 2, A: 3, S: 5, Z: 5 };
     const RANK_LEVEL_REQ = { B: 4, A: 9, S: 16 };
+    // S.rank pode vir de JSON importado: só aceita um Rank conhecido antes de ir para HTML
+    const validRank = r => Object.prototype.hasOwnProperty.call(RANK_TITLE_LIMITS, r) ? r : 'C';
 
     // ═══════════════════════════════════════════════════════════════
     // STATE
@@ -3799,6 +3801,7 @@
             inventory: [], relations: [], notes: ''
           };
           S = { ...defaults, ...data };
+          S.rank = validRank(S.rank);
           localStorage.setItem('arc_v1', JSON.stringify(S));
           buildPericiasTable(); buildDotStacks(); buildMulticlasse();
           loadDOM(); updateAll();
@@ -4833,7 +4836,7 @@
 
     // Seletor do Mestre: correções são silenciosas; só a ida para Z toca a animação.
     function gmSetRank(v) {
-      const prev = S.rank || 'C', anim = v === 'Z' && prev !== 'Z';
+      const prev = validRank(S.rank), anim = v === 'Z' && prev !== 'Z';
       if (anim) rankThemeHold = prev;
       autosave(); updateTitlesUI();
       if (anim) playRankUp(prev, 'Z', releaseRankTheme);
@@ -4994,7 +4997,7 @@
     // (e ganham as skills dele quando o personagem sobe de Rank).
     function renderArtifactTitles() {
       const wrap = document.getElementById('artifactTitlesWrap'); if (!wrap) return;
-      const rank = S.rank || 'C', list = S.artifactTitles || [];
+      const rank = validRank(S.rank), list = S.artifactTitles || [];
       if (!list.length) { wrap.innerHTML = '<div class="empty-msg">Nenhum título de Artefato Mítico.</div>'; return; }
       for (const t of list)
         for (let k = t.skills.length; k < RANK_SKILL_COUNTS[rank]; k++) t.skills.push({ name: `Skill ${k + 1}`, action: 'Passiva', cost: '', desc: '' });
