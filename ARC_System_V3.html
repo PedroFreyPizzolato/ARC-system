@@ -11,7 +11,16 @@
     rel="stylesheet">
   <style>
     :root {
-      --blue: #00d4ff;
+      /* cor principal = Rank do personagem (data-rank no <html>); tons do Miro clareados p/ contraste no fundo escuro */
+      --blue: #5088f1;
+      --acc-rgb: 80, 136, 241;
+      --cyan: #00d4ff;
+      --cyan-rgb: 0, 212, 255;
+      --rk-C: #5088f1;
+      --rk-B: #e33bf5;
+      --rk-A: #f65151;
+      --rk-S: #c97b10;
+      --rk-Z: #09a43a;
       --blue-dim: #0099bb;
       --purple: #7c3aed;
       --purple-b: #a855f7;
@@ -22,19 +31,39 @@
       --bg: #020408;
       --bg-purple: #050009;
       --bg-yellow: #090703;
-      --bg-panel: rgba(0, 212, 255, 0.03);
-      --bg-hover: rgba(0, 212, 255, 0.07);
-      --bd: rgba(0, 212, 255, 0.15);
-      --bd-b: rgba(0, 212, 255, 0.4);
+      --bg-panel: rgba(var(--acc-rgb), 0.03);
+      --bg-hover: rgba(var(--acc-rgb), 0.07);
+      --bd: rgba(var(--acc-rgb), 0.15);
+      --bd-b: rgba(var(--acc-rgb), 0.4);
       --txt: #e0f7ff;
       --txt-nsd: rgba(224, 247, 255, 0.65);
       --txt-d: rgba(224, 247, 255, 0.45);
-      --txt-lbl: rgba(0, 212, 255, 0.7);
+      --txt-lbl: rgba(var(--acc-rgb), 0.7);
       --fs: 17px;
       --fs-sm: 15px;
       --fs-xs: 14px;
       --fs-lg: 20px;
       --fs-xl: 23px;
+    }
+
+    :root[data-rank="B"] {
+      --blue: #e33bf5;
+      --acc-rgb: 227, 59, 245
+    }
+
+    :root[data-rank="A"] {
+      --blue: #f65151;
+      --acc-rgb: 246, 81, 81
+    }
+
+    :root[data-rank="S"] {
+      --blue: #c97b10;
+      --acc-rgb: 201, 123, 16
+    }
+
+    :root[data-rank="Z"] {
+      --blue: #09a43a;
+      --acc-rgb: 9, 164, 58
     }
 
     * {
@@ -65,7 +94,7 @@
       position: fixed;
       inset: 0;
       z-index: 0;
-      background-image: linear-gradient(rgba(0, 212, 255, 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 212, 255, 0.025) 1px, transparent 1px);
+      background-image: linear-gradient(rgba(var(--acc-rgb), 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--acc-rgb), 0.025) 1px, transparent 1px);
       background-size: 44px 44px;
       pointer-events: none
     }
@@ -75,7 +104,7 @@
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      background: radial-gradient(ellipse 60% 40% at 15% 15%, rgba(124, 58, 237, 0.07) 0%, transparent 60%), radial-gradient(ellipse 50% 50% at 85% 85%, rgba(0, 212, 255, 0.05) 0%, transparent 60%)
+      background: radial-gradient(ellipse 60% 40% at 15% 15%, rgba(124, 58, 237, 0.07) 0%, transparent 60%), radial-gradient(ellipse 50% 50% at 85% 85%, rgba(var(--acc-rgb), 0.05) 0%, transparent 60%)
     }
 
     .scanline {
@@ -83,7 +112,7 @@
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 212, 255, 0.008) 2px, rgba(0, 212, 255, 0.008) 4px)
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(var(--acc-rgb), 0.008) 2px, rgba(var(--acc-rgb), 0.008) 4px)
     }
 
     /* ── LAYOUT ── */
@@ -104,7 +133,7 @@
       padding: 14px 20px;
       margin-bottom: 14px;
       border: 1px solid var(--bd);
-      background: linear-gradient(135deg, rgba(0, 212, 255, 0.04), rgba(124, 58, 237, 0.04));
+      background: linear-gradient(135deg, rgba(var(--acc-rgb), 0.04), rgba(124, 58, 237, 0.04));
       clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
       position: sticky;
       top: 0;
@@ -124,7 +153,7 @@
       font-weight: 900;
       letter-spacing: 4px;
       color: var(--blue);
-      text-shadow: 0 0 18px rgba(0, 212, 255, 0.5)
+      text-shadow: 0 0 18px rgba(var(--acc-rgb), 0.5)
     }
 
     .hdr-sep {
@@ -200,8 +229,8 @@
     }
 
     .btn-blue:hover {
-      background: rgba(0, 212, 255, .1);
-      box-shadow: 0 0 14px rgba(0, 212, 255, .3)
+      background: rgba(var(--acc-rgb), .1);
+      box-shadow: 0 0 14px rgba(var(--acc-rgb), .3)
     }
 
     .btn-blue.saved {
@@ -272,10 +301,10 @@
     }
 
     .tab.active {
-      background: rgba(0, 212, 255, .08);
+      background: rgba(var(--acc-rgb), .08);
       border-color: var(--blue);
       color: var(--blue);
-      box-shadow: 0 0 12px rgba(0, 212, 255, .12)
+      box-shadow: 0 0 12px rgba(var(--acc-rgb), .12)
     }
 
     .tab-content {
@@ -297,7 +326,7 @@
     }
 
     .panel:hover {
-      border-color: rgba(0, 212, 255, .22)
+      border-color: rgba(var(--acc-rgb), .22)
     }
 
     .panel-title {
@@ -511,15 +540,15 @@
     }
 
     .act-row-defensivas .act-row-head {
-      color: var(--blue)
+      color: var(--cyan)
     }
 
     .act-row-defensivas .act-row-head::before {
-      background: linear-gradient(90deg, transparent, var(--blue))
+      background: linear-gradient(90deg, transparent, var(--cyan))
     }
 
     .act-row-defensivas .act-row-head::after {
-      background: linear-gradient(90deg, var(--blue), transparent)
+      background: linear-gradient(90deg, var(--cyan), transparent)
     }
 
     .act-row-inspiradoras .act-row-head {
@@ -593,7 +622,7 @@
     }
 
     .inp {
-      background: rgba(0, 212, 255, 0.04);
+      background: rgba(var(--acc-rgb), 0.04);
       border: 1px solid var(--bd);
       color: var(--txt);
       font-size: var(--fs);
@@ -605,8 +634,8 @@
 
     .inp:focus {
       border-color: var(--blue);
-      box-shadow: 0 0 10px rgba(0, 212, 255, .12);
-      background: rgba(0, 212, 255, .07)
+      box-shadow: 0 0 10px rgba(var(--acc-rgb), .12);
+      background: rgba(var(--acc-rgb), .07)
     }
 
     .inp:disabled {
@@ -626,7 +655,7 @@
     }
 
     .computed {
-      background: rgba(0, 212, 255, 0.06);
+      background: rgba(var(--acc-rgb), 0.06);
       border: 1px solid var(--bd);
       color: var(--blue);
       font-family: 'Orbitron', monospace;
@@ -743,7 +772,7 @@
     }
 
     .c-btn.cor {
-      color: var(--blue);
+      color: var(--cyan);
       font-weight: 700
     }
 
@@ -758,9 +787,9 @@
     }
 
     .c-btn.cor:hover {
-      border-color: var(--blue);
-      color: var(--blue);
-      background: rgba(0, 212, 255, .08)
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(var(--cyan-rgb), .08)
     }
 
     .c-btn.men:hover {
@@ -782,7 +811,7 @@
       color: var(--blue);
       min-width: 30px;
       text-align: center;
-      text-shadow: 0 0 10px rgba(0, 212, 255, .4)
+      text-shadow: 0 0 10px rgba(var(--acc-rgb), .4)
     }
 
     .c-bonus {
@@ -820,7 +849,7 @@
       position: relative;
       padding: 5px 4px;
       background: transparent;
-      border: 1px solid rgba(0, 212, 255, .12);
+      border: 1px solid rgba(var(--acc-rgb), .12);
       color: var(--txt-d);
       font-family: 'Share Tech Mono', monospace;
       font-size: 16px;
@@ -865,24 +894,24 @@
 
     .pick-btn.cor {
       background: transparent;
-      border-color: rgba(0, 212, 255, .12);
+      border-color: rgba(var(--cyan-rgb), .12);
       color: var(--txt-d)
     }
 
     .pick-desc.cor {
       background: var(--bg);
-      border: 1px solid rgba(0, 212, 255, .5);
+      border: 1px solid rgba(var(--cyan-rgb), .5);
     }
 
     .pick-btn.cor:hover {
-      border-color: var(--blue);
+      border-color: var(--cyan);
       color: var(--txt)
     }
 
     .pick-btn.cor.sel {
-      background: rgba(0, 212, 255, .12);
-      border-color: var(--blue);
-      color: var(--blue);
+      background: rgba(var(--cyan-rgb), .12);
+      border-color: var(--cyan);
+      color: var(--cyan);
       box-shadow: 0 0 6px rgba(85, 123, 247, 0.2)
     }
 
@@ -983,7 +1012,7 @@
     }
 
     .subder-item span.cor {
-      color: var(--blue);
+      color: var(--cyan);
       font-weight: 700
     }
 
@@ -999,7 +1028,7 @@
 
     /* ── SKILL CARD ── */
     .skill-card {
-      background: rgba(0, 212, 255, .02);
+      background: rgba(var(--acc-rgb), .02);
       border: 1px solid var(--bd);
       padding: 12px;
       margin-bottom: 8px;
@@ -1007,7 +1036,7 @@
     }
 
     .skill-card:hover {
-      border-color: rgba(0, 212, 255, .25)
+      border-color: rgba(var(--acc-rgb), .25)
     }
 
     .skill-card.ultimate {
@@ -1056,7 +1085,7 @@
     }
 
     .action-sel {
-      background: rgba(0, 212, 255, .05);
+      background: rgba(var(--acc-rgb), .05);
       border: 1px solid var(--bd);
       color: var(--blue);
       font-family: 'Share Tech Mono', monospace;
@@ -1101,7 +1130,7 @@
     .badge-blue {
       border-color: var(--blue);
       color: var(--blue);
-      background: rgba(0, 212, 255, .06)
+      background: rgba(var(--acc-rgb), .06)
     }
 
     .badge-purple {
@@ -1135,7 +1164,7 @@
       gap: 8px;
       align-items: center;
       padding: 7px 10px;
-      border-bottom: 1px solid rgba(0, 212, 255, .04);
+      border-bottom: 1px solid rgba(var(--acc-rgb), .04);
       transition: background .15s;
       font-size: var(--fs-sm)
     }
@@ -1153,7 +1182,7 @@
     }
 
     .per-row:hover {
-      background: rgba(0, 212, 255, .03)
+      background: rgba(var(--acc-rgb), .03)
     }
 
     .per-row.hdr {
@@ -1405,7 +1434,7 @@
       gap: 8px;
       align-items: center;
       padding: 7px 0;
-      border-bottom: 1px solid rgba(0, 212, 255, .05)
+      border-bottom: 1px solid rgba(var(--acc-rgb), .05)
     }
 
     .weapon-row.hdr {
@@ -1484,7 +1513,7 @@
       padding: 8px 10px;
       border: 1px solid var(--bd);
       margin-bottom: 6px;
-      background: rgba(0, 212, 255, .02)
+      background: rgba(var(--acc-rgb), .02)
     }
 
     .impl-lbl {
@@ -1553,19 +1582,23 @@
     }
 
     .rank-S {
-      color: var(--gold)
+      color: var(--rk-S)
     }
 
     .rank-A {
-      color: #e879f9
+      color: var(--rk-A)
     }
 
     .rank-B {
-      color: #38bdf8
+      color: var(--rk-B)
     }
 
     .rank-C {
-      color: var(--green)
+      color: var(--rk-C)
+    }
+
+    .rank-Z {
+      color: var(--rk-Z)
     }
 
     .title-name {
@@ -1604,7 +1637,7 @@
       align-items: center;
       gap: 8px;
       padding: 6px 0;
-      border-bottom: 1px solid rgba(0, 212, 255, .05)
+      border-bottom: 1px solid rgba(var(--acc-rgb), .05)
     }
 
     .quest-desc {
@@ -1644,12 +1677,12 @@
       gap: 8px;
       align-items: center;
       padding: 8px 0;
-      border-bottom: 1px solid rgba(0, 212, 255, .04)
+      border-bottom: 1px solid rgba(var(--acc-rgb), .04)
     }
 
     /* ── INVENTORY ── */
     .inv-card {
-      background: rgba(0, 212, 255, .02);
+      background: rgba(var(--acc-rgb), .02);
       border: 1px solid var(--bd);
       padding: 12px;
       margin-bottom: 8px
@@ -1669,7 +1702,7 @@
     /* ── NOTES ── */
     .notes-ta {
       width: 100%;
-      background: rgba(0, 212, 255, .03);
+      background: rgba(var(--acc-rgb), .03);
       border: 1px solid var(--bd);
       color: var(--txt);
       font-family: 'Rajdhani', sans-serif;
@@ -1739,7 +1772,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 5px 0;
-      border-bottom: 1px solid rgba(0, 212, 255, .05)
+      border-bottom: 1px solid rgba(var(--acc-rgb), .05)
     }
 
     .info-key {
@@ -1771,8 +1804,8 @@
       width: 100%;
       padding: 10px;
       background: transparent;
-      border: 1px dashed rgba(0, 212, 255, .25);
-      color: rgba(0, 212, 255, .4);
+      border: 1px dashed rgba(var(--acc-rgb), .25);
+      color: rgba(var(--acc-rgb), .4);
       font-family: 'Orbitron', monospace;
       font-size: 16px;
       letter-spacing: 2px;
@@ -1875,7 +1908,7 @@
       padding: 2px 7px;
       border: 1px solid var(--blue);
       color: var(--blue);
-      background: rgba(0, 212, 255, .06);
+      background: rgba(var(--acc-rgb), .06);
       white-space: nowrap
     }
 
@@ -1933,7 +1966,7 @@
     }
 
     .sync-inp {
-      background: rgba(0, 212, 255, .04);
+      background: rgba(var(--acc-rgb), .04);
       border: 1px solid var(--bd);
       color: var(--txt);
       font-family: 'Share Tech Mono', monospace;
@@ -1961,7 +1994,7 @@
     }
 
     .sync-btn:hover {
-      background: rgba(0, 212, 255, .1)
+      background: rgba(var(--acc-rgb), .1)
     }
 
     .sync-btn.red {
@@ -1976,7 +2009,7 @@
     .sync-pid {
       font-family: 'Share Tech Mono', monospace;
       font-size: 15px;
-      color: rgba(0, 212, 255, .4);
+      color: rgba(var(--acc-rgb), .4);
       letter-spacing: 1px
     }
 
@@ -1995,7 +2028,7 @@
 
     .fb-modal {
       background: rgba(8, 12, 20, .98);
-      border: 1px solid rgba(0, 212, 255, .35);
+      border: 1px solid rgba(var(--acc-rgb), .35);
       padding: 28px 32px;
       max-width: 520px;
       width: 100%;
@@ -2010,7 +2043,7 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, var(--blue), rgba(0, 212, 255, .2), transparent)
+      background: linear-gradient(90deg, var(--blue), rgba(var(--acc-rgb), .2), transparent)
     }
 
     .fb-modal-tag {
@@ -2055,7 +2088,7 @@
     }
 
     .fb-inp {
-      background: rgba(0, 212, 255, .04);
+      background: rgba(var(--acc-rgb), .04);
       border: 1px solid var(--bd);
       color: var(--txt);
       font-family: 'Share Tech Mono', monospace;
@@ -2269,7 +2302,7 @@
                 <div class="info-row"><span class="info-key">Base Natural</span><span class="info-val" id="caBase"
                     style="color:var(--txt-d)">10</span></div>
                 <div class="info-row"><span class="info-key">Corpo+Mente</span><span class="info-val" id="caCM"
-                    style="color:var(--blue)">+0</span></div>
+                    style="color:var(--cyan)">+0</span></div>
                 <div class="info-row">
                   <span class="info-key">Armadura (−)</span>
                   <input class="bar-inp" type="number" id="caArmadura" value="0" oninput="calcCA();autosave()"
@@ -2520,14 +2553,14 @@
           <div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
               <div>
-                <div style="font-family:'Orbitron',monospace;font-size:23px;color:var(--blue);letter-spacing:2px">CORPO
+                <div style="font-family:'Orbitron',monospace;font-size:23px;color:var(--cyan);letter-spacing:2px">CORPO
                 </div>
                 <div style="font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--txt-d)">Força · Vigor ·
                   Agilidade</div>
               </div>
               <div class="attr-ctrl">
                 <button class="c-btn cor" onclick="changeMainAttr('corpo',-1)">−</button>
-                <span class="c-val" id="val-corpo">0</span>
+                <span class="c-val" id="val-corpo" style="color:var(--cyan)">0</span>
                 <button class="c-btn cor" onclick="changeMainAttr('corpo',1)">+</button>
                 <span class="c-bonus" id="bon-corpo">+0</span>
               </div>
@@ -2580,7 +2613,7 @@
           </div>
           <!-- ALMA LOCKED -->
           <div id="almaLockedBlock"
-            style="grid-column:span 2;border-top:1px solid rgba(0,212,255,0.08);padding-top:14px">
+            style="grid-column:span 2;border-top:1px solid rgba(var(--acc-rgb),0.08);padding-top:14px">
             <div style="display:flex;align-items:center;gap:14px">
               <div
                 style="font-family:'Orbitron',monospace;font-size:23px;color:rgba(245,158,11,.25);letter-spacing:2px">
@@ -2645,7 +2678,7 @@
           <div id="implSupWrap"></div>
           <button class="dashed-btn" onclick="addImplant('sup')">+ SUPERIOR</button>
           <div class="sep"></div>
-          <div class="lbl mb8" style="color:var(--blue)">INFERIORES (Agilidade)</div>
+          <div class="lbl mb8" style="color:var(--cyan)">INFERIORES (Agilidade)</div>
           <div id="implInfWrap"></div>
           <button class="dashed-btn" onclick="addImplant('inf')">+ INFERIOR</button>
           <div class="sep"></div>
@@ -2860,7 +2893,7 @@
     <button class="sync-btn" onclick="syncConnect()">[ CONECTAR ]</button>
     <button class="sync-btn red" id="syncDisconnectBtn" style="display:none" onclick="syncDisconnect()">[ DESCONECTAR
       ]</button>
-    <!--  <button class="sync-btn" style="border-color:rgba(0,212,255,.4);color:rgba(0,212,255,.7)" onclick="openFbConfig()">[ CONFIGURAR ]</button> -->
+    <!--  <button class="sync-btn" style="border-color:rgba(var(--acc-rgb),.4);color:rgba(var(--acc-rgb),.7)" onclick="openFbConfig()">[ CONFIGURAR ]</button> -->
   </div>
 
   <!-- FIREBASE SETUP MODAL -->
@@ -3641,6 +3674,7 @@
       // sync rank display in titles tab
       const rd = document.getElementById('rankDisplay');
       if (rd) { rd.textContent = rank; rd.className = 'rank-' + rank; }
+      document.documentElement.dataset.rank = rank;
     }
 
     function updateBars() {
@@ -3685,7 +3719,7 @@
       if (!sk) return '<span class="desc-row">Sem habilidade</span>';
       const cost = sk.cost ? ' [' + sk.cost + ']' : '';
       return '<span class="desc-row" style="color: var(--txt); font-size: 17px; letter-spacing: 0.75px; padding-top: 8px; padding-bottom: 0; padding-left: 2%">' + sk.name + '</span>'
-        + '<span class="desc-row" style="color: var(--txt-d); font-size: 15px; border-bottom: 1px solid rgba(0, 212, 255, .25);">(' + sk.action + ')' + cost + '</span>'
+        + '<span class="desc-row" style="color: var(--txt-d); font-size: 15px; border-bottom: 1px solid rgba(var(--acc-rgb), .25);">(' + sk.action + ')' + cost + '</span>'
         + '<span class="desc-row">' + sk.desc + '</span>';
     }
 
