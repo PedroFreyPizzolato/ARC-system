@@ -2209,7 +2209,7 @@
     <div><label class="lbl">GRUPO (PASTA DA BARRA LATERAL)</label><select class="sel" onchange="setGroup(this.value)">${groupOpts(n.groupId)}</select></div>
     <div class="g2" style="gap:8px">
       <div><label class="lbl">NÍVEL</label><div style="display:flex;gap:5px;align-items:center"><button style="width:24px;height:30px;background:transparent;border:1px solid var(--bd);color:var(--dim);cursor:pointer;font-size:23px" onclick="changeLevel(-1)">−</button><span style="font-family:'Orbitron',monospace;font-size:23px;font-weight:700;color:var(--blue);min-width:28px;text-align:center">${n.level || 0}</span><button style="width:24px;height:30px;background:transparent;border:1px solid var(--bd);color:var(--dim);cursor:pointer;font-size:23px" onclick="changeLevel(1)">+</button></div></div>
-      <div><label class="lbl">RANK</label><select class="sel" onchange="su('rank',this.value)">${['C', 'B', 'A', 'S'].map(r => `<option${n.rank === r ? ' selected' : ''}>${r}</option>`).join('')}</select></div>
+      <div><label class="lbl">RANK</label><select class="sel" onchange="su('rank',this.value)">${['C', 'B', 'A', 'S', 'Z'].map(r => `<option${n.rank === r ? ' selected' : ''}>${r}</option>`).join('')}</select></div>
     </div>
     <div><label class="lbl">NATUREZA</label><select class="sel" onchange="setNatureza(this.value)"><option value="">— Selecionar —</option>${['Brutamontes', 'Guerreiro', 'Atleta', 'Velocista'].map(v => `<option${n.natureza === v ? ' selected' : ''}>${v}</option>`).join('')}</select></div>
   </div>`;

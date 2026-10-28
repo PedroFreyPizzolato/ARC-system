@@ -2269,7 +2269,7 @@
   <div class="g3 mb8">
     <div class="field"><span class="lbl">NATUREZA</span><select class="inp" onchange="nF(${n.id},'natureza',this.value)"><option value="">—</option>${NATS.map(x => `<option${x === n.natureza ? ' selected' : ''}>${x}</option>`).join('')}</select></div>
     <div class="field"><span class="lbl">NÍVEL</span><div class="attr-ctrl mt4"><button class="c-btn" onclick="nNum(${n.id},'nivel',-1)">−</button><span class="c-val" id="nv_nivel_${n.id}">${n.nivel || 1}</span><button class="c-btn" onclick="nNum(${n.id},'nivel',1)">+</button></div></div>
-    <div class="field"><span class="lbl">RANK</span><select class="inp" onchange="nF(${n.id},'rank',this.value)">${['C', 'B', 'A', 'S', '?'].map(r => `<option${r === n.rank ? ' selected' : ''}>${r}</option>`).join('')}</select></div>
+    <div class="field"><span class="lbl">RANK</span><select class="inp" onchange="nF(${n.id},'rank',this.value)">${['C', 'B', 'A', 'S', 'Z', '?'].map(r => `<option${r === n.rank ? ' selected' : ''}>${r}</option>`).join('')}</select></div>
   </div>
   <div class="g2 mb12">
     <div class="field"><span class="lbl">PAPEL / FUNÇÃO</span><input class="inp" value="${esc(n.role || '')}" oninput="nF(${n.id},'role',this.value)" placeholder="ex: Chefe de Guarda"></div>
@@ -2552,7 +2552,7 @@
     <div class="field"><span class="lbl">NOME PLAYER</span><input class="inp" value="${esc(p.name)}" oninput="pF(${p.id},'name',this.value)"></div>
     <div class="field"><span class="lbl">PERSONAGEM</span><input class="inp" value="${esc(p.charName || '')}" oninput="pF(${p.id},'charName',this.value)"></div>
     <div class="field"><span class="lbl">NÍVEL</span><input class="inp" type="number" value="${p.nivel || 0}" min="0" max="20" oninput="pF(${p.id},'nivel',+this.value)"></div>
-    <div class="field"><span class="lbl">RANK</span><select class="inp" onchange="pF(${p.id},'rank',this.value)">${['C', 'B', 'A', 'S'].map(r => `<option${r === p.rank ? ' selected' : ''}>${r}</option>`).join('')}</select></div>
+    <div class="field"><span class="lbl">RANK</span><select class="inp" onchange="pF(${p.id},'rank',this.value)">${['C', 'B', 'A', 'S', 'Z'].map(r => `<option${r === p.rank ? ' selected' : ''}>${r}</option>`).join('')}</select></div>
   </div>
   <div class="g4 mb12">
     <div class="field"><span class="lbl">NATUREZA</span><select class="inp" onchange="pF(${p.id},'natureza',this.value)"><option value="">—</option>${NATS.map(n => `<option${n === p.natureza ? ' selected' : ''}>${n}</option>`).join('')}</select></div>
