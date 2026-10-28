@@ -2661,12 +2661,14 @@
         <div class="panel">
           <div class="panel-title">ARMAS</div>
           <div class="weapon-row hdr"><span>NOME</span><span>DANO
-              BASE</span><span>CRIT</span><span>CATEGORIA</span><span>TIPO</span><span>DUR</span><span>MÁX</span><span></span></div>
+              BASE</span><span>CRIT</span><span>CATEGORIA</span><span>TIPO</span><span>DUR</span><span>MÁX</span><span></span>
+          </div>
           <div id="weaponsWrap"></div>
           <button class="dashed-btn" onclick="addWeapon()">+ ARMA</button>
           <div class="sep"></div>
           <div class="panel-title" style="margin-top:0">ARMADURAS</div>
-          <div class="weapon-row hdr" style="grid-template-columns:1fr 60px 1fr 52px 52px 30px"><span>NOME</span><span>CA
+          <div class="weapon-row hdr" style="grid-template-columns:1fr 60px 1fr 52px 52px 30px">
+            <span>NOME</span><span>CA
               (−)</span><span>TIPO</span><span>DUR</span><span>MÁX</span><span></span></div>
           <div id="armorsWrap"></div>
           <button class="dashed-btn" onclick="addArmor()">+ ARMADURA</button>
@@ -4263,7 +4265,7 @@
     function durInputs(o) {
       return `<input class="w-inp" type="number" min="0" data-f="durCur" value="${o.durCur ?? ''}" title="Durabilidade atual" oninput="autosave();updateDurPen(this)">
       <input class="w-inp" type="number" min="0" data-f="durMax" value="${o.durMax ?? ''}" title="Durabilidade máxima" oninput="autosave();updateDurPen(this)">`;
-    } 
+    }
 
     function isEditingFocus(wrap) {
       const el = document.activeElement;
@@ -4313,7 +4315,7 @@
       <div class="dur-pen${durPenaltyInfo('armor', a.durCur, a.durMax).broken ? ' broken' : ''}">${durPenaltyText('armor', a.durCur, a.durMax)}</div>
     </div>`).join('');
     }
-    function addArmor() { S.armors.push({ name: '', ca: '0', type: '' , durCur: '', durMax: '' }); renderArmors(); autosave(); }
+    function addArmor() { S.armors.push({ name: '', ca: '0', type: '', durCur: '', durMax: '' }); renderArmors(); autosave(); }
     function removeArmor(i) { S.armors.splice(i, 1); renderArmors(); autosave(); }
 
     function renderImplants() {
