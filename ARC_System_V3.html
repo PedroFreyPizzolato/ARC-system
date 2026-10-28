@@ -2114,6 +2114,13 @@
       justify-content: flex-end;
       margin-top: 20px
     }
+
+    .arc-dlg-err {
+      min-height: 18px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 15px;
+      color: var(--red)
+    }
   /* ═══════════ ANIMAÇÃO DE RANK UP — cópia de ARC-rankup-demo.html. Mudou uma, mude nas duas. ═══════════ */
   .ru { position:fixed; inset:0; z-index:9999; overflow:hidden; cursor:pointer; display:grid; place-items:center;
     --c-rgb:80,136,241; --hit:900ms; font-family:'Rajdhani',sans-serif; color:#fff; user-select:none }
@@ -2950,7 +2957,7 @@
           </div>
           <button class="btn btn-blue btn-sm" id="rankUpBtn" style="white-space:nowrap" onclick="openRankUp()"
             disabled>▲ RANK UP</button>
-          <button class="btn btn-gold btn-sm" style="white-space:nowrap" onclick="addTitle()">+ ADICIONAR
+          <button class="btn btn-gold btn-sm" id="addTitleBtn" style="white-space:nowrap" onclick="addTitle()">+ ADICIONAR
             TÍTULO</button>
         </div>
       </div>
@@ -3788,7 +3795,7 @@
             const orig = lbl.textContent.trim(); lbl.style.borderColor = 'var(--green)'; lbl.style.color = 'var(--green)';
             setTimeout(() => { lbl.style.borderColor = ''; lbl.style.color = ''; }, 2000);
           }
-        } catch (err) { alert('Erro ao importar: arquivo inválido ou corrompido.'); }
+        } catch (err) { arcDialog({ tag: '[ IMPORTAR ]', title: 'Arquivo inválido', sub: 'Não foi possível importar: o arquivo está inválido ou corrompido.', cancel: null }); }
         e.target.value = ''; // reset input para permitir reimportar o mesmo arquivo
       };
       reader.readAsText(file);
@@ -4826,6 +4833,8 @@
       const rank = S.rank || 'C', s = rankUpStatus(rank, S.nivel, S.titles);
       btn.style.display = s.next ? '' : 'none';
       btn.disabled = !s.ready;
+      const add = document.getElementById('addTitleBtn'), full = (S.titles || []).length >= RANK_TITLE_LIMITS[rank];
+      if (add) { add.disabled = full; add.title = full ? `Máximo de ${RANK_TITLE_LIMITS[rank]} títulos para Rank ${rank}` : ''; }
       btn.textContent = s.next ? `▲ RANK UP → ${s.next}` : '';
       const ok = c => c ? 'color:var(--green)' : '';
       const undo = rankUndo ? ` <button class="btn btn-gold btn-sm" style="margin-left:10px" onclick="undoRankUp()">DESFAZER RANK UP</button>` : '';
@@ -4868,7 +4877,7 @@
       const rank = S.rank || 'C', next = NEXT_RANK[rank];
       const discard = [...document.querySelectorAll('#rankUpPanel input[name=rankDiscard]:checked')].map(i => +i.value);
       let titles;
-      try { titles = applyRankUp(S.titles, rank, discard); } catch (e) { alert(e.message); return; }
+      try { titles = applyRankUp(S.titles, rank, discard); } catch (e) { arcDialog({ tag: '[ RANK UP ]', title: 'Não foi possível subir de Rank', sub: e.message, cancel: null }); return; }
       rankUndo = { rank, titles: S.titles }; // applyRankUp não muta a lista antiga
       S.titles = titles; S.rank = next; sv('charRank', next);
       document.getElementById('rankUpPanel').hidden = true;
@@ -4893,11 +4902,56 @@
       }
     });
 
-    function addTitle() {
+    // Modal do ARC no lugar de alert/prompt/confirm (mesmo visual do modal do Firebase).
+    // Devolve uma Promise: o texto digitado (com input), true (sem input) ou null (cancelou, Esc, clique fora).
+    function arcDialog({ tag = '[ ARC ]', title, sub = '', input = null, ok = 'OK', cancel = 'CANCELAR', danger = false }) {
+      return new Promise(resolve => {
+        const prev = document.activeElement;
+        const ov = document.createElement('div');
+        ov.className = 'fb-modal-ov arc-dlg'; ov.style.zIndex = 600;
+        ov.innerHTML = `<div class="fb-modal" role="dialog" aria-modal="true" aria-label="${escH(title)}">
+          <div class="fb-modal-tag">${escH(tag)}</div>
+          <div class="fb-modal-title">${escH(title)}</div>
+          ${sub ? `<div class="fb-modal-sub" style="white-space:pre-line">${escH(sub)}</div>` : ''}
+          ${input ? `<div class="fb-field"><span class="fb-lbl">${escH(input.label)}</span><input class="fb-inp" maxlength="60" placeholder="${escH(input.placeholder || '')}" value="${escH(input.value || '')}"><span class="arc-dlg-err"></span></div>` : ''}
+          <div class="fb-acts">${cancel ? `<button class="sync-btn arc-dlg-cancel" style="border-color:rgba(255,255,255,.18);color:rgba(255,255,255,.4)">${escH(cancel)}</button>` : ''}<button class="sync-btn arc-dlg-ok${danger ? ' red' : ''}">${escH(ok)}</button></div>
+        </div>`;
+        const box = ov.firstElementChild, inp = ov.querySelector('input'), err = ov.querySelector('.arc-dlg-err');
+        const close = v => { ov.remove(); removeEventListener('keydown', onKey, true); if (prev && prev.focus) prev.focus(); resolve(v); };
+        const submit = () => {
+          if (!input) return close(true);
+          const v = inp.value.trim();
+          if (!v) { err.textContent = 'Preencha este campo.'; inp.focus(); return; }
+          close(v);
+        };
+        const onKey = e => {
+          if (e.key === 'Escape') { e.preventDefault(); close(null); }
+          else if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') { e.preventDefault(); submit(); }
+          else if (e.key === 'Tab') { // mantém o foco dentro da modal
+            const f = box.querySelectorAll('input,button'), first = f[0], last = f[f.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+          }
+        };
+        addEventListener('keydown', onKey, true);
+        ov.addEventListener('mousedown', e => { if (e.target === ov) close(null); });
+        ov.querySelector('.arc-dlg-ok').onclick = submit;
+        const c = ov.querySelector('.arc-dlg-cancel'); if (c) c.onclick = () => close(null);
+        if (inp) inp.addEventListener('input', () => { err.textContent = ''; });
+        document.body.appendChild(ov);
+        (inp || ov.querySelector('.arc-dlg-ok')).focus();
+      });
+    }
+
+    async function addTitle() {
       const rank = S.rank || 'C'; const limit = RANK_TITLE_LIMITS[rank];
-      if ((S.titles || []).length >= limit) { alert(`Máximo de ${limit} títulos para Rank ${rank}.`); return; }
+      if ((S.titles || []).length >= limit) return; // o botão já fica desabilitado no limite
       const skillCount = RANK_SKILL_COUNTS[rank] || 1;
-      const name = prompt('Nome do título:'); if (!name) return;
+      const name = await arcDialog({
+        tag: '[ NOVO TÍTULO ]', title: 'Adicionar Título', sub: `Rank ${rank} · ${(S.titles || []).length + 1}/${limit} títulos`,
+        input: { label: 'NOME DO TÍTULO', placeholder: 'Ex.: Lâmina Rubra' }, ok: 'ADICIONAR'
+      });
+      if (!name) return;
       const skills = [];
       for (let i = 0; i < skillCount; i++) {
         skills.push({ name: `Skill ${i + 1}`, action: 'Passiva', cost: '', desc: '' });
