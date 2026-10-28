@@ -223,6 +223,11 @@
       clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)
     }
 
+    .btn:disabled {
+      opacity: .35;
+      cursor: not-allowed
+    }
+
     .btn-blue {
       border-color: var(--blue);
       color: var(--blue)
@@ -2201,15 +2206,6 @@
               <option value="">—</option>
             </select>
           </div>
-          <div class="field" style="min-width:80px">
-            <span class="lbl">RANK</span>
-            <select class="inp" id="charRank" onchange="autosave();updateTitlesUI()">
-              <option value="C">C</option>
-              <option value="B">B</option>
-              <option value="A">A</option>
-              <option value="S">S</option>
-            </select>
-          </div>
           <div style="margin-left:auto;text-align:right">
             <div class="lbl" style="margin-bottom:4px">PTS ATRIBUTO</div>
             <div
@@ -2793,8 +2789,29 @@
           <span style="font-family:'Share Tech Mono',monospace;font-size:17px;color:var(--txt-d);margin-left:12px"
             id="titleCountDisp">0/4 títulos</span>
         </div>
-        <button class="btn btn-gold btn-sm" onclick="addTitle()">+ ADICIONAR TÍTULO</button>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+          <!-- ponytail: "modo Mestre" só esconde o seletor (Ctrl+Alt+M); proteção por honra, não por segurança -->
+          <div id="gmRankBar" style="display:none;gap:6px;align-items:center">
+            <span class="lbl">MESTRE · RANK</span>
+            <select class="inp" id="charRank" style="width:auto" onchange="autosave();updateTitlesUI()">
+              <option value="C">C</option>
+              <option value="B">B</option>
+              <option value="A">A</option>
+              <option value="S">S</option>
+              <option value="Z">Z</option>
+            </select>
+          </div>
+          <button class="btn btn-blue btn-sm" id="rankUpBtn" style="white-space:nowrap" onclick="openRankUp()"
+            disabled>▲ RANK UP</button>
+          <button class="btn btn-gold btn-sm" style="white-space:nowrap" onclick="addTitle()">+ ADICIONAR
+            TÍTULO</button>
+        </div>
       </div>
+      <div id="rankUpInfo"
+        style="font-family:'Share Tech Mono',monospace;font-size:var(--fs-sm);color:var(--txt-d);margin:-6px 0 12px">
+      </div>
+      <div id="rankLevelBar" class="progress-wrap" style="margin-bottom:14px"></div>
+      <div id="rankUpPanel" class="title-card" hidden style="border-color:var(--blue);margin-bottom:14px"></div>
       <div id="titlesWrap">
         <div class="empty-msg">Nenhum título registrado.</div>
       </div>
@@ -3324,8 +3341,8 @@
       ]
     };
 
-    const RANK_TITLE_LIMITS = { C: 4, B: 3, A: 2, S: 1 };
-    const RANK_SKILL_COUNTS = { C: 1, B: 2, A: 3, S: 5 };
+    const RANK_TITLE_LIMITS = { C: 4, B: 3, A: 2, S: 1, Z: 1 }; // Z (amaldiçoado) = regras do S
+    const RANK_SKILL_COUNTS = { C: 1, B: 2, A: 3, S: 5, Z: 5 };
     const RANK_LEVEL_REQ = { B: 4, A: 9, S: 16 };
 
     // ═══════════════════════════════════════════════════════════════
@@ -3677,6 +3694,7 @@
       const rd = document.getElementById('rankDisplay');
       if (rd) { rd.textContent = rank; rd.className = 'rank-' + rank; }
       document.documentElement.dataset.rank = rank;
+      renderRankUp();
     }
 
     function updateBars() {
@@ -4503,6 +4521,117 @@
       renderTitles();
     }
 
+    // ── RANK UP ── cópia fiel das funções de tools/rank-up/rankup.js. Mudou uma, mude nas duas.
+    const NEXT_RANK = { C: 'B', B: 'A', A: 'S' }; // S e Z não sobem
+
+    function isTitleComplete(t) {
+      const qs = (t && t.quests) || [];
+      return qs.length > 0 && qs.every(q => q.total > 0 && (q.cur || 0) >= q.total);
+    }
+
+    function rankUpStatus(rank, nivel, titles) {
+      const next = NEXT_RANK[rank] || null;
+      const done = (titles || []).filter(isTitleComplete).length;
+      if (!next) return { next, done, needed: 0, reqLevel: null, levelOk: false, ready: false, mustDiscard: 0 };
+      const needed = RANK_TITLE_LIMITS[rank] - 1;
+      const reqLevel = RANK_LEVEL_REQ[next];
+      const levelOk = (nivel || 0) >= reqLevel;
+      return { next, done, needed, reqLevel, levelOk, ready: levelOk && done >= needed, mustDiscard: Math.max(0, done - RANK_TITLE_LIMITS[next]) };
+    }
+
+    function applyRankUp(titles, rank, discardIdx) {
+      const next = NEXT_RANK[rank];
+      const s = rankUpStatus(rank, Infinity, titles);
+      if (!next || !s.ready) throw new Error('Rank Up não liberado');
+      const discard = new Set(discardIdx || []);
+      if (discard.size !== s.mustDiscard || [...discard].some(i => !isTitleComplete(titles[i])))
+        throw new Error(`Escolha ${s.mustDiscard} título(s) concluído(s) para descartar`);
+      const nSkills = RANK_SKILL_COUNTS[next];
+      return titles
+        .map((t, i) => ({ t, i }))
+        .filter(({ t, i }) => isTitleComplete(t) && !discard.has(i))
+        .map(({ t }) => {
+          const skills = t.skills.map(sk => ({ ...sk }));
+          for (let k = skills.length; k < nSkills; k++) skills.push({ name: `Skill ${k + 1}`, action: 'Passiva', cost: '', desc: '' });
+          return { ...t, rank: next, skills, quests: [{ desc: '', total: 0, cur: 0 }] };
+        });
+    }
+    // ── fim da cópia ──
+
+    const escH = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    let rankUndo = null, rankUndoTimer = null;
+
+    // Atualiza só o botão e a linha de progresso (chamado a cada autosave via updateHeader).
+    function renderRankUp() {
+      const btn = document.getElementById('rankUpBtn'), info = document.getElementById('rankUpInfo');
+      if (!btn || !info) return;
+      const rank = S.rank || 'C', s = rankUpStatus(rank, S.nivel, S.titles);
+      btn.style.display = s.next ? '' : 'none';
+      btn.disabled = !s.ready;
+      btn.textContent = s.next ? `▲ RANK UP → ${s.next}` : '';
+      const ok = c => c ? 'color:var(--green)' : '';
+      const undo = rankUndo ? ` <button class="btn btn-gold btn-sm" style="margin-left:10px" onclick="undoRankUp()">DESFAZER RANK UP</button>` : '';
+      info.innerHTML = s.next
+        ? `PRÓXIMO RANK (${s.next}): <span style="${ok(s.done >= s.needed)}">${s.done}/${s.needed} títulos concluídos</span>${undo}`
+        : (rank === 'Z' ? 'Amaldiçoado — sem Rank Up.' : 'Rank máximo alcançado.') + undo;
+      // barra de nível única (antes havia uma por título)
+      const bar = document.getElementById('rankLevelBar');
+      if (bar) {
+        bar.style.display = s.next ? '' : 'none';
+        if (s.next) bar.innerHTML = `<div style="display:flex;justify-content:space-between"><span class="lbl">PROMOÇÃO PARA RANK ${s.next} — NÍVEL</span><span style="font-family:'Share Tech Mono',monospace;font-size:17px;${ok(s.levelOk) || 'color:var(--txt-d)'}">${S.nivel || 0}/${s.reqLevel}</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100, ((S.nivel || 0) / s.reqLevel) * 100)}%"></div></div>`;
+      }
+    }
+
+    function openRankUp() {
+      const rank = S.rank || 'C', s = rankUpStatus(rank, S.nivel, S.titles);
+      const panel = document.getElementById('rankUpPanel');
+      if (!s.ready || !panel) return;
+      const all = S.titles.map((t, i) => ({ t, i }));
+      const lost = all.filter(x => !isTitleComplete(x.t)), kept = all.filter(x => isTitleComplete(x.t));
+      const names = xs => xs.map(x => escH(x.t.name)).join(', ');
+      const pick = s.mustDiscard
+        ? `<div class="lbl mt4" style="color:var(--gold)">TODOS CONCLUÍDOS — ESCOLHA ${s.mustDiscard} PARA DESCARTAR:</div>`
+        + kept.map(x => `<label style="display:block;margin:6px 0;cursor:pointer"><input type="${s.mustDiscard === 1 ? 'radio' : 'checkbox'}" name="rankDiscard" value="${x.i}"> ${escH(x.t.name)}</label>`).join('')
+        : `<div class="mt4">Sobem para Rank ${s.next}: <b>${names(kept)}</b></div>`;
+      panel.innerHTML = `<div class="title-rank rank-${s.next}">RANK UP ${rank} → ${s.next}</div>
+        ${lost.length ? `<div class="mt4" style="color:var(--red)">Descartados (incompletos): ${names(lost)}</div>` : ''}
+        ${pick}
+        <div class="mt4" style="color:var(--txt-d)">As missões dos títulos que sobem serão zeradas e as skills completadas até ${RANK_SKILL_COUNTS[s.next]}.</div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-blue btn-sm" onclick="confirmRankUp()">CONFIRMAR RANK UP</button>
+          <button class="btn btn-red btn-sm" onclick="document.getElementById('rankUpPanel').hidden=true">CANCELAR</button>
+        </div>`;
+      panel.hidden = false;
+    }
+
+    function confirmRankUp() {
+      const rank = S.rank || 'C', next = NEXT_RANK[rank];
+      const discard = [...document.querySelectorAll('#rankUpPanel input[name=rankDiscard]:checked')].map(i => +i.value);
+      let titles;
+      try { titles = applyRankUp(S.titles, rank, discard); } catch (e) { alert(e.message); return; }
+      rankUndo = { rank, titles: S.titles }; // applyRankUp não muta a lista antiga
+      S.titles = titles; S.rank = next; sv('charRank', next);
+      document.getElementById('rankUpPanel').hidden = true;
+      clearTimeout(rankUndoTimer);
+      rankUndoTimer = setTimeout(() => { rankUndo = null; renderRankUp(); }, 15000);
+      autosave(); updateTitlesUI();
+    }
+
+    function undoRankUp() {
+      if (!rankUndo) return;
+      S.titles = rankUndo.titles; S.rank = rankUndo.rank; sv('charRank', rankUndo.rank);
+      rankUndo = null; clearTimeout(rankUndoTimer);
+      autosave(); updateTitlesUI();
+    }
+
+    window.addEventListener('keydown', e => {
+      if (e.ctrlKey && e.altKey && e.code === 'KeyM') {
+        const bar = document.getElementById('gmRankBar');
+        bar.style.display = bar.style.display === 'none' ? 'flex' : 'none';
+      }
+    });
+
     function addTitle() {
       const rank = S.rank || 'C'; const limit = RANK_TITLE_LIMITS[rank];
       if ((S.titles || []).length >= limit) { alert(`Máximo de ${limit} títulos para Rank ${rank}.`); return; }
@@ -4519,10 +4648,7 @@
     function renderTitles() {
       const wrap = document.getElementById('titlesWrap'); if (!wrap) return;
       if ((S.titles || []).length === 0) { wrap.innerHTML = '<div class="empty-msg">Nenhum título. Clique em "+ Adicionar Título".</div>'; return; }
-      const playerLevel = S.nivel || 0;
       wrap.innerHTML = S.titles.map((t, ti) => {
-        const reqLevel = RANK_LEVEL_REQ[t.rank];
-        const levelPct = reqLevel ? Math.min(100, (playerLevel / reqLevel) * 100) : 100;
         const skills = t.skills.map((sk, si) => `
       <div class="skill-card mt4">
         <div class="sk-header">
@@ -4557,10 +4683,6 @@
         </div>
         <button class="w-rem" onclick="S.titles.splice(${ti},1);renderTitles();autosave()" style="font-size:25px">✕</button>
       </div>
-      ${reqLevel ? `<div class="progress-wrap mb8">
-        <div style="display:flex;justify-content:space-between"><span class="lbl">PROMOÇÃO PARA RANK SUPERIOR</span><span style="font-family:'Share Tech Mono',monospace;font-size:17px;color:var(--txt-d)">${playerLevel}/${reqLevel}</span></div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${levelPct}%"></div></div>
-      </div>`: '<div style="font-size:17px;color:var(--gold);font-family:\'Share Tech Mono\',monospace;letter-spacing:1px;margin-bottom:10px">RANK MÁXIMO</div>'}
       <div class="sep"></div>
       ${skills}
       <div class="sep"></div>
