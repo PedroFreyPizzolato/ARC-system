@@ -1575,6 +1575,11 @@
       clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))
     }
 
+    .title-card.artifact-card {
+      background: rgba(168, 85, 247, .04);
+      border-color: rgba(168, 85, 247, .3)
+    }
+
     .title-card:hover {
       border-color: rgba(245, 158, 11, .35)
     }
@@ -2969,6 +2974,14 @@
       <div id="titlesWrap">
         <div class="empty-msg">Nenhum título registrado.</div>
       </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin:28px 0 12px">
+        <div>
+          <span class="lbl" style="color:var(--purple-b)">TÍTULOS DE ARTEFATO MÍTICO</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:var(--fs-sm);color:var(--txt-d);margin-left:12px">sem limite · não contam para o Rank Up</span>
+        </div>
+        <button class="btn btn-gold btn-sm" style="white-space:nowrap" onclick="addArtifactTitle()">+ TÍTULO DE ARTEFATO</button>
+      </div>
+      <div id="artifactTitlesWrap"></div>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════
@@ -3521,7 +3534,7 @@
       dotEnv: { on: false, dmg: '', efeito: '' },
       dotExtras: [],
       statusNeg: {}, statusPos: {},
-      titles: [],
+      titles: [], artifactTitles: [],
       fullName: '', age: '', gender: '', height: '', weight: '', hair: '', eyes: '', skin: '', marks: '', photo: '',
       personality: '', dream: '', bonds: '', qualities: '', flaws: '',
       classeGeralSel: '', classeEspSel: '',
@@ -3778,7 +3791,7 @@
             weapons: [], armors: [], implSup: [], implInf: [], implInt: [],
             dotSang: { on: false, stacks: 0, dmg: '', dur: '' }, dotQueim: { on: false, stacks: 0, dmg: '', dur: '' },
             dotEnv: { on: false, dmg: '', efeito: '' }, dotExtras: [], statusNeg: {}, statusPos: {},
-            titles: [], fullName: '', age: '', gender: '', height: '', weight: '', hair: '',
+            titles: [], artifactTitles: [], fullName: '', age: '', gender: '', height: '', weight: '', hair: '',
             eyes: '', skin: '', marks: '', photo: '', personality: '', dream: '', bonds: '',
             qualities: '', flaws: '', classeGeralSel: '', classeEspSel: '',
             multiclass: [{ cls: '', sk: -1 }, { cls: '', sk: -1 }],
@@ -4878,7 +4891,7 @@
       const discard = [...document.querySelectorAll('#rankUpPanel input[name=rankDiscard]:checked')].map(i => +i.value);
       let titles;
       try { titles = applyRankUp(S.titles, rank, discard); } catch (e) { arcDialog({ tag: '[ RANK UP ]', title: 'Não foi possível subir de Rank', sub: e.message, cancel: null }); return; }
-      rankUndo = { rank, titles: S.titles }; // applyRankUp não muta a lista antiga
+      rankUndo = { rank, titles: S.titles, artifactTitles: JSON.parse(JSON.stringify(S.artifactTitles || [])) }; // applyRankUp não muta a lista antiga
       S.titles = titles; S.rank = next; sv('charRank', next);
       document.getElementById('rankUpPanel').hidden = true;
       clearTimeout(rankUndoTimer);
@@ -4890,7 +4903,7 @@
 
     function undoRankUp() {
       if (!rankUndo) return;
-      S.titles = rankUndo.titles; S.rank = rankUndo.rank; sv('charRank', rankUndo.rank);
+      S.titles = rankUndo.titles; S.artifactTitles = rankUndo.artifactTitles; S.rank = rankUndo.rank; sv('charRank', rankUndo.rank);
       rankUndo = null; clearTimeout(rankUndoTimer);
       autosave(); updateTitlesUI();
     }
@@ -4960,23 +4973,61 @@
       renderTitles(); autosave();
     }
 
+    // Skills editáveis de um título; list = 'titles' ou 'artifactTitles'.
+    function titleSkillsHtml(list, ti, skills) {
+      return skills.map((sk, si) => `
+      <div class="skill-card mt4">
+        <div class="sk-header">
+          <input style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt);font-size:var(--fs);font-weight:700;outline:none;padding:2px" value="${escH(sk.name)}" oninput="S.${list}[${ti}].skills[${si}].name=this.value;autosave()">
+          <div class="sk-meta">
+            <select class="action-sel" onchange="S.${list}[${ti}].skills[${si}].action=this.value;toggleCostField(this)">
+              ${ACTIONS_LIST.map(a => `<option${a === sk.action ? ' selected' : ''}>${a}</option>`).join('')}
+            </select>
+            <input class="cost-inp" type="text" value="${escH(sk.cost || '')}" placeholder="—S" ${sk.action === 'Passiva' ? 'disabled' : ''} oninput="S.${list}[${ti}].skills[${si}].cost=this.value;autosave()">
+          </div>
+        </div>
+        <textarea class="inp mt4" style="min-height:50px" oninput="S.${list}[${ti}].skills[${si}].desc=this.value;autosave()" placeholder="Descrição da skill...">${escH(sk.desc || '')}</textarea>
+      </div>`).join('');
+    }
+
+    // Títulos de Artefato Mítico: fora do limite e do Rank Up; seguem o Rank atual do personagem
+    // (e ganham as skills dele quando o personagem sobe de Rank).
+    function renderArtifactTitles() {
+      const wrap = document.getElementById('artifactTitlesWrap'); if (!wrap) return;
+      const rank = S.rank || 'C', list = S.artifactTitles || [];
+      if (!list.length) { wrap.innerHTML = '<div class="empty-msg">Nenhum título de Artefato Mítico.</div>'; return; }
+      for (const t of list)
+        for (let k = t.skills.length; k < RANK_SKILL_COUNTS[rank]; k++) t.skills.push({ name: `Skill ${k + 1}`, action: 'Passiva', cost: '', desc: '' });
+      wrap.innerHTML = list.map((t, ti) => `<div class="title-card artifact-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="title-rank rank-${rank}">ARTEFATO MÍTICO · RANK ${rank}</div>
+          <div class="title-name">${escH(t.name)}</div>
+        </div>
+        <button class="w-rem" onclick="S.artifactTitles.splice(${ti},1);renderTitles();autosave()" style="font-size:25px">✕</button>
+      </div>
+      <div class="sep"></div>
+      ${titleSkillsHtml('artifactTitles', ti, t.skills)}
+    </div>`).join('');
+    }
+
+    async function addArtifactTitle() {
+      const rank = S.rank || 'C';
+      const name = await arcDialog({
+        tag: '[ ARTEFATO MÍTICO ]', title: 'Título de Artefato', sub: `Segue o Rank atual (${rank}) e não conta para o limite de títulos.`,
+        input: { label: 'NOME DO TÍTULO', placeholder: 'Ex.: Portador da Lança' }, ok: 'ADICIONAR'
+      });
+      if (!name) return;
+      (S.artifactTitles ||= []).push({ name, skills: [] }); // as skills vêm do Rank, no render
+      renderTitles(); autosave();
+    }
+
     function renderTitles() {
+      renderArtifactTitles();
       const wrap = document.getElementById('titlesWrap'); if (!wrap) return;
       if ((S.titles || []).length === 0) { wrap.innerHTML = '<div class="empty-msg">Nenhum título. Clique em "+ Adicionar Título".</div>'; return; }
       wrap.innerHTML = S.titles.map((t, ti) => {
-        const skills = t.skills.map((sk, si) => `
-      <div class="skill-card mt4">
-        <div class="sk-header">
-          <input style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt);font-size:var(--fs);font-weight:700;outline:none;padding:2px" value="${sk.name}" oninput="S.titles[${ti}].skills[${si}].name=this.value;autosave()">
-          <div class="sk-meta">
-            <select class="action-sel" onchange="S.titles[${ti}].skills[${si}].action=this.value;toggleCostField(this)">
-              ${ACTIONS_LIST.map(a => `<option${a === sk.action ? ' selected' : ''}>${a}</option>`).join('')}
-            </select>
-            <input class="cost-inp" type="text" value="${sk.cost || ''}" placeholder="—S" ${sk.action === 'Passiva' ? 'disabled' : ''} oninput="S.titles[${ti}].skills[${si}].cost=this.value;autosave()">
-          </div>
-        </div>
-        <textarea class="inp mt4" style="min-height:50px" oninput="S.titles[${ti}].skills[${si}].desc=this.value;autosave()" placeholder="Descrição da skill...">${sk.desc || ''}</textarea>
-      </div>`).join('');
+        const skills = titleSkillsHtml('titles', ti, t.skills);
         const quests = (t.quests || []).map((q, qi) => `
       <div class="quest-row">
         <input style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:var(--fs-sm);outline:none;padding:2px" value="${q.desc || ''}" placeholder="Descrição da missão..." oninput="S.titles[${ti}].quests[${qi}].desc=this.value;autosave()">
@@ -5246,7 +5297,7 @@
     }
 
     function buildGMPayload(playerName) {
-      const titleNames = (S.titles || []).map(t => t.name).join(', ');
+      const titleNames = [...(S.titles || []).map(t => t.name), ...(S.artifactTitles || []).map(t => t.name + ' (Artefato)')].join(', ');
 
       return {
         _playerName: playerName,
