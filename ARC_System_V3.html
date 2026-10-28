@@ -2114,6 +2114,153 @@
       justify-content: flex-end;
       margin-top: 20px
     }
+  /* ═══════════ ANIMAÇÃO DE RANK UP — cópia de ARC-rankup-demo.html. Mudou uma, mude nas duas. ═══════════ */
+  .ru { position:fixed; inset:0; z-index:9999; overflow:hidden; cursor:pointer; display:grid; place-items:center;
+    --c-rgb:80,136,241; --hit:900ms; font-family:'Rajdhani',sans-serif; color:#fff; user-select:none }
+  .ru * { pointer-events:none }
+  .ru-bg { position:absolute; inset:0; opacity:0; background:radial-gradient(ellipse 70% 55% at 50% 50%, rgba(var(--c-rgb),.22), transparent 70%), rgba(2,4,8,.93);
+    animation:ru-fade .35s cubic-bezier(.2,.8,.2,1) forwards }
+  .ru-shake { position:absolute; inset:0; display:grid; place-items:center }
+
+  /* faixa horizontal (VICTORY) */
+  .ru-band { position:absolute; left:0; right:0; top:50%; height:260px; margin-top:-130px; transform:scaleY(0);
+    background:linear-gradient(90deg, transparent, rgba(var(--c-rgb),.28) 18%, rgba(var(--c-rgb),.42) 50%, rgba(var(--c-rgb),.28) 82%, transparent);
+    animation:ru-scaleY .5s cubic-bezier(.16,1,.3,1) calc(var(--hit) - 650ms) forwards }
+  .ru-band::before, .ru-band::after { content:''; position:absolute; left:0; right:0; height:2px; transform:scaleX(0);
+    background:linear-gradient(90deg, transparent, rgb(var(--c-rgb)) 30%, #fff 50%, rgb(var(--c-rgb)) 70%, transparent);
+    animation:ru-scaleX .7s cubic-bezier(.16,1,.3,1) calc(var(--hit) - 500ms) forwards }
+  .ru-band::before { top:0 } .ru-band::after { bottom:0 }
+
+  /* varrida diagonal de cor no impacto (MATCH FOUND) */
+  .ru-wipe { position:absolute; top:-20%; bottom:-20%; left:-20%; width:140%; opacity:.9; background:rgb(var(--c-rgb));
+    transform:translateX(-130%) skewX(-18deg); animation:ru-wipe .55s cubic-bezier(.7,0,.3,1) calc(var(--hit) - 275ms) forwards }
+  .ru-flash { position:absolute; inset:0; background:#fff; opacity:0; animation:ru-flash .6s cubic-bezier(.2,.8,.2,1) var(--hit) forwards }
+
+  /* letra + textos */
+  .ru-stage { position:relative; display:grid; justify-items:center; animation:ru-drift 4s linear var(--hit) forwards }
+  .ru-kicker { font-weight:700; font-size:clamp(18px,2.6vw,30px); letter-spacing:.45em; margin-right:-.45em; opacity:0;
+    text-shadow:0 0 18px rgba(var(--c-rgb),.9); animation:ru-track .6s cubic-bezier(.16,1,.3,1) calc(var(--hit) + 80ms) both }
+  .ru-letter { font-family:'Orbitron',monospace; font-weight:900; font-size:clamp(150px,24vw,300px); line-height:1; opacity:0;
+    text-shadow:0 0 28px rgba(var(--c-rgb),.95), 0 0 90px rgba(var(--c-rgb),.6);
+    animation:ru-slam .35s cubic-bezier(.55,0,.9,.3) calc(var(--hit) - 350ms) both }
+  .ru-sub { font-family:'Share Tech Mono',monospace; font-size:clamp(14px,1.6vw,18px); letter-spacing:.25em; color:rgba(255,255,255,.75); text-align:center; opacity:0;
+    animation:ru-up .5s cubic-bezier(.16,1,.3,1) calc(var(--hit) + 260ms) both }
+  .ru-sub b { color:rgb(var(--c-rgb)); font-weight:400 }
+
+  /* nível 2+ : ondas de choque, chevrons, rastros */
+  .ru-ring { position:absolute; left:50%; top:50%; width:220px; height:220px; border:2px solid rgb(var(--c-rgb)); border-radius:50%; opacity:0;
+    transform:translate(-50%,-50%); animation:ru-ring .9s cubic-bezier(.16,1,.3,1) var(--hit) forwards }
+  .ru-ring + .ru-ring { border-width:1px; animation-delay:calc(var(--hit) + 140ms) }
+  .ru-chev { position:absolute; top:50%; height:220px; width:80px; margin-top:-110px; opacity:0; background:rgba(var(--c-rgb),.85);
+    clip-path:polygon(0 0, 38% 0, 100% 50%, 38% 100%, 0 100%, 62% 50%);
+    animation:ru-chev .45s cubic-bezier(.16,1,.3,1) calc(var(--hit) - 350ms) both }
+  .ru-chev.l { --dir:1; left:calc(50% - 330px) } .ru-chev.r { --dir:-1; left:calc(50% + 250px) }
+  .ru-streak { position:absolute; bottom:0; width:2px; opacity:0; background:linear-gradient(transparent, rgb(var(--c-rgb)), transparent);
+    animation:ru-rise var(--dur) cubic-bezier(.3,0,.2,1) var(--d) forwards }
+
+  /* nível 3 : raios girando, faíscas, tremor */
+  .ru-rays { position:absolute; left:50%; top:50%; width:170vmax; height:170vmax; opacity:0; transform:translate(-50%,-50%);
+    background:repeating-conic-gradient(rgba(var(--c-rgb),.32) 0deg 3deg, transparent 3deg 15deg);
+    -webkit-mask-image:radial-gradient(circle, #000 0%, transparent 42%); mask-image:radial-gradient(circle, #000 0%, transparent 42%);
+    animation:ru-fade .8s ease-out var(--hit) forwards, ru-spin 14s linear var(--hit) infinite }
+  .ru-spark { position:absolute; left:50%; top:50%; width:var(--s); height:var(--s); border-radius:50%; opacity:0; background:var(--col);
+    box-shadow:0 0 8px rgb(var(--c-rgb)); animation:ru-spark 1.2s cubic-bezier(.16,1,.3,1) var(--hit) forwards }
+  .ru[data-tier="3"] .ru-shake { animation:ru-shake .45s linear var(--hit) }
+
+  /* Z : corrupção / glitch */
+  .ru-scan { position:absolute; inset:0; opacity:.55; background:repeating-linear-gradient(0deg, rgba(0,0,0,.45) 0 2px, transparent 2px 4px);
+    animation:ru-flicker 1.3s steps(1,end) infinite }
+  .ru-slice { position:absolute; left:0; right:0; opacity:0; background:rgb(var(--c-rgb)); mix-blend-mode:screen;
+    animation:ru-slice .2s steps(2,end) var(--d) forwards }
+  .ru[data-z] .ru-bg { background:radial-gradient(ellipse 70% 55% at 50% 50%, rgba(var(--c-rgb),.18), transparent 70%), rgba(1,6,3,.95) }
+  .ru-lw { display:grid; place-items:center } .ru-lw > * { grid-area:1/1 }
+  /* chuva de glifos corrompidos */
+  .ru-rain { position:absolute; top:0; white-space:pre; line-height:1.05; font-family:'Share Tech Mono',monospace; opacity:0;
+    color:rgb(var(--c-rgb)); text-shadow:0 0 6px rgba(var(--c-rgb),.8); animation:ru-fall var(--dur) linear var(--d) forwards }
+  /* o Rank atual aparece antes da troca: recolhe quando a nova letra cai (no Z, é corrompido) */
+  .ru-old { font-family:'Orbitron',monospace; font-weight:900; font-size:clamp(150px,24vw,300px); line-height:1; opacity:0;
+    color:rgba(255,255,255,.85); text-shadow:0 0 26px rgba(var(--o-rgb),.9), 0 0 70px rgba(var(--o-rgb),.45);
+    animation:ru-oldIn .45s cubic-bezier(.16,1,.3,1) 120ms both, ru-oldGone .35s cubic-bezier(.4,0,1,1) calc(var(--hit) - 350ms) forwards }
+  .ru[data-z] .ru-old { animation:ru-oldOut calc(var(--hit) - 250ms) steps(1,end) both }
+  /* cópias vermelha/ciano que convergem no impacto e explodem para fora */
+  .ru-ghost { font-family:'Orbitron',monospace; font-weight:900; font-size:clamp(150px,24vw,300px); line-height:1; opacity:0;
+    animation:ru-ghost .55s cubic-bezier(.55,0,.9,.3) calc(var(--hit) - 550ms) both, ru-ghostOut .7s cubic-bezier(.16,1,.3,1) var(--hit) forwards }
+  .ru-ghost.r { --gx:-70px; color:rgba(255,0,70,.75) } .ru-ghost.c { --gx:70px; color:rgba(0,255,210,.65) }
+  /* rachaduras saindo da letra */
+  .ru-cracks { position:absolute; inset:0; width:100%; height:100%; opacity:0;
+    animation:ru-fade .05s linear var(--hit) forwards, ru-out 1.4s ease-in calc(var(--hit) + 1900ms) forwards }
+  .ru-cracks polyline { fill:none; stroke:rgb(var(--c-rgb)); stroke-width:2.5; stroke-dasharray:1400; stroke-dashoffset:1400;
+    filter:drop-shadow(0 0 5px rgb(var(--c-rgb))); animation:ru-draw .4s cubic-bezier(.16,1,.3,1) var(--hit) forwards }
+  .ru[data-z] .ru-bg { background:radial-gradient(ellipse 70% 55% at 50% 50%, rgba(var(--c-rgb),.2), transparent 70%), rgba(1,6,3,.95) }
+  .ru[data-z] .ru-band { height:200px; margin-top:-100px;
+    background:linear-gradient(90deg, transparent, rgba(var(--c-rgb),.2) 15%, rgba(var(--c-rgb),.32) 50%, rgba(var(--c-rgb),.2) 85%, transparent);
+    animation:ru-scaleY .24s steps(3,end) calc(var(--hit) - 120ms) forwards, ru-tear 1.3s steps(1,end) calc(var(--hit) + 150ms) infinite }
+  .ru[data-z] .ru-ring { border-style:dashed; border-width:3px }
+  .ru[data-z] .ru-flash { background:rgb(var(--c-rgb)) }
+  .ru[data-z] .ru-shake { animation:ru-gshake .7s steps(1,end) var(--hit) }
+  .ru[data-z] .ru-letter { color:#d9ffe4; text-shadow:-5px 0 rgba(255,0,70,.75), 5px 0 rgba(0,255,210,.6), 0 0 40px rgba(var(--c-rgb),.9);
+    animation:ru-slam .3s cubic-bezier(.55,0,.9,.3) calc(var(--hit) - 300ms) both, ru-glitch .55s steps(1,end) var(--hit),
+      ru-jitter 1.7s steps(1,end) calc(var(--hit) + 900ms) infinite }
+  .ru[data-z] .ru-kicker { animation:ru-glitch .5s steps(1,end) calc(var(--hit) + 120ms) both }
+  .ru[data-z] .ru-sub { animation:ru-glitch .5s steps(1,end) calc(var(--hit) + 380ms) both }
+
+  /* saída: mais curta e discreta que a entrada */
+  .ru.ru-out { animation:ru-out .4s cubic-bezier(.4,0,1,1) forwards }
+
+  /* movimento reduzido: só o cartão final, sem varrida/flash/tremor */
+  .ru[data-reduce] *, .ru[data-reduce] *::before, .ru[data-reduce] *::after { animation:none !important }
+  .ru[data-reduce]:not(.ru-out) { animation:ru-fade .3s ease-out both }
+  .ru[data-reduce] .ru-bg, .ru[data-reduce] .ru-kicker, .ru[data-reduce] .ru-letter, .ru[data-reduce] .ru-sub { opacity:1 }
+  .ru[data-reduce] .ru-band, .ru[data-reduce] .ru-band::before, .ru[data-reduce] .ru-band::after { transform:none }
+
+  @keyframes ru-fall { 0% { opacity:0; transform:translateY(-100%) } 10%, 85% { opacity:var(--o) } 100% { opacity:0; transform:translateY(110vh) } }
+  @keyframes ru-oldOut {
+    0% { opacity:0 } 18% { opacity:1; clip-path:inset(-40%); transform:none }
+    58% { clip-path:inset(20% 0 55% 0); transform:translateX(-18px) }
+    66% { clip-path:inset(60% 0 10% 0); transform:translateX(14px) }
+    74% { opacity:.75; clip-path:inset(5% 0 75% 0); transform:translateX(-8px) }
+    84% { opacity:.4; clip-path:inset(40% 0 40% 0); transform:translateX(22px) }
+    100% { opacity:0 } }
+  @keyframes ru-oldIn { from { opacity:0; transform:scale(.92); filter:blur(8px) } to { opacity:1; transform:none; filter:blur(0) } }
+  @keyframes ru-oldGone { from { opacity:1; transform:none; filter:blur(0) } to { opacity:0; transform:scale(.6); filter:blur(10px) } }
+  @keyframes ru-ghost { from { opacity:0; transform:translateX(var(--gx)) scale(1.5); filter:blur(10px) } to { opacity:.9; transform:none; filter:blur(0) } }
+  @keyframes ru-ghostOut { from { opacity:.9; transform:none } to { opacity:0; transform:translateX(calc(var(--gx) * 2.5)) scale(1.3) } }
+  @keyframes ru-draw { to { stroke-dashoffset:0 } }
+  @keyframes ru-tear {
+    0%, 100% { transform:scaleY(1); clip-path:inset(0) }
+    20% { transform:scaleY(1) translateX(-30px); clip-path:inset(0 0 55% 0) }
+    23% { transform:scaleY(1); clip-path:inset(0) }
+    58% { transform:scaleY(1) translateX(24px); clip-path:inset(40% 0 0 0) }
+    61% { transform:scaleY(1); clip-path:inset(0) } }
+  @keyframes ru-gshake { 0%, 100% { transform:none } 10% { transform:translate(-14px,6px) } 20% { transform:translate(12px,-8px) skewX(4deg) }
+    32% { transform:translate(-8px,0) } 45% { transform:translate(10px,4px) skewX(-3deg) } 60% { transform:translate(-4px,-2px) } 75% { transform:translate(3px,1px) } }
+  @keyframes ru-fade { to { opacity:1 } }
+  @keyframes ru-out { to { opacity:0 } }
+  @keyframes ru-scaleY { to { transform:scaleY(1) } }
+  @keyframes ru-scaleX { to { transform:scaleX(1) } }
+  @keyframes ru-wipe { 0% { transform:translateX(-130%) skewX(-18deg) } 50% { transform:translateX(0) skewX(-18deg) } 100% { transform:translateX(130%) skewX(-18deg) } }
+  @keyframes ru-flash { 0% { opacity:.7 } 100% { opacity:0 } }
+  @keyframes ru-slam { 0% { opacity:0; transform:scale(1.9); filter:blur(18px) } 40% { opacity:1 } 100% { opacity:1; transform:scale(1); filter:blur(0) } }
+  @keyframes ru-drift { from { transform:scale(1) } to { transform:scale(1.045) } }
+  @keyframes ru-track { from { opacity:0; letter-spacing:.95em; filter:blur(6px) } to { opacity:1; letter-spacing:.45em; filter:blur(0) } }
+  @keyframes ru-up { from { opacity:0; transform:translateY(14px); filter:blur(4px) } to { opacity:1; transform:none; filter:blur(0) } }
+  @keyframes ru-ring { 0% { opacity:.9; transform:translate(-50%,-50%) scale(.4) } 100% { opacity:0; transform:translate(-50%,-50%) scale(4.5) } }
+  @keyframes ru-chev { from { opacity:0; transform:translateX(calc(var(--dir) * -45vw)) scaleX(var(--dir)) } to { opacity:.85; transform:translateX(0) scaleX(var(--dir)) } }
+  @keyframes ru-rise { 0% { opacity:0; transform:translateY(20vh) } 25% { opacity:1 } 100% { opacity:0; transform:translateY(-110vh) } }
+  @keyframes ru-spin { from { transform:translate(-50%,-50%) rotate(0) } to { transform:translate(-50%,-50%) rotate(360deg) } }
+  @keyframes ru-spark { 0% { opacity:1; transform:translate(-50%,-50%) } 100% { opacity:0; transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.3) } }
+  @keyframes ru-shake { 0%,100% { transform:none } 15% { transform:translate(-8px,4px) } 30% { transform:translate(7px,-5px) } 45% { transform:translate(-5px,3px) } 60% { transform:translate(4px,-2px) } 80% { transform:translate(-2px,1px) } }
+  @keyframes ru-flicker { 0% { opacity:.55 } 7% { opacity:.2 } 9% { opacity:.7 } 40% { opacity:.45 } 42% { opacity:.8 } 70% { opacity:.55 } }
+  @keyframes ru-slice { 0% { opacity:.85; transform:translateX(-8%) } 100% { opacity:0; transform:translateX(6%) } }
+  @keyframes ru-glitch {
+    0% { opacity:0 }
+    12% { opacity:1; clip-path:inset(10% 0 60% 0); transform:translateX(-14px) }
+    24% { clip-path:inset(52% 0 18% 0); transform:translateX(12px) }
+    36% { clip-path:inset(0 0 82% 0); transform:translateX(-5px) }
+    48% { clip-path:inset(68% 0 4% 0); transform:translateX(9px) }
+    62% { clip-path:inset(-40%); transform:translateX(-6px) }
+    74%, 100% { opacity:1; clip-path:inset(-40%); transform:none } }
+  @keyframes ru-jitter { 0%, 100% { transform:none; clip-path:inset(-40%) } 31% { transform:translateX(-6px); clip-path:inset(40% 0 35% 0) } 33% { transform:none; clip-path:inset(-40%) } 78% { transform:translateX(4px) } 80% { transform:none } }
   </style>
 </head>
 
@@ -2793,7 +2940,7 @@
           <!-- ponytail: "modo Mestre" só esconde o seletor (Ctrl+Alt+M); proteção por honra, não por segurança -->
           <div id="gmRankBar" style="display:none;gap:6px;align-items:center">
             <span class="lbl">MESTRE · RANK</span>
-            <select class="inp" id="charRank" style="width:auto" onchange="autosave();updateTitlesUI()">
+            <select class="inp" id="charRank" style="width:auto" onchange="gmSetRank(this.value)">
               <option value="C">C</option>
               <option value="B">B</option>
               <option value="A">A</option>
@@ -3693,7 +3840,7 @@
       // sync rank display in titles tab
       const rd = document.getElementById('rankDisplay');
       if (rd) { rd.textContent = rank; rd.className = 'rank-' + rank; }
-      document.documentElement.dataset.rank = rank;
+      document.documentElement.dataset.rank = rankThemeHold || rank; // durante a animação, a cor antiga fica até o impacto
       renderRankUp();
     }
 
@@ -4521,6 +4668,101 @@
       renderTitles();
     }
 
+    // ═══════════ ANIMAÇÃO DE RANK UP ═══════════ cópia de ARC-rankup-demo.html. Mudou uma, mude nas duas.
+    const RU_RGB = { C: '80,136,241', B: '227,59,245', A: '246,81,81', S: '201,123,16', Z: '9,164,58' };
+    const RU_TIER = { B: 1, A: 2, S: 3 };
+    const RU_SUB = {
+      B: '3 TÍTULOS · 2 SKILLS POR TÍTULO',
+      A: '2 TÍTULOS · 3 SKILLS POR TÍTULO',
+      S: 'RANK MÁXIMO · 1 TÍTULO · 5 SKILLS',
+      Z: 'O TÍTULO FOI RENEGADO'
+    };
+
+    // onImpact(to) é chamado no instante do impacto — é ali que o tema do ARC troca de cor.
+    function playRankUp(from, to, onImpact, forceReduce) {
+      document.querySelector('.ru')?.remove();
+      const z = to === 'Z', tier = z ? 0 : RU_TIER[to] || 1;
+      const reduce = forceReduce || matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const hit = reduce ? 0 : z ? 1300 : [0, 1300, 1400, 1600][tier];
+      const total = reduce ? 1800 : z ? 4800 : [0, 3300, 3900, 4900][tier];
+      const rnd = (a, b) => a + Math.random() * (b - a);
+      const old = from ? `<div class="ru-old">${from}</div>` : '';
+      let letter = `<div class="ru-lw">${old}<div class="ru-letter">${to}</div></div>`;
+
+      const el = document.createElement('div');
+      el.className = 'ru';
+      el.dataset.tier = tier;
+      if (z) el.dataset.z = '';
+      if (reduce) el.dataset.reduce = '';
+      el.style.setProperty('--c-rgb', RU_RGB[to]);
+      el.style.setProperty('--o-rgb', RU_RGB[from] || RU_RGB[to]);
+      el.style.setProperty('--hit', hit + 'ms');
+
+      let fx = '';
+      if (z) {
+        const glyphs = 'ΖΩ†‡ØÆ01アカサタナᚱᚦᛟ#%$';
+        for (let i = 0; i < 26; i++) {
+          const col = Array.from({ length: Math.round(rnd(10, 22)) }, () => glyphs[Math.floor(Math.random() * glyphs.length)]).join('\n');
+          fx += `<div class="ru-rain" style="left:${rnd(0, 98)}%;font-size:${Math.round(rnd(13, 24))}px;--o:${rnd(.2, .55).toFixed(2)};--dur:${Math.round(rnd(1800, 3400))}ms;--d:${Math.round(rnd(-1500, hit + 1000))}ms">${col}</div>`;
+        }
+        fx += '<div class="ru-band"></div><div class="ru-scan"></div>';
+        for (let i = 0; i < 30; i++)
+          fx += `<div class="ru-slice" style="top:${rnd(3, 97)}%;height:${rnd(2, 22)}px;--d:${Math.round(rnd(0, hit + 1200))}ms"></div>`;
+        fx += `<div class="ru-ring"></div><div class="ru-ring"></div><div class="ru-ring" style="animation-delay:calc(var(--hit) + 320ms)"></div>`;
+        // rachaduras: passeio aleatório do centro para fora (viewBox centrado na tela)
+        let cracks = '';
+        for (let i = 0; i < 9; i++) {
+          let a = (i / 9) * Math.PI * 2 + rnd(-.3, .3), r = rnd(150, 190);
+          const pts = [];
+          while (r < 900) { pts.push(`${(Math.cos(a) * r).toFixed(0)},${(Math.sin(a) * r).toFixed(0)}`); r += rnd(50, 110); a += rnd(-.28, .28); }
+          cracks += `<polyline points="${pts.join(' ')}" style="animation-delay:calc(var(--hit) + ${Math.round(rnd(0, 120))}ms)"/>`;
+        }
+        fx += `<svg class="ru-cracks" viewBox="-500 -500 1000 1000" preserveAspectRatio="xMidYMid slice">${cracks}</svg>`;
+        letter = `<div class="ru-lw">${old}<div class="ru-ghost r">Z</div><div class="ru-ghost c">Z</div><div class="ru-letter">Z</div></div>`;
+      } else {
+        fx += '<div class="ru-band"></div>';
+        if (tier >= 3) {
+          fx += '<div class="ru-rays"></div>';
+          for (let i = 0; i < 28; i++) {
+            const a = rnd(0, Math.PI * 2), d = rnd(180, 460);
+            fx += `<div class="ru-spark" style="--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d}px;--s:${rnd(3, 7)}px;--col:${i % 3 ? 'rgb(var(--c-rgb))' : '#fff'}"></div>`;
+          }
+        }
+        if (tier >= 2) {
+          fx += '<div class="ru-ring"></div><div class="ru-ring"></div><div class="ru-chev l"></div><div class="ru-chev r"></div>';
+          for (let i = 0; i < 14; i++)
+            fx += `<div class="ru-streak" style="left:${rnd(2, 98)}%;height:${rnd(80, 220)}px;--dur:${Math.round(rnd(700, 1200))}ms;--d:${Math.round(hit + rnd(0, 450))}ms"></div>`;
+        }
+      }
+
+      el.innerHTML = `<div class="ru-bg"></div>
+        <div class="ru-shake">${fx}
+          <div class="ru-stage">
+            <div class="ru-kicker">${z ? 'TÍTULO ABDICADO' : 'RANK UP'}</div>
+            ${letter}
+            <div class="ru-sub">${z ? `${from ? `${from} ▸ ` : ''}<b>AMALDIÇOADO</b>` : `${from} ▸ <b>${to}</b>`}<br>${RU_SUB[to] || ''}</div>
+          </div>
+        </div>
+        ${z ? '' : '<div class="ru-wipe"></div>'}<div class="ru-flash"></div>`;
+      document.body.appendChild(el);
+
+      let impacted = false;
+      const impact = () => { if (!impacted) { impacted = true; onImpact && onImpact(to); } };
+      const tHit = setTimeout(impact, hit);
+      const close = () => {
+        if (el.classList.contains('ru-out')) return;
+        impact(); clearTimeout(tHit); clearTimeout(tEnd);
+        removeEventListener('keydown', onKey);
+        el.classList.add('ru-out');
+        setTimeout(() => el.remove(), 400);
+      };
+      const onKey = e => { if (e.key === 'Escape') close(); };
+      const tEnd = setTimeout(close, total);
+      el.addEventListener('click', close);
+      addEventListener('keydown', onKey);
+    }
+
+
     // ── RANK UP ── cópia fiel das funções de tools/rank-up/rankup.js. Mudou uma, mude nas duas.
     const NEXT_RANK = { C: 'B', B: 'A', A: 'S' }; // S e Z não sobem
 
@@ -4559,7 +4801,17 @@
     // ── fim da cópia ──
 
     const escH = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-    let rankUndo = null, rankUndoTimer = null;
+    let rankUndo = null, rankUndoTimer = null, rankThemeHold = null;
+
+    function releaseRankTheme() { rankThemeHold = null; document.documentElement.dataset.rank = S.rank || 'C'; }
+
+    // Seletor do Mestre: correções são silenciosas; só a ida para Z toca a animação.
+    function gmSetRank(v) {
+      const prev = S.rank || 'C', anim = v === 'Z' && prev !== 'Z';
+      if (anim) rankThemeHold = prev;
+      autosave(); updateTitlesUI();
+      if (anim) playRankUp(prev, 'Z', releaseRankTheme);
+    }
 
     // Atualiza só o botão e a linha de progresso (chamado a cada autosave via updateHeader).
     function renderRankUp() {
@@ -4615,7 +4867,9 @@
       document.getElementById('rankUpPanel').hidden = true;
       clearTimeout(rankUndoTimer);
       rankUndoTimer = setTimeout(() => { rankUndo = null; renderRankUp(); }, 15000);
+      rankThemeHold = rank;
       autosave(); updateTitlesUI();
+      playRankUp(rank, next, releaseRankTheme);
     }
 
     function undoRankUp() {
