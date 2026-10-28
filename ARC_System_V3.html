@@ -4771,14 +4771,20 @@
       return qs.length > 0 && qs.every(q => q.total > 0 && (q.cur || 0) >= q.total);
     }
 
+    // Libera com o conjunto completo de títulos do Rank (C: 4), (limite − 1) deles
+    // concluídos e o nível do próximo Rank.
+    // mustDiscard > 0 quando sobram concluídos além do limite do novo Rank.
     function rankUpStatus(rank, nivel, titles) {
       const next = NEXT_RANK[rank] || null;
+      const have = (titles || []).length;
       const done = (titles || []).filter(isTitleComplete).length;
-      if (!next) return { next, done, needed: 0, reqLevel: null, levelOk: false, ready: false, mustDiscard: 0 };
-      const needed = RANK_TITLE_LIMITS[rank] - 1;
+      if (!next) return { next, have, limit: RANK_TITLE_LIMITS[rank], haveAll: false, done, needed: 0, reqLevel: null, levelOk: false, ready: false, mustDiscard: 0 };
+      const limit = RANK_TITLE_LIMITS[rank];
+      const needed = limit - 1;
       const reqLevel = RANK_LEVEL_REQ[next];
       const levelOk = (nivel || 0) >= reqLevel;
-      return { next, done, needed, reqLevel, levelOk, ready: levelOk && done >= needed, mustDiscard: Math.max(0, done - RANK_TITLE_LIMITS[next]) };
+      const haveAll = have >= limit;
+      return { next, have, limit, haveAll, done, needed, reqLevel, levelOk, ready: haveAll && levelOk && done >= needed, mustDiscard: Math.max(0, done - RANK_TITLE_LIMITS[next]) };
     }
 
     function applyRankUp(titles, rank, discardIdx) {
@@ -4824,7 +4830,7 @@
       const ok = c => c ? 'color:var(--green)' : '';
       const undo = rankUndo ? ` <button class="btn btn-gold btn-sm" style="margin-left:10px" onclick="undoRankUp()">DESFAZER RANK UP</button>` : '';
       info.innerHTML = s.next
-        ? `PRÓXIMO RANK (${s.next}): <span style="${ok(s.done >= s.needed)}">${s.done}/${s.needed} títulos concluídos</span>${undo}`
+        ? `PRÓXIMO RANK (${s.next}): <span style="${ok(s.done >= s.needed)}">${s.done}/${s.needed} concluídos</span> · <span style="${ok(s.haveAll)}">${s.have}/${s.limit} títulos</span>${undo}`
         : (rank === 'Z' ? 'Amaldiçoado — sem Rank Up.' : 'Rank máximo alcançado.') + undo;
       // barra de nível única (antes havia uma por título)
       const bar = document.getElementById('rankLevelBar');

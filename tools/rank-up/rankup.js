@@ -12,16 +12,20 @@ function isTitleComplete(t) {
   return qs.length > 0 && qs.every(q => q.total > 0 && (q.cur || 0) >= q.total);
 }
 
-// Libera com (limite do Rank − 1) títulos concluídos + nível do próximo Rank.
+// Libera com o conjunto completo de títulos do Rank (C: 4), (limite − 1) deles
+// concluídos e o nível do próximo Rank.
 // mustDiscard > 0 quando sobram concluídos além do limite do novo Rank.
 function rankUpStatus(rank, nivel, titles) {
   const next = NEXT_RANK[rank] || null;
+  const have = (titles || []).length;
   const done = (titles || []).filter(isTitleComplete).length;
-  if (!next) return { next, done, needed: 0, reqLevel: null, levelOk: false, ready: false, mustDiscard: 0 };
-  const needed = RANK_TITLE_LIMITS[rank] - 1;
+  if (!next) return { next, have, limit: RANK_TITLE_LIMITS[rank], haveAll: false, done, needed: 0, reqLevel: null, levelOk: false, ready: false, mustDiscard: 0 };
+  const limit = RANK_TITLE_LIMITS[rank];
+  const needed = limit - 1;
   const reqLevel = RANK_LEVEL_REQ[next];
   const levelOk = (nivel || 0) >= reqLevel;
-  return { next, done, needed, reqLevel, levelOk, ready: levelOk && done >= needed, mustDiscard: Math.max(0, done - RANK_TITLE_LIMITS[next]) };
+  const haveAll = have >= limit;
+  return { next, have, limit, haveAll, done, needed, reqLevel, levelOk, ready: haveAll && levelOk && done >= needed, mustDiscard: Math.max(0, done - RANK_TITLE_LIMITS[next]) };
 }
 
 // Devolve os novos títulos: incompletos somem, os de índice em discardIdx somem,

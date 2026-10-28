@@ -64,3 +64,15 @@ test('aplicar recusa descarte em quantidade errada', () => {
   assert.throws(() => applyRankUp([done('a', 'A'), done('b', 'A')], 'A', []));
   assert.throws(() => applyRankUp([done('a'), done('b'), done('c'), open('d')], 'C', [0]));
 });
+
+test('precisa ter o conjunto completo de títulos: 3 concluídos de 3 não sobe de C', () => {
+  const s = rankUpStatus('C', 20, [done('a'), done('b'), done('c')]);
+  assert.deepEqual([s.have, s.limit, s.haveAll, s.ready], [3, 4, false, false]);
+  assert.throws(() => applyRankUp([done('a'), done('b'), done('c')], 'C', []));
+});
+
+test('conjunto completo vale para B→A (3) e A→S (2)', () => {
+  assert.equal(rankUpStatus('B', 20, [done('a', 'B'), done('b', 'B')]).ready, false);
+  assert.equal(rankUpStatus('A', 20, [done('a', 'A')]).ready, false);
+  assert.equal(rankUpStatus('A', 20, [done('a', 'A'), open('b', 'A')]).ready, true);
+});
