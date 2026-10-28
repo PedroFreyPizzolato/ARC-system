@@ -4830,8 +4830,9 @@
       const bar = document.getElementById('rankLevelBar');
       if (bar) {
         bar.style.display = s.next ? '' : 'none';
-        if (s.next) bar.innerHTML = `<div style="display:flex;justify-content:space-between"><span class="lbl">PROMOÇÃO PARA RANK ${s.next} — NÍVEL</span><span style="font-family:'Share Tech Mono',monospace;font-size:17px;${ok(s.levelOk) || 'color:var(--txt-d)'}">${S.nivel || 0}/${s.reqLevel}</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100, ((S.nivel || 0) / s.reqLevel) * 100)}%"></div></div>`;
+        const lvl = Number(S.nivel) || 0; // S vem de JSON importado: nunca interpolar bruto em innerHTML
+        if (s.next) bar.innerHTML =`<div style="display:flex;justify-content:space-between"><span class="lbl">PROMOÇÃO PARA RANK ${s.next} — NÍVEL</span><span style="font-family:'Share Tech Mono',monospace;font-size:17px;${ok(s.levelOk) || 'color:var(--txt-d)'}">${lvl}/${s.reqLevel}</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100, (lvl / s.reqLevel) * 100)}%"></div></div>`;
       }
     }
 
