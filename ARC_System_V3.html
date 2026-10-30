@@ -2312,6 +2312,7 @@
       <button class="tab" onclick="switchTab('personagem')">PERSONAGEM</button>
       <button class="tab" onclick="switchTab('titulos')">TÍTULOS</button>
       <button class="tab" onclick="switchTab('classes')">CLASSES</button>
+      <button class="tab" onclick="switchTab('arsenal')">ARSENAL</button>
       <button class="tab" onclick="switchTab('regras')">REGRAS</button>
       <button class="tab" onclick="switchTab('notas')">NOTAS</button>
     </div>
@@ -2810,41 +2811,6 @@
         </div>
       </div>
 
-      <!-- WEAPONS + IMPLANTS -->
-      <div class="g2 mt12" style="gap:14px">
-        <!-- Weapons -->
-        <div class="panel">
-          <div class="panel-title">ARMAS</div>
-          <div class="weapon-row hdr"><span>NOME</span><span>DANO
-              BASE</span><span>CRIT</span><span>CATEGORIA</span><span>TIPO</span><span>DUR</span><span>MÁX</span><span></span>
-          </div>
-          <div id="weaponsWrap"></div>
-          <button class="dashed-btn" onclick="addWeapon()">+ ARMA</button>
-          <div class="sep"></div>
-          <div class="panel-title" style="margin-top:0">ARMADURAS</div>
-          <div class="weapon-row hdr" style="grid-template-columns:1fr 60px 1fr 52px 52px 30px">
-            <span>NOME</span><span>CA
-              (−)</span><span>TIPO</span><span>DUR</span><span>MÁX</span><span></span></div>
-          <div id="armorsWrap"></div>
-          <button class="dashed-btn" onclick="addArmor()">+ ARMADURA</button>
-        </div>
-        <!-- Implants quick -->
-        <div class="panel panel-purple">
-          <div class="panel-title">IMPLANTES</div>
-          <div class="lbl mb8" style="color:var(--purple-b)">SUPERIORES (Força)</div>
-          <div id="implSupWrap"></div>
-          <button class="dashed-btn" onclick="addImplant('sup')">+ SUPERIOR</button>
-          <div class="sep"></div>
-          <div class="lbl mb8" style="color:var(--cyan)">INFERIORES (Agilidade)</div>
-          <div id="implInfWrap"></div>
-          <button class="dashed-btn" onclick="addImplant('inf')">+ INFERIOR</button>
-          <div class="sep"></div>
-          <div class="lbl mb8" style="color:var(--green)">INTERNOS (Resistência)</div>
-          <div id="implIntWrap"></div>
-          <button class="dashed-btn" onclick="addImplant('int')">+ INTERNO</button>
-        </div>
-      </div>
-
     </div><!-- /tab-ficha -->
 
     <!-- ═══════════════════════════════════════════════════════
@@ -2922,7 +2888,7 @@
           <div class="panel panel-purple">
             <div class="panel-title">IMPLANTES DETALHADOS</div>
             <div id="implDetailWrap">
-              <div class="empty-msg">Adicione implantes na aba Ficha para detalhar aqui.</div>
+              <div class="empty-msg">Adicione implantes na aba Arsenal para detalhar aqui.</div>
             </div>
           </div>
 
@@ -3057,6 +3023,47 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+     TAB: ARSENAL (equipamento do personagem + catálogo do Doc: Armas, Implantes, Itens, Artefatos)
+    ═══════════════════════════════════════════════════════ -->
+    <div id="tab-arsenal" class="tab-content">
+      <!-- WEAPONS + IMPLANTS -->
+      <div class="g2" style="gap:14px">
+        <!-- Weapons -->
+        <div class="panel">
+          <div class="panel-title">ARMAS</div>
+          <div class="weapon-row hdr"><span>NOME</span><span>DANO
+              BASE</span><span>CRIT</span><span>CATEGORIA</span><span>TIPO</span><span>DUR</span><span>MÁX</span><span></span>
+          </div>
+          <div id="weaponsWrap"></div>
+          <button class="dashed-btn" onclick="addWeapon()">+ ARMA</button>
+          <div class="sep"></div>
+          <div class="panel-title" style="margin-top:0">ARMADURAS</div>
+          <div class="weapon-row hdr" style="grid-template-columns:1fr 60px 1fr 52px 52px 30px">
+            <span>NOME</span><span>CA
+              (−)</span><span>TIPO</span><span>DUR</span><span>MÁX</span><span></span></div>
+          <div id="armorsWrap"></div>
+          <button class="dashed-btn" onclick="addArmor()">+ ARMADURA</button>
+        </div>
+        <!-- Implants quick -->
+        <div class="panel panel-purple">
+          <div class="panel-title">IMPLANTES</div>
+          <div class="lbl mb8" style="color:var(--purple-b)">SUPERIORES (Força)</div>
+          <div id="implSupWrap"></div>
+          <button class="dashed-btn" onclick="addImplant('sup')">+ SUPERIOR</button>
+          <div class="sep"></div>
+          <div class="lbl mb8" style="color:var(--cyan)">INFERIORES (Agilidade)</div>
+          <div id="implInfWrap"></div>
+          <button class="dashed-btn" onclick="addImplant('inf')">+ INFERIOR</button>
+          <div class="sep"></div>
+          <div class="lbl mb8" style="color:var(--green)">INTERNOS (Resistência)</div>
+          <div id="implIntWrap"></div>
+          <button class="dashed-btn" onclick="addImplant('int')">+ INTERNO</button>
+        </div>
+      </div>
+      <div id="arsenalWrap"></div>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════
@@ -3554,6 +3561,7 @@
     let SYSTEMS = SYSTEMS_EMBEDDED;
     let ACTIONS = ACTIONS_EMBEDDED;
     let SAN_TIERS = SAN_TIERS_EMBEDDED;
+    let ARSENAL = null; // catálogo do Doc (Armas/Implantes/Itens/Artefatos); só vem do Firebase/cache
     const FB_RULES_URL = 'https://intitulations-default-rtdb.firebaseio.com/arc_rules.json';
     const _SUB_CM = ['forca', 'vigor', 'agilidade', 'habilidade', 'sincronia', 'intelecto'];
     const _SUB_ALMA = ['conexao', 'entendimento'];
@@ -3597,6 +3605,7 @@
         if (ep && ep.items && ep.items.length) { STATUS_POS = ep.items.map(i => i.name); ep.items.forEach(i => { STATUS_DESC[i.name] = i.desc; }); }
       }
       if (data.actions && (data.actions.desc || _isNonEmptyObj(data.actions.columns))) ACTIONS = data.actions;
+      if (_isNonEmptyObj(data.items)) ARSENAL = data.items;
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -3633,6 +3642,7 @@
       renderDotDescs();
       renderActions();
       buildRegras();
+      buildArsenal();
       loadDOM();
       updateAll();
       setupNotesFormat();
@@ -4545,7 +4555,7 @@
       const all = [...S.implSUP || [], ...S.implINF || [], ...S.implINT || [], ...S.implSup || [], ...S.implInf || [], ...S.implInt || []];
       const unique = []; const seen = new Set();
       all.forEach(im => { if (im.name && !seen.has(im.name)) { seen.add(im.name); unique.push(im); } });
-      if (unique.length === 0) { wrap.innerHTML = '<div class="empty-msg">Adicione implantes na aba Ficha para detalhar aqui.</div>'; return; }
+      if (unique.length === 0) { wrap.innerHTML = '<div class="empty-msg">Adicione implantes na aba Arsenal para detalhar aqui.</div>'; return; }
       wrap.innerHTML = unique.map(im => `
     <div class="impl-slot" style="grid-template-columns:1fr;margin-bottom:6px">
       <div><span class="impl-lbl">${im.name}</span></div>
@@ -4678,6 +4688,41 @@
           + `<div class="reg-head" onclick="toggleReg(this)"><span class="reg-caret">▾</span>${title}</div>`
           + `<div class="reg-body">${body}</div></div>`;
       }).join('');
+    }
+
+    // ARSENAL (Doc → ARSENAL): catálogo de Armas, Implantes, Itens e Artefatos, no visual da aba Regras.
+    // Placeholders do Doc ("?", "Placeholder") aparecem como estão: são revelados ao longo da campanha.
+    // O Firebase descarta listas vazias e null, daí os "|| []".
+    function buildArsenal() {
+      const wrap = document.getElementById('arsenalWrap'); if (!wrap) return;
+      if (!ARSENAL) { wrap.innerHTML = '<div class="empty-msg mt12">Catálogo ainda não publicado (Doc → Ponte ARC → Publicar).</div>'; return; }
+      const intro = lines => (lines || []).map(t => `<div class="reg-cell-desc" style="color:var(--txt);margin-bottom:6px">${_esc(t)}</div>`).join('');
+      const sub = t => `<div class="lbl" style="margin:14px 0 6px">${_esc(t)}</div>`;
+      const cell = (title, descHtml) => `<div class="reg-cell"><div class="reg-cell-title">${_esc(title)}</div><div class="reg-cell-desc">${descHtml}</div></div>`;
+      const grid = cells => cells.length ? `<div class="reg-grid">${cells.join('')}</div>` : '';
+      const nd = x => `<div><b>${_esc(x.name)}</b>${x.desc ? ': ' + _esc(x.desc) : ''}</div>`;
+      const section = (title, body) => `<div class="reg-section panel mt12">`
+        + `<div class="reg-head" onclick="toggleReg(this)"><span class="reg-caret">▾</span>${title}</div>`
+        + `<div class="reg-body">${body}</div></div>`;
+
+      const A = ARSENAL.armas || {}, I = ARSENAL.implantes || {}, T = ARSENAL.itens || {}, R = ARSENAL.artefatos || {};
+      const armas = intro(A.intro) + (A.grupos || []).map(g =>
+        sub(g.nome.toUpperCase()) + intro(g.intro)
+        + (g.tracos || []).map(tr => sub(tr.titulo) + grid((tr.itens || []).map(x => cell(x.name, _esc(x.desc))))).join('')
+        + (g.pesos || []).map(p => sub(p.nome + (p.req ? ' · ' + p.req : ''))
+          + ((p.armas || []).length
+            ? grid(p.armas.map(a => cell(a.nome, (a.campos || []).map(c => `<div><b>${_esc(c.k)}:</b> ${_esc(c.v)}</div>`).join(''))))
+            : '<div class="reg-cell-desc">?</div>')).join('')
+      ).join('');
+      const implantes = intro(I.intro) + (I.categorias || []).map(c =>
+        sub(c.nome + (c.desc ? ' — ' + c.desc : ''))
+        + grid((c.grupos || []).map(g => cell(g.parte || c.nome, (g.itens || []).map(nd).join(''))))
+      ).join('');
+      const itens = intro(T.intro) + grid((T.categorias || []).map(c => cell(c.nome, (c.itens || []).map(nd).join(''))));
+      const artefatos = intro(R.intro) + grid((R.categorias || []).map(c => cell(c.nome,
+        _esc(c.desc || '') + ((c.itens || []).length ? `<div class="reg-note" style="font-style:normal">${c.itens.map(nd).join('')}</div>` : ''))));
+
+      wrap.innerHTML = section('ARMAS', armas) + section('IMPLANTES', implantes) + section('ITENS', itens) + section('ARTEFATOS', artefatos);
     }
 
     // ═══════════════════════════════════════════════════════════════
