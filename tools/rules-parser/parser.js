@@ -124,6 +124,9 @@ function parseClasses(paragraphs) {
   return { classes, warnings };
 }
 
+// Quebra de linha dentro de um parágrafo: Apps Script devolve a quebra suave (Shift+Enter) como "\r" sozinho.
+const LINE_SPLIT = /\r\n|\r|\n/;
+
 const SUBATTR_KEYS = ['forca', 'vigor', 'agilidade', 'habilidade', 'sincronia', 'intelecto', 'conexao', 'entendimento'];
 function _subKey(text) {
   const t = String(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
@@ -144,7 +147,7 @@ function parseSubattrs(paragraphs) {
     if (!inAttrs) continue;
     if (heading === 'HEADING2') { currentSub = null; lbMode = false; continue; }
     // um item pode conter várias linhas (quebra de linha interna no Doc) — processa cada uma
-    for (const raw of full.split(/\r?\n/)) {
+    for (const raw of full.split(LINE_SPLIT)) {
       const t = raw.trim();
       if (!t) continue;
       const sub = _subKey(t);
@@ -255,7 +258,7 @@ function parseStatus(paragraphs) {
       if (mode === 'sanidade') { const row = parseSanityRow(p.cells); if (row) sanity.push(row); }
       continue;
     }
-    for (const raw of full.split(/\r?\n/)) {
+    for (const raw of full.split(LINE_SPLIT)) {
       const t = raw.trim();
       if (!t) continue;
       if (/^vida$/i.test(t)) { mode = 'vida'; currentNat = null; continue; }
@@ -311,7 +314,7 @@ function parseNatures(paragraphs) {
     const full = String(p.text || '');
     if (heading === 'HEADING1') { inNat = /^naturezas$/i.test(full.trim()); currentNat = null; continue; }
     if (!inNat) continue;
-    for (const raw of full.split(/\r?\n/)) {
+    for (const raw of full.split(LINE_SPLIT)) {
       const t = raw.trim();
       if (!t) continue;
       let m;
@@ -363,7 +366,7 @@ function parseSystems(paragraphs) {
     const full = String(p.text || '');
     if (heading === 'HEADING1') { inSystems = _norm(full) === 'sistemas e esclarecimentos'; key = undefined; item = null; continue; }
     if (!inSystems) continue;
-    for (const raw of full.split(/\r?\n/)) {
+    for (const raw of full.split(LINE_SPLIT)) {
       const t = raw.trim();
       if (!t) continue;
       const n = _norm(t);
@@ -406,7 +409,7 @@ function parseActions(paragraphs) {
     const full = String(p.text || '');
     if (heading === 'HEADING1') { inActions = _norm(full) === 'acoes'; mode = undefined; item = null; continue; }
     if (!inActions) continue;
-    for (const raw of full.split(/\r?\n/)) {
+    for (const raw of full.split(LINE_SPLIT)) {
       const t = raw.trim();
       if (!t) continue;
       const n = _norm(t);
@@ -424,4 +427,107 @@ function parseActions(paragraphs) {
   return { actions: actions, warnings: warnings };
 }
 
-module.exports = { parseSanityRow, normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses, diffClasses, parseSubattrs, parseStatus, parseNatures, parseSystems, parseActions };
+// Seções "# Armas", "# Implantes", "# Itens" e "# Artefatos" → catálogo da aba Arsenal do ARC.
+// Sincroniza só a referência de regras; armas prontas, implantes e artefatos listados ficam no Doc
+// (são revelados ao longo da campanha). Placeholders "? – ?" dos traços e dos Itens entram como estão.
+const ITEM_SECTIONS = { armas: 'armas', implantes: 'implantes', itens: 'itens', artefatos: 'artefatos' };
+const WEIGHT_RE = /^(pesadas|m[ée]dias|leves)\s*(?:\(([^)]*)\))?$/i;
+const TRAIT_RE = /^(.{1,40}?)\s+[–—-]\s+(.+)$/;
+const IMPL_CATS = ['blindagens', 'superiores', 'inferiores', 'internos'];
+const IMPL_PARTS = ['bracos', 'torso', 'cabeca', 'pernas', 'pes', 'quadril', 'ossos', 'orgaos', 'musculos'];
+
+function _nameDesc(t) {
+  const m = t.match(SYS_ITEM_RE);
+  return m ? { name: m[1].trim(), desc: m[2].trim() } : { name: t, desc: '' };
+}
+function _append(obj, k, t) { obj[k] = obj[k] ? obj[k] + ' ' + t : t; }
+
+// Armas: H2 = grupo (Corpo a corpo / À distância); rótulo seguido de "Nome – desc" = lista de traços
+// (Arquétipos, Identidades, Perfis). A partir de "Pesadas/Médias/Leves" (armas prontas) o resto do grupo é ignorado.
+function _parseArmas(lines, A) {
+  let g = null, trait = null, skip = false;
+  lines.forEach(function (ln, i) {
+    let m;
+    if (ln.h === 'HEADING2') { g = { nome: ln.t, tracos: [] }; A.grupos.push(g); trait = null; skip = false; return; }
+    if (!g || skip) return;
+    if (WEIGHT_RE.test(ln.t)) { skip = true; return; }
+    if (trait && (m = ln.t.match(TRAIT_RE))) { trait.itens.push({ name: m[1].trim(), desc: m[2].trim() }); return; }
+    const next = lines[i + 1];
+    if (next && next.h !== 'HEADING2' && TRAIT_RE.test(next.t)) { trait = { titulo: ln.t, itens: [] }; g.tracos.push(trait); }
+  });
+}
+
+// Implantes: categoria conhecida (Blindagens/Superiores/...), 1ª linha depois = desc; parte do corpo conhecida
+// (Braços, Torso, ...). Linhas soltas = "Descrição." da parte (ou da categoria, se ainda não há parte).
+// Antes da 1ª categoria: rótulo "Qualidade dos implantes" seguido de "Perfeito: desc" = qualidades.
+// Itens de lista (os implantes em si) não são sincronizados.
+function _parseImplantes(lines, I) {
+  let cat = null, parte = null, wantDesc = false, inQual = false;
+  lines.forEach(function (ln) {
+    if (ln.list) return;
+    const n = _norm(ln.t);
+    if (IMPL_CATS.indexOf(n) >= 0) { cat = { nome: ln.t, desc: null, uso: null, partes: [] }; I.categorias.push(cat); parte = null; wantDesc = true; return; }
+    if (!cat) {
+      if (n.indexOf('qualidade dos implantes') === 0) { inQual = true; return; }
+      if (inQual && SYS_ITEM_RE.test(ln.t)) { I.qualidades.push(_nameDesc(ln.t)); return; }
+      I.intro.push(ln.t);
+      return;
+    }
+    if (wantDesc) { cat.desc = ln.t; wantDesc = false; return; }
+    if (IMPL_PARTS.indexOf(n) >= 0) { parte = { nome: ln.t, desc: null }; cat.partes.push(parte); return; }
+    if (parte) _append(parte, 'desc', ln.t); else _append(cat, 'uso', ln.t);
+  });
+}
+
+// Itens: linha "*..." = nota (intro); "Nome: desc" = item; outra linha = categoria nova.
+function _parseItensCat(lines, T) {
+  let cat = null;
+  lines.forEach(function (ln) {
+    if (ln.t.charAt(0) === '*') { T.intro.push(ln.t); return; }
+    if (cat && SYS_ITEM_RE.test(ln.t)) { cat.itens.push(_nameDesc(ln.t)); return; }
+    cat = { nome: ln.t, itens: [] }; T.categorias.push(cat);
+  });
+}
+
+// Artefatos: H2 = categoria (Divino/Ancião/...), 1ª linha = desc, linhas seguintes = "Descrição." (como usar).
+// O 1º artefato listado ("Nome: desc") encerra a categoria: ele e o que vem abaixo não são sincronizados.
+function _parseArtefatos(lines, R) {
+  let cat = null, done = false;
+  lines.forEach(function (ln) {
+    if (ln.h === 'HEADING2') { cat = { nome: ln.t, desc: null, uso: null }; R.categorias.push(cat); done = false; return; }
+    if (!cat) { R.intro.push(ln.t); return; }
+    if (done) return;
+    if (cat.desc == null) { cat.desc = ln.t; return; }
+    if (SYS_ITEM_RE.test(ln.t)) { done = true; return; }
+    _append(cat, 'uso', ln.t);
+  });
+}
+
+function parseItems(paragraphs) {
+  const lines = { armas: [], implantes: [], itens: [], artefatos: [] };
+  let sec = null;
+  for (const p of paragraphs) {
+    const heading = p.heading || 'NORMAL';
+    const full = String(p.text || '');
+    if (heading === 'HEADING1') { sec = ITEM_SECTIONS[_norm(full)] || null; continue; }
+    if (!sec) continue;
+    full.split(LINE_SPLIT).forEach(function (raw) {
+      const t = raw.trim();
+      // "*Serão adicionados conforme o passar do RPG" fala dos itens listados; só faz sentido nos Itens.
+      if (t && !(sec !== 'itens' && t.charAt(0) === '*')) lines[sec].push({ h: heading, t: t, list: !!p.list });
+    });
+  }
+  const items = {
+    armas: { grupos: [] },
+    implantes: { intro: [], qualidades: [], categorias: [] },
+    itens: { intro: [], categorias: [] },
+    artefatos: { intro: [], categorias: [] },
+  };
+  _parseArmas(lines.armas, items.armas);
+  _parseImplantes(lines.implantes, items.implantes);
+  _parseItensCat(lines.itens, items.itens);
+  _parseArtefatos(lines.artefatos, items.artefatos);
+  return { items: items, warnings: [] };
+}
+
+module.exports = { parseItems, parseSanityRow, normalizeAction, normalizeCost, parseSkillLine, parseUltimateHeader, parseClasses, diffClasses, parseSubattrs, parseStatus, parseNatures, parseSystems, parseActions };

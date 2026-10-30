@@ -135,6 +135,9 @@ function parseClasses(paragraphs) {
   return { classes, warnings };
 }
 
+// Quebra de linha dentro de um parágrafo: Apps Script devolve a quebra suave (Shift+Enter) como "\r" sozinho.
+const LINE_SPLIT = /\r\n|\r|\n/;
+
 const SUBATTR_KEYS = ['forca', 'vigor', 'agilidade', 'habilidade', 'sincronia', 'intelecto', 'conexao', 'entendimento'];
 function _subKey(text) {
   const t = String(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
@@ -155,7 +158,7 @@ function parseSubattrs(paragraphs) {
     if (!inAttrs) continue;
     if (heading === 'HEADING2') { currentSub = null; lbMode = false; continue; }
     // um item pode conter várias linhas (quebra de linha interna no Doc) — processa cada uma
-    for (const raw of full.split(/\r?\n/)) {
+    for (const raw of full.split(LINE_SPLIT)) {
       const t = raw.trim();
       if (!t) continue;
       const sub = _subKey(t);
@@ -266,7 +269,7 @@ function parseStatus(paragraphs) {
       if (mode === 'sanidade') { const row = parseSanityRow(p.cells); if (row) sanity.push(row); }
       continue;
     }
-    for (const raw of full.split(/\r?\n/)) {
+    for (const raw of full.split(LINE_SPLIT)) {
       const t = raw.trim();
       if (!t) continue;
       if (/^vida$/i.test(t)) { mode = 'vida'; currentNat = null; continue; }
@@ -322,7 +325,7 @@ function parseNatures(paragraphs) {
     const full = String(p.text || '');
     if (heading === 'HEADING1') { inNat = /^naturezas$/i.test(full.trim()); currentNat = null; continue; }
     if (!inNat) continue;
-    for (const raw of full.split(/\r?\n/)) {
+    for (const raw of full.split(LINE_SPLIT)) {
       const t = raw.trim();
       if (!t) continue;
       let m;
@@ -373,7 +376,7 @@ function parseSystems(paragraphs) {
     const full = String(p.text || '');
     if (heading === 'HEADING1') { inSystems = _norm(full) === 'sistemas e esclarecimentos'; key = undefined; item = null; continue; }
     if (!inSystems) continue;
-    for (const raw of full.split(/\r?\n/)) {
+    for (const raw of full.split(LINE_SPLIT)) {
       const t = raw.trim();
       if (!t) continue;
       const n = _norm(t);
@@ -413,7 +416,7 @@ function parseActions(paragraphs) {
     const full = String(p.text || '');
     if (heading === 'HEADING1') { inActions = _norm(full) === 'acoes'; mode = undefined; item = null; continue; }
     if (!inActions) continue;
-    for (const raw of full.split(/\r?\n/)) {
+    for (const raw of full.split(LINE_SPLIT)) {
       const t = raw.trim();
       if (!t) continue;
       const n = _norm(t);
@@ -430,6 +433,109 @@ function parseActions(paragraphs) {
   }
   return { actions: actions, warnings: warnings };
 }
+// Seções "# Armas", "# Implantes", "# Itens" e "# Artefatos" → catálogo da aba Arsenal do ARC.
+// Sincroniza só a referência de regras; armas prontas, implantes e artefatos listados ficam no Doc
+// (são revelados ao longo da campanha). Placeholders "? – ?" dos traços e dos Itens entram como estão.
+const ITEM_SECTIONS = { armas: 'armas', implantes: 'implantes', itens: 'itens', artefatos: 'artefatos' };
+const WEIGHT_RE = /^(pesadas|m[ée]dias|leves)\s*(?:\(([^)]*)\))?$/i;
+const TRAIT_RE = /^(.{1,40}?)\s+[–—-]\s+(.+)$/;
+const IMPL_CATS = ['blindagens', 'superiores', 'inferiores', 'internos'];
+const IMPL_PARTS = ['bracos', 'torso', 'cabeca', 'pernas', 'pes', 'quadril', 'ossos', 'orgaos', 'musculos'];
+
+function _nameDesc(t) {
+  const m = t.match(SYS_ITEM_RE);
+  return m ? { name: m[1].trim(), desc: m[2].trim() } : { name: t, desc: '' };
+}
+function _append(obj, k, t) { obj[k] = obj[k] ? obj[k] + ' ' + t : t; }
+
+// Armas: H2 = grupo (Corpo a corpo / À distância); rótulo seguido de "Nome – desc" = lista de traços
+// (Arquétipos, Identidades, Perfis). A partir de "Pesadas/Médias/Leves" (armas prontas) o resto do grupo é ignorado.
+function _parseArmas(lines, A) {
+  let g = null, trait = null, skip = false;
+  lines.forEach(function (ln, i) {
+    let m;
+    if (ln.h === 'HEADING2') { g = { nome: ln.t, tracos: [] }; A.grupos.push(g); trait = null; skip = false; return; }
+    if (!g || skip) return;
+    if (WEIGHT_RE.test(ln.t)) { skip = true; return; }
+    if (trait && (m = ln.t.match(TRAIT_RE))) { trait.itens.push({ name: m[1].trim(), desc: m[2].trim() }); return; }
+    const next = lines[i + 1];
+    if (next && next.h !== 'HEADING2' && TRAIT_RE.test(next.t)) { trait = { titulo: ln.t, itens: [] }; g.tracos.push(trait); }
+  });
+}
+
+// Implantes: categoria conhecida (Blindagens/Superiores/...), 1ª linha depois = desc; parte do corpo conhecida
+// (Braços, Torso, ...). Linhas soltas = "Descrição." da parte (ou da categoria, se ainda não há parte).
+// Antes da 1ª categoria: rótulo "Qualidade dos implantes" seguido de "Perfeito: desc" = qualidades.
+// Itens de lista (os implantes em si) não são sincronizados.
+function _parseImplantes(lines, I) {
+  let cat = null, parte = null, wantDesc = false, inQual = false;
+  lines.forEach(function (ln) {
+    if (ln.list) return;
+    const n = _norm(ln.t);
+    if (IMPL_CATS.indexOf(n) >= 0) { cat = { nome: ln.t, desc: null, uso: null, partes: [] }; I.categorias.push(cat); parte = null; wantDesc = true; return; }
+    if (!cat) {
+      if (n.indexOf('qualidade dos implantes') === 0) { inQual = true; return; }
+      if (inQual && SYS_ITEM_RE.test(ln.t)) { I.qualidades.push(_nameDesc(ln.t)); return; }
+      I.intro.push(ln.t);
+      return;
+    }
+    if (wantDesc) { cat.desc = ln.t; wantDesc = false; return; }
+    if (IMPL_PARTS.indexOf(n) >= 0) { parte = { nome: ln.t, desc: null }; cat.partes.push(parte); return; }
+    if (parte) _append(parte, 'desc', ln.t); else _append(cat, 'uso', ln.t);
+  });
+}
+
+// Itens: linha "*..." = nota (intro); "Nome: desc" = item; outra linha = categoria nova.
+function _parseItensCat(lines, T) {
+  let cat = null;
+  lines.forEach(function (ln) {
+    if (ln.t.charAt(0) === '*') { T.intro.push(ln.t); return; }
+    if (cat && SYS_ITEM_RE.test(ln.t)) { cat.itens.push(_nameDesc(ln.t)); return; }
+    cat = { nome: ln.t, itens: [] }; T.categorias.push(cat);
+  });
+}
+
+// Artefatos: H2 = categoria (Divino/Ancião/...), 1ª linha = desc, linhas seguintes = "Descrição." (como usar).
+// O 1º artefato listado ("Nome: desc") encerra a categoria: ele e o que vem abaixo não são sincronizados.
+function _parseArtefatos(lines, R) {
+  let cat = null, done = false;
+  lines.forEach(function (ln) {
+    if (ln.h === 'HEADING2') { cat = { nome: ln.t, desc: null, uso: null }; R.categorias.push(cat); done = false; return; }
+    if (!cat) { R.intro.push(ln.t); return; }
+    if (done) return;
+    if (cat.desc == null) { cat.desc = ln.t; return; }
+    if (SYS_ITEM_RE.test(ln.t)) { done = true; return; }
+    _append(cat, 'uso', ln.t);
+  });
+}
+
+function parseItems(paragraphs) {
+  const lines = { armas: [], implantes: [], itens: [], artefatos: [] };
+  let sec = null;
+  for (const p of paragraphs) {
+    const heading = p.heading || 'NORMAL';
+    const full = String(p.text || '');
+    if (heading === 'HEADING1') { sec = ITEM_SECTIONS[_norm(full)] || null; continue; }
+    if (!sec) continue;
+    full.split(LINE_SPLIT).forEach(function (raw) {
+      const t = raw.trim();
+      // "*Serão adicionados conforme o passar do RPG" fala dos itens listados; só faz sentido nos Itens.
+      if (t && !(sec !== 'itens' && t.charAt(0) === '*')) lines[sec].push({ h: heading, t: t, list: !!p.list });
+    });
+  }
+  const items = {
+    armas: { grupos: [] },
+    implantes: { intro: [], qualidades: [], categorias: [] },
+    itens: { intro: [], categorias: [] },
+    artefatos: { intro: [], categorias: [] },
+  };
+  _parseArmas(lines.armas, items.armas);
+  _parseImplantes(lines.implantes, items.implantes);
+  _parseItensCat(lines.itens, items.itens);
+  _parseArtefatos(lines.artefatos, items.artefatos);
+  return { items: items, warnings: [] };
+}
+
 // ---- FIM cópia de tools/rules-parser/parser.js ----
 
 // ---- Camada Google (I/O): lê o Doc, mostra preview, grava no Firebase ----
@@ -471,7 +577,7 @@ function coletarParagrafos() {
     if (type === ET.PARAGRAPH) p = el.asParagraph();
     else if (type === ET.LIST_ITEM) p = el.asListItem();
     else if (type === ET.TABLE) _linhasDaTabela(el.asTable()).forEach(function (r) { out.push(r); });
-    if (p) out.push({ heading: _headingName(p.getHeading()), text: p.getText() });
+    if (p) out.push({ heading: _headingName(p.getHeading()), text: p.getText(), list: type === ET.LIST_ITEM });
   }
   return out;
 }
@@ -484,6 +590,8 @@ function construirArcRules() {
   const nt = parseNatures(paras);
   const sy = parseSystems(paras);
   const ac = parseActions(paras);
+  const it = parseItems(paras);
+  const envIt = _envItems(it.items);
   // Mescla buff/debuff/habUnica (# Naturezas) no mesmo nó de cada natureza (hp/sta vêm de # Status).
   Object.keys(nt.natures).forEach(function (n) {
     const dst = st.natures[n] || (st.natures[n] = {}), src = nt.natures[n];
@@ -492,14 +600,15 @@ function construirArcRules() {
     if (src.habUnica) dst.habUnica = src.habUnica;
   });
   return {
-    rules: { _version: 1, _updatedAt: new Date().getTime(), classes: c.classes, subattrs: s.subattrs, status: { natures: st.natures, sanity: st.sanity }, systems: sy.systems, actions: ac.actions },
-    warnings: c.warnings.concat(s.warnings).concat(st.warnings).concat(nt.warnings).concat(sy.warnings).concat(ac.warnings),
+    rules: { _version: 1, _updatedAt: new Date().getTime(), classes: c.classes, subattrs: s.subattrs, status: { natures: st.natures, sanity: st.sanity }, systems: sy.systems, actions: ac.actions, items: it.items },
+    warnings: c.warnings.concat(s.warnings).concat(st.warnings).concat(nt.warnings).concat(sy.warnings).concat(ac.warnings).concat(it.warnings),
     countClasses: Object.keys(c.classes).length,
     countSubattrs: Object.keys(s.subattrs).length,
     countNatures: Object.keys(st.natures).length,
     countSanity: st.sanity.length,
     countSystems: Object.keys(sy.systems).length,
     countActions: ACT_COL_KEYS.reduce(function (acc, k) { return acc + (ac.actions.columns[k].items || []).length; }, 0),
+    countArsenal: Object.keys(envIt).reduce(function (acc, k) { return acc + envIt[k].skills.length; }, 0),
   };
 }
 
@@ -571,6 +680,38 @@ function _envStatus(status) {
   return o;
 }
 
+// Envelopa o catálogo do Arsenal (armas/implantes/itens/artefatos) como pseudo-classes p/ reusar diffClasses.
+// Cada linha ganha um nome único (caminho + #n), pois há vários "?"/"Placeholder" repetidos.
+function _envItems(items) {
+  items = items || {};
+  const o = {};
+  function add(sec, name, desc) {
+    const k = 'Arsenal — ' + sec;
+    if (!o[k]) o[k] = { skills: [], ultimate: null };
+    o[k].skills.push({ name: name + ' #' + (o[k].skills.length + 1), action: '', cost: null, desc: desc || '' });
+  }
+  function nd(x) { return x.name + (x.desc ? ': ' + x.desc : ''); }
+  const A = items.armas || {}, I = items.implantes || {}, T = items.itens || {}, R = items.artefatos || {};
+  (A.grupos || []).forEach(function (g) {
+    (g.tracos || []).forEach(function (tr) { (tr.itens || []).forEach(function (x) { add('Armas', g.nome + ' › ' + tr.titulo, nd(x)); }); });
+  });
+  (I.intro || []).forEach(function (t) { add('Implantes', '(intro)', t); });
+  (I.qualidades || []).forEach(function (x) { add('Implantes', 'Qualidade', nd(x)); });
+  (I.categorias || []).forEach(function (c) {
+    if (c.desc) add('Implantes', c.nome + ' › (desc)', c.desc);
+    if (c.uso) add('Implantes', c.nome + ' › (descrição)', c.uso);
+    (c.partes || []).forEach(function (p) { add('Implantes', c.nome + ' › ' + p.nome, p.desc); });
+  });
+  (T.intro || []).forEach(function (t) { add('Itens', '(intro)', t); });
+  (T.categorias || []).forEach(function (c) { (c.itens || []).forEach(function (x) { add('Itens', c.nome, nd(x)); }); });
+  (R.intro || []).forEach(function (t) { add('Artefatos', '(intro)', t); });
+  (R.categorias || []).forEach(function (c) {
+    if (c.desc) add('Artefatos', c.nome + ' › (desc)', c.desc);
+    if (c.uso) add('Artefatos', c.nome + ' › (descrição)', c.uso);
+  });
+  return o;
+}
+
 function _esc(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -588,8 +729,8 @@ function _diffSection(titulo, diff) {
     + '<table><tr><th>Atual (Firebase)</th><th>Novo (Doc)</th></tr>' + rows + '</table>';
 }
 
-function _previewHtml(out, diffCls, diffSub, diffSt, diffSy, diffAc) {
-  let head = '<div class="hd">Classes: <b>' + out.countClasses + '</b> (14) · Subatributos: <b>' + out.countSubattrs + '</b> (8) · Naturezas Vida/Sta: <b>' + out.countNatures + '</b> (4) · Sistemas: <b>' + out.countSystems + '</b> · Ações: <b>' + out.countActions + '</b></div>';
+function _previewHtml(out, diffCls, diffSub, diffSt, diffSy, diffAc, diffIt) {
+  let head = '<div class="hd">Classes: <b>' + out.countClasses + '</b> (14) · Subatributos: <b>' + out.countSubattrs + '</b> (8) · Naturezas Vida/Sta: <b>' + out.countNatures + '</b> (4) · Sistemas: <b>' + out.countSystems + '</b> · Ações: <b>' + out.countActions + '</b> · Arsenal: <b>' + out.countArsenal + '</b></div>';
   if (out.warnings.length) {
     head += '<div class="warn">⚠️ ' + out.warnings.length + ' aviso(s):<ul>';
     out.warnings.forEach(function (w) { head += '<li>' + _esc(w) + '</li>'; });
@@ -608,7 +749,7 @@ function _previewHtml(out, diffCls, diffSub, diffSt, diffSy, diffAc) {
     + '.tag.modified{background:#9a6700}.tag.skill-added,.tag.class-added{background:#22863a}'
     + '.tag.skill-removed,.tag.class-removed{background:#d73a49}'
     + '</style>';
-  return css + head + _diffSection('Classes', diffCls) + _diffSection('Subatributos', diffSub) + _diffSection('Status (Vida/Stamina)', diffSt) + _diffSection('Sistemas e Esclarecimentos', diffSy) + _diffSection('Ações', diffAc);
+  return css + head + _diffSection('Classes', diffCls) + _diffSection('Subatributos', diffSub) + _diffSection('Status (Vida/Stamina)', diffSt) + _diffSection('Sistemas e Esclarecimentos', diffSy) + _diffSection('Ações', diffAc) + _diffSection('Arsenal (Armas/Implantes/Itens/Artefatos)', diffIt);
 }
 
 function onOpen() {
@@ -627,7 +768,8 @@ function mostrarPreview() {
   const diffSt = diffClasses(_envStatus(atual.status), _envStatus(out.rules.status));
   const diffSy = diffClasses(_envSystems(atual.systems), _envSystems(out.rules.systems));
   const diffAc = diffClasses(_envActions(atual.actions), _envActions(out.rules.actions));
-  const html = HtmlService.createHtmlOutput(_previewHtml(out, diffCls, diffSub, diffSt, diffSy, diffAc)).setWidth(860).setHeight(620);
+  const diffIt = diffClasses(_envItems(atual.items), _envItems(out.rules.items));
+  const html = HtmlService.createHtmlOutput(_previewHtml(out, diffCls, diffSub, diffSt, diffSy, diffAc, diffIt)).setWidth(860).setHeight(620);
   DocumentApp.getUi().showModalDialog(html, 'Preview — Ponte ARC');
 }
 
@@ -639,10 +781,11 @@ function publicar() {
     + diffClasses(_envelope(atual.subattrs), _envelope(out.rules.subattrs)).rows.length
     + diffClasses(_envStatus(atual.status), _envStatus(out.rules.status)).rows.length
     + diffClasses(_envSystems(atual.systems), _envSystems(out.rules.systems)).rows.length
-    + diffClasses(_envActions(atual.actions), _envActions(out.rules.actions)).rows.length;
+    + diffClasses(_envActions(atual.actions), _envActions(out.rules.actions)).rows.length
+    + diffClasses(_envItems(atual.items), _envItems(out.rules.items)).rows.length;
   const aviso = out.warnings.length ? ('\n\n⚠️ ' + out.warnings.length + ' aviso(s)! Veja o Preview antes.') : '';
   const resp = ui.alert('Publicar no Firebase',
-    'Enviar ' + out.countClasses + ' classes + ' + out.countSubattrs + ' subatributos + ' + out.countNatures + ' naturezas + ' + out.countSystems + ' sistemas + ' + out.countActions + ' ações + ' + out.countSanity + ' faixas de sanidade (' + nMud + ' mudança(s)) para o ARC?'
+    'Enviar ' + out.countClasses + ' classes + ' + out.countSubattrs + ' subatributos + ' + out.countNatures + ' naturezas + ' + out.countSystems + ' sistemas + ' + out.countActions + ' ações + ' + out.countArsenal + ' linhas do Arsenal + ' + out.countSanity + ' faixas de sanidade (' + nMud + ' mudança(s)) para o ARC?'
     + '\nUse "Pré-visualizar" para ver o diff lado a lado.' + aviso,
     ui.ButtonSet.OK_CANCEL);
   if (resp !== ui.Button.OK) return;
