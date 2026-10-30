@@ -2239,8 +2239,11 @@
   /* Evolução (nível 4) e Super Evolução (nível 5) de Títulos de Rank S: somam ao S */
   .ru-rays.rev { background:repeating-conic-gradient(from 7deg, rgba(255,241,201,.2) 0deg 2deg, transparent 2deg 22deg);
     animation:ru-fade .8s ease-out var(--hit) forwards, ru-spin 20s linear var(--hit) infinite reverse }
-  .ru-stars { font-size:clamp(22px,3vw,36px); letter-spacing:.3em; margin-right:-.3em; color:#ffe6a6; opacity:0;
-    text-shadow:0 0 14px rgba(var(--c-rgb),.95); animation:ru-up .5s cubic-bezier(.16,1,.3,1) calc(var(--hit) + 150ms) both }
+  .ru-letter { position:relative }
+  .ru-plus { position:absolute; top:50%; font-size:.42em; opacity:0; transform:translateY(-58%);
+    animation:ru-plus .45s cubic-bezier(.16,1,.3,1) calc(var(--hit) + 120ms) both }
+  .ru-plus.r { left:100%; margin-left:.06em } .ru-plus.l { right:100%; margin-right:.06em }
+  @keyframes ru-plus { from { opacity:0; transform:translateY(-58%) scale(.3) } to { opacity:1; transform:translateY(-58%) scale(1) } }
   .ru-pillar { position:absolute; left:50%; top:-10%; bottom:-10%; width:240px; margin-left:-120px; opacity:0; transform:scaleX(0);
     background:linear-gradient(90deg, transparent, rgba(255,241,201,.25) 38%, rgba(255,255,255,.5) 50%, rgba(255,241,201,.25) 62%, transparent);
     animation:ru-pillar 1.4s cubic-bezier(.16,1,.3,1) calc(var(--hit) - 200ms) forwards }
@@ -2290,7 +2293,7 @@
   /* movimento reduzido: só o cartão final, sem varrida/flash/tremor */
   .ru[data-reduce] *, .ru[data-reduce] *::before, .ru[data-reduce] *::after { animation:none !important }
   .ru[data-reduce]:not(.ru-out) { animation:ru-fade .3s ease-out both }
-  .ru[data-reduce] .ru-bg, .ru[data-reduce] .ru-kicker, .ru[data-reduce] .ru-letter, .ru[data-reduce] .ru-sub, .ru[data-reduce] .ru-stars { opacity:1 }
+  .ru[data-reduce] .ru-bg, .ru[data-reduce] .ru-kicker, .ru[data-reduce] .ru-letter, .ru[data-reduce] .ru-sub, .ru[data-reduce] .ru-plus { opacity:1 }
   .ru[data-reduce] .ru-band, .ru[data-reduce] .ru-band::before, .ru[data-reduce] .ru-band::after { transform:none }
 
   @keyframes ru-fall { 0% { opacity:0; transform:translateY(-100%) } 10%, 85% { opacity:var(--o) } 100% { opacity:0; transform:translateY(110vh) } }
@@ -4911,7 +4914,8 @@
       const total = reduce ? 1800 : z ? 4800 : [0, 3300, 3900, 4900, 5400, 6000][tier];
       const rnd = (a, b) => a + Math.random() * (b - a);
       const old = from ? `<div class="ru-old">${from}</div>` : '';
-      let letter = `<div class="ru-lw">${old}<div class="ru-letter">${to}</div></div>`;
+      const plus = evo === 2 ? '<span class="ru-plus l">+</span>' : '', plusR = evo ? '<span class="ru-plus r">+</span>' : '';
+      let letter = `<div class="ru-lw">${old}<div class="ru-letter">${plus}${to}${plusR}</div></div>`;
 
       const el = document.createElement('div');
       el.className = 'ru';
@@ -4964,9 +4968,8 @@
       el.innerHTML = `<div class="ru-bg"></div>
         <div class="ru-shake">${fx}
           <div class="ru-stage">
-            <div class="ru-kicker">${z ? 'TÍTULO ABDICADO' : evo === 2 ? 'SUPER EVOLUÇÃO' : evo ? 'EVOLUÇÃO' : 'RANK UP'}</div>
+            <div class="ru-kicker">${z ? 'TÍTULO ABDICADO' : evo === 2 ? '✦✦ SUPER EVOLUÇÃO ✦✦' : evo ? '✦ EVOLUÇÃO ✦' : 'RANK UP'}</div>
             ${letter}
-            ${evo ? `<div class="ru-stars">${'✦'.repeat(evo)}</div>` : ''}
             <div class="ru-sub">${evo ? `<b>${RU_ESC(opts.title)}</b><br>${evo === 2 ? 'O TÍTULO ATINGIU SUA FORMA FINAL' : 'O TÍTULO EVOLUIU'}`
               : z ? `${from ? `${from} ▸ ` : ''}<b>AMALDIÇOADO</b>` : `${from} ▸ <b>${to}</b>`}${evo ? '' : '<br>' + (RU_SUB[to] || '')}</div>
           </div>
