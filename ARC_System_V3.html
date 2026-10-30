@@ -2401,6 +2401,8 @@
     /* seletor escondido (Ctrl+Alt+E) */
     .evo-tool { display: none }
     html.evo-tools .evo-tool { display: flex; gap: 8px; align-items: center; margin-top: 8px }
+    html.evo-tools .evo-banner { margin: 0 0 12px; padding: 8px 12px; border: 1px dashed rgba(var(--evo-1-rgb), .55);
+      font-family: 'Share Tech Mono', monospace; font-size: var(--fs-sm); color: var(--evo-1) }
 
     @media (prefers-reduced-motion: reduce) {
       html[data-evo] .evo-sheen, .evo-embers { display: none !important }
@@ -3071,6 +3073,7 @@
       </div>
       <div id="rankLevelBar" class="progress-wrap" style="margin-bottom:14px"></div>
       <div id="rankUpPanel" class="title-card" hidden style="border-color:var(--blue);margin-bottom:14px"></div>
+      <div id="evoBanner" class="evo-tool evo-banner"></div>
       <div id="titlesWrap">
         <div class="empty-msg">Nenhum título registrado.</div>
       </div>
@@ -5146,8 +5149,8 @@
     }
 
     window.addEventListener('keydown', e => {
-      if (e.ctrlKey && e.altKey && e.code === 'KeyE') document.documentElement.classList.toggle('evo-tools');
-      if (e.ctrlKey && e.altKey && e.code === 'KeyM') {
+      if (e.ctrlKey && e.altKey && !e.repeat && e.code === 'KeyE') { document.documentElement.classList.toggle('evo-tools'); renderTitles(); }
+      if (e.ctrlKey && e.altKey && !e.repeat && e.code === 'KeyM') {
         const bar = document.getElementById('gmRankBar');
         bar.style.display = bar.style.display === 'none' ? 'flex' : 'none';
       }
@@ -5263,6 +5266,10 @@
 
     function renderTitles() {
       renderArtifactTitles();
+      const isS = validRank(S.rank) === 'S';
+      const banner = document.getElementById('evoBanner');
+      if (banner) banner.textContent = 'MODO MESTRE · EVOLUÇÃO — ' + (!isS ? `só existe em Rank S (Rank atual: ${validRank(S.rank)}).`
+        : !(S.titles || []).length ? 'adicione um Título para poder evoluí-lo.' : 'escolha a evolução de cada Título abaixo. Ctrl+Alt+E esconde.');
       const wrap = document.getElementById('titlesWrap'); if (!wrap) return;
       if ((S.titles || []).length === 0) { wrap.innerHTML = '<div class="empty-msg">Nenhum título. Clique em "+ Adicionar Título".</div>'; return; }
       wrap.innerHTML = S.titles.map((t, ti) => {
@@ -5280,13 +5287,13 @@
       <div class="progress-wrap mt4">
         <div class="progress-bar"><div class="progress-fill gold" style="width:${q.total > 0 ? Math.min(100, ((q.cur || 0) / q.total) * 100) : 0}%"></div></div>
       </div>`).join('');
-        const ev = t.rank === 'S' ? titleEvo(t) : 0;
+        const ev = isS ? titleEvo(t) : 0;
         return `<div class="title-card${ev ? ' evo-' + ev : ''}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
           <div class="title-rank rank-${t.rank}">RANK ${t.rank}</div>
           <div class="title-name">${t.name}</div>
-          ${t.rank === 'S' ? `<div class="evo-tool"><span class="lbl">EVOLUÇÃO (MESTRE)</span><select class="inp" style="width:auto" onchange="setTitleEvo(${ti},this.value)">${['Base', 'Evolução', 'Super Evolução'].map((n, i) => `<option value="${i}"${i === ev ? ' selected' : ''}>${n}</option>`).join('')}</select></div>` : ''}
+          ${isS ? `<div class="evo-tool"><span class="lbl">EVOLUÇÃO (MESTRE)</span><select class="inp" style="width:auto" onchange="setTitleEvo(${ti},this.value)">${['Base', 'Evolução', 'Super Evolução'].map((n, i) => `<option value="${i}"${i === ev ? ' selected' : ''}>${n}</option>`).join('')}</select></div>` : ''}
         </div>
         <button class="w-rem" onclick="S.titles.splice(${ti},1);renderTitles();autosave()" style="font-size:25px">✕</button>
       </div>
