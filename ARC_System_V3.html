@@ -5088,7 +5088,7 @@
       const skillCount = RANK_SKILL_COUNTS[rank] || 1;
       const name = await arcDialog({
         tag: '[ NOVO TÍTULO ]', title: 'Adicionar Título', sub: `Rank ${rank} · ${(S.titles || []).length + 1}/${limit} títulos`,
-        input: { label: 'NOME DO TÍTULO', placeholder: 'Ex.: Lâmina Rubra' }, ok: 'ADICIONAR'
+        input: { label: 'NOME DO TÍTULO', placeholder: 'Ex.: O Imortal' }, ok: 'ADICIONAR'
       });
       if (!name) return;
       const skills = [];
@@ -5141,7 +5141,7 @@
       const rank = S.rank || 'C';
       const name = await arcDialog({
         tag: '[ ARTEFATO MÍTICO ]', title: 'Título de Artefato', sub: `Segue o Rank atual (${rank}) e não conta para o limite de títulos.`,
-        input: { label: 'NOME DO TÍTULO', placeholder: 'Ex.: Portador da Lança' }, ok: 'ADICIONAR'
+        input: { label: 'NOME DO TÍTULO', placeholder: 'Ex.: O Imortal' }, ok: 'ADICIONAR'
       });
       if (!name) return;
       (S.artifactTitles ||= []).push({ name, skills: [] }); // as skills vêm do Rank, no render
