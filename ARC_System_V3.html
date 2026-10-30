@@ -3097,7 +3097,7 @@
           <div id="weaponsWrap"></div>
           <button class="dashed-btn" onclick="addWeapon()">+ ARMA</button>
         </div>
-        <div class="g2">
+        <div class="g2" style="align-items:start"><!-- start: cada painel com altura própria -->
         <!-- Implants quick -->
         <div class="panel panel-purple">
           <div class="panel-title">MEUS IMPLANTES</div>
@@ -4779,7 +4779,7 @@
       const intro = lines => (lines || []).map(t => `<div class="reg-cell-desc" style="color:var(--txt);margin-bottom:6px">${_esc(t)}</div>`).join('');
       const sub = t => `<div class="lbl" style="margin:14px 0 6px">${_esc(t)}</div>`;
       const cell = (title, descHtml) => `<div class="reg-cell"><div class="reg-cell-title">${_esc(title)}</div><div class="reg-cell-desc">${descHtml}</div></div>`;
-      const grid = cells => cells.length ? `<div class="reg-grid">${cells.join('')}</div>` : '';
+      const grid = (cells, cols) => cells.length ? `<div class="reg-grid"${cols ? ` style="grid-template-columns:repeat(${cols},1fr)"` : ''}>${cells.join('')}</div>` : '';
       const nd = x => `<div><b>${_esc(x.name)}</b>${x.desc ? ': ' + _esc(x.desc) : ''}</div>`;
       const section = (title, body) => `<div class="reg-section panel mt12">`
         + `<div class="reg-head" onclick="toggleReg(this)"><span class="reg-caret">▾</span>${title}</div>`
@@ -4788,7 +4788,7 @@
       const A = ARSENAL.armas || {}, I = ARSENAL.implantes || {}, T = ARSENAL.itens || {}, R = ARSENAL.artefatos || {};
       const armas = (A.grupos || []).map(g =>
         sub(g.nome.toUpperCase())
-        + (g.tracos || []).map(tr => sub(tr.titulo) + grid((tr.itens || []).map(x => cell(x.name, _esc(x.desc))))).join('')
+        + (g.tracos || []).map(tr => sub(tr.titulo) + grid((tr.itens || []).map(x => cell(x.name, _esc(x.desc))), Math.min(5, (tr.itens || []).length))).join('')
       ).join('');
       // Blindagens têm a "Descrição." direto na categoria; as demais, uma por parte do corpo.
       const qualidades = (I.qualidades || []).length ? sub('Qualidade dos implantes') + grid(I.qualidades.map(x => cell(x.name, _esc(x.desc)))) : '';
