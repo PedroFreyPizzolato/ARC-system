@@ -2398,16 +2398,9 @@
     html[data-evo="2"] .bg-glow { background: radial-gradient(ellipse 55% 35% at 50% 0%, rgba(var(--evo-1-rgb), .13), transparent 70%) }
     html[data-evo="2"] header { border-image: linear-gradient(90deg, rgba(var(--evo-1-rgb), .15), var(--evo-2), rgba(var(--evo-1-rgb), .15)) 1 }
 
-    /* aviso ao ligar/desligar o modo (Ctrl+Alt+E), visível em qualquer aba */
-    #evoToast { position: fixed; left: 50%; bottom: 72px; transform: translateX(-50%); z-index: 700; max-width: calc(100vw - 32px);
-      padding: 10px 16px; background: rgba(8, 12, 20, .96); border: 1px solid var(--evo-1); color: var(--evo-1);
-      font-family: 'Share Tech Mono', monospace; font-size: var(--fs-sm); box-shadow: 0 10px 40px rgba(0, 0, 0, .6) }
-
     /* seletor escondido (Ctrl+Alt+E) */
     .evo-tool { display: none }
     html.evo-tools .evo-tool { display: flex; gap: 8px; align-items: center; margin-top: 8px }
-    html.evo-tools .evo-banner { margin: 0 0 12px; padding: 8px 12px; border: 1px dashed rgba(var(--evo-1-rgb), .55);
-      font-family: 'Share Tech Mono', monospace; font-size: var(--fs-sm); color: var(--evo-1) }
 
     @media (prefers-reduced-motion: reduce) {
       html[data-evo] .evo-sheen, .evo-embers { display: none !important }
@@ -3078,7 +3071,6 @@
       </div>
       <div id="rankLevelBar" class="progress-wrap" style="margin-bottom:14px"></div>
       <div id="rankUpPanel" class="title-card" hidden style="border-color:var(--blue);margin-bottom:14px"></div>
-      <div id="evoBanner" class="evo-tool evo-banner"></div>
       <div id="titlesWrap">
         <div class="empty-msg">Nenhum título registrado.</div>
       </div>
@@ -5153,18 +5145,8 @@
       autosave(); updateTitlesUI();
     }
 
-    // Alterna o modo escondido de Evolução (atalho Ctrl+Alt+E ou link com #evo) e avisa na tela.
-    let evoToastTimer = null;
-    function toggleEvoTools(on) {
-      const html = document.documentElement;
-      html.classList.toggle('evo-tools', on);
-      renderTitles();
-      let t = document.getElementById('evoToast');
-      if (!t) { t = document.createElement('div'); t.id = 'evoToast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
-      t.textContent = html.classList.contains('evo-tools')
-        ? 'MODO MESTRE · EVOLUÇÃO ligado. Abra a aba Títulos. Ctrl+Alt+E desliga.' : 'MODO MESTRE · EVOLUÇÃO desligado.';
-      t.hidden = false; clearTimeout(evoToastTimer); evoToastTimer = setTimeout(() => { t.hidden = true; }, 3500);
-    }
+    // Alterna o modo escondido de Evolução (atalho Ctrl+Alt+E ou link com #evo).
+    function toggleEvoTools(on) { document.documentElement.classList.toggle('evo-tools', on); }
     if (location.hash === '#evo') window.addEventListener('load', () => toggleEvoTools(true)); // alternativa ao atalho
 
     window.addEventListener('keydown', e => {
@@ -5287,9 +5269,6 @@
     function renderTitles() {
       renderArtifactTitles();
       const isS = validRank(S.rank) === 'S';
-      const banner = document.getElementById('evoBanner');
-      if (banner) banner.textContent = 'MODO MESTRE · EVOLUÇÃO — ' + (!isS ? `só existe em Rank S (Rank atual: ${validRank(S.rank)}).`
-        : !(S.titles || []).length ? 'adicione um Título para poder evoluí-lo.' : 'escolha a evolução de cada Título abaixo. Ctrl+Alt+E esconde.');
       const wrap = document.getElementById('titlesWrap'); if (!wrap) return;
       if ((S.titles || []).length === 0) { wrap.innerHTML = '<div class="empty-msg">Nenhum título. Clique em "+ Adicionar Título".</div>'; return; }
       wrap.innerHTML = S.titles.map((t, ti) => {
