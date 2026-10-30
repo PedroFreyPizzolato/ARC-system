@@ -459,14 +459,20 @@ function _parseArmas(lines, A) {
 
 // Implantes: categoria conhecida (Blindagens/Superiores/...), 1ª linha depois = desc; parte do corpo conhecida
 // (Braços, Torso, ...). Linhas soltas = "Descrição." da parte (ou da categoria, se ainda não há parte).
+// Antes da 1ª categoria: rótulo "Qualidade dos implantes" seguido de "Perfeito: desc" = qualidades.
 // Itens de lista (os implantes em si) não são sincronizados.
 function _parseImplantes(lines, I) {
-  let cat = null, parte = null, wantDesc = false;
+  let cat = null, parte = null, wantDesc = false, inQual = false;
   lines.forEach(function (ln) {
     if (ln.list) return;
     const n = _norm(ln.t);
     if (IMPL_CATS.indexOf(n) >= 0) { cat = { nome: ln.t, desc: null, uso: null, partes: [] }; I.categorias.push(cat); parte = null; wantDesc = true; return; }
-    if (!cat) { I.intro.push(ln.t); return; }
+    if (!cat) {
+      if (n.indexOf('qualidade dos implantes') === 0) { inQual = true; return; }
+      if (inQual && SYS_ITEM_RE.test(ln.t)) { I.qualidades.push(_nameDesc(ln.t)); return; }
+      I.intro.push(ln.t);
+      return;
+    }
     if (wantDesc) { cat.desc = ln.t; wantDesc = false; return; }
     if (IMPL_PARTS.indexOf(n) >= 0) { parte = { nome: ln.t, desc: null }; cat.partes.push(parte); return; }
     if (parte) _append(parte, 'desc', ln.t); else _append(cat, 'uso', ln.t);
@@ -513,7 +519,7 @@ function parseItems(paragraphs) {
   }
   const items = {
     armas: { grupos: [] },
-    implantes: { intro: [], categorias: [] },
+    implantes: { intro: [], qualidades: [], categorias: [] },
     itens: { intro: [], categorias: [] },
     artefatos: { intro: [], categorias: [] },
   };

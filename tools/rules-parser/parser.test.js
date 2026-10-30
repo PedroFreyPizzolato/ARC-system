@@ -469,6 +469,7 @@ test('parseItems: Armas — só grupos com traços (com "? – ?"); sem intros, 
 test('parseItems: Implantes — categoria, "Descrição." da categoria e das partes; sem os implantes', () => {
   const { implantes } = parseItems(SAMPLE_ITEMS).items;
   assert.deepEqual(implantes.intro, ['Buffs dependendo da qualidade do implante']);
+  assert.deepEqual(implantes.qualidades, [{ name: 'Perfeito', desc: 'Abc.' }, { name: 'Mediano', desc: 'Nada.' }]);
   assert.deepEqual(implantes.categorias, [
     { nome: 'Blindagens', desc: 'Buffs principalmente em redução de dano', uso: 'Descrição.', partes: [] },
     { nome: 'Superiores', desc: 'Buffs principalmente em força', uso: null, partes: [

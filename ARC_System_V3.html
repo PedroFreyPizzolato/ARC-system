@@ -1514,8 +1514,19 @@
       min-width: 0
     }
 
-    .impl-row1>.impl-cat {
+    .impl-row1>.impl-sel {
       flex: 0 0 120px
+    }
+
+    .art-dec {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: var(--fs-xs);
+      color: var(--txt-d);
+      letter-spacing: 1px;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4px
     }
 
     .impl-row1>input[data-f="durCur"],
@@ -2506,7 +2517,7 @@
                 <div class="info-row"><span class="info-key">Corpo+Mente</span><span class="info-val" id="caCM"
                     style="color:var(--cyan)">+0</span></div>
                 <div class="info-row">
-                  <span class="info-key">Armadura (−)</span>
+                  <span class="info-key">Blindagem (−)</span>
                   <input class="bar-inp" type="number" id="caArmadura" value="0" oninput="calcCA();autosave()"
                     style="width:50px;border-color:rgba(239,68,68,.4);color:var(--red)">
                 </div>
@@ -3086,9 +3097,10 @@
           <div id="weaponsWrap"></div>
           <button class="dashed-btn" onclick="addWeapon()">+ ARMA</button>
         </div>
+        <div class="g2">
         <!-- Implants quick -->
         <div class="panel panel-purple">
-          <div class="panel-title">IMPLANTES</div>
+          <div class="panel-title">MEUS IMPLANTES</div>
           <div class="lbl mb8" style="color:var(--blue)">BLINDAGENS (Redução de dano)</div>
           <div id="implBliWrap"></div>
           <button class="dashed-btn" onclick="addImplant('bli')">+ BLINDAGEM</button>
@@ -3104,6 +3116,13 @@
           <div class="lbl mb8" style="color:var(--green)">INTERNOS (Resistência)</div>
           <div id="implIntWrap"></div>
           <button class="dashed-btn" onclick="addImplant('int')">+ INTERNO</button>
+        </div>
+        <!-- Artifacts -->
+        <div class="panel">
+          <div class="panel-title">MEUS ARTEFATOS</div>
+          <div id="artifactsWrap"></div>
+          <button class="dashed-btn dashed-gold" onclick="addArtifact()">+ ARTEFATO</button>
+        </div>
         </div>
       </div>
       <div id="arsenalWrap"></div>
@@ -3580,7 +3599,7 @@
       corpo: 0, mente: 0, alma: 0, corpoPicks: [], mentePicks: [], almaPicks: [],
       periciaTrained: {}, periciaExtra: {},
       weapons: [],
-      implBli: [], implSup: [], implInf: [], implInt: [],
+      implBli: [], implSup: [], implInf: [], implInt: [], artifacts: [],
       dotSang: { on: false, stacks: 0, dmg: '', dur: '' },
       dotQueim: { on: false, stacks: 0, dmg: '', dur: '' },
       dotEnv: { on: false, dmg: '', efeito: '' },
@@ -3755,10 +3774,11 @@
         S.weapons.push({ name: r.querySelector('[data-f=name]')?.value || '', dmg: r.querySelector('[data-f=dmg]')?.value || '', crit: r.querySelector('[data-f=crit]')?.value || '20', kind: r.querySelector('[data-f=kind]')?.value || '', arquetipo: r.querySelector('[data-f=arquetipo]')?.value || '', identidade: r.querySelector('[data-f=identidade]')?.value || '', perfil: r.querySelector('[data-f=perfil]')?.value || '', category: r.querySelector('[data-f=category]')?.value || '', type: r.querySelector('[data-f=type]')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' });
       });
       // collect implants
-      S.implBli = []; document.querySelectorAll('.impl-bli').forEach(r => S.implBli.push({ name: r.querySelector('.impl-name')?.value || '', cat: r.querySelector('.impl-cat')?.value || '', eff: r.querySelector('.impl-eff')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' }));
-      S.implSup = []; document.querySelectorAll('.impl-sup').forEach(r => S.implSup.push({ name: r.querySelector('.impl-name')?.value || '', cat: r.querySelector('.impl-cat')?.value || '', eff: r.querySelector('.impl-eff')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' }));
-      S.implInf = []; document.querySelectorAll('.impl-inf').forEach(r => S.implInf.push({ name: r.querySelector('.impl-name')?.value || '', cat: r.querySelector('.impl-cat')?.value || '', eff: r.querySelector('.impl-eff')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' }));
-      S.implInt = []; document.querySelectorAll('.impl-int').forEach(r => S.implInt.push({ name: r.querySelector('.impl-name')?.value || '', cat: r.querySelector('.impl-cat')?.value || '', eff: r.querySelector('.impl-eff')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' }));
+      S.implBli = []; document.querySelectorAll('.impl-bli').forEach(r => S.implBli.push({ name: r.querySelector('.impl-name')?.value || '', qual: r.querySelector('.impl-qual')?.value || '', membro: r.querySelector('.impl-membro')?.value || '', eff: r.querySelector('.impl-eff')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' }));
+      S.implSup = []; document.querySelectorAll('.impl-sup').forEach(r => S.implSup.push({ name: r.querySelector('.impl-name')?.value || '', qual: r.querySelector('.impl-qual')?.value || '', membro: r.querySelector('.impl-membro')?.value || '', eff: r.querySelector('.impl-eff')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' }));
+      S.implInf = []; document.querySelectorAll('.impl-inf').forEach(r => S.implInf.push({ name: r.querySelector('.impl-name')?.value || '', qual: r.querySelector('.impl-qual')?.value || '', membro: r.querySelector('.impl-membro')?.value || '', eff: r.querySelector('.impl-eff')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' }));
+      S.implInt = []; document.querySelectorAll('.impl-int').forEach(r => S.implInt.push({ name: r.querySelector('.impl-name')?.value || '', qual: r.querySelector('.impl-qual')?.value || '', membro: r.querySelector('.impl-membro')?.value || '', eff: r.querySelector('.impl-eff')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' }));
+      S.artifacts = []; document.querySelectorAll('.artifact-entry').forEach(r => S.artifacts.push({ name: r.querySelector('[data-f=name]')?.value || '', cat: r.querySelector('[data-f=cat]')?.value || '', decifrado: !!r.querySelector('[data-f=decifrado]')?.checked, desc: r.querySelector('[data-f=desc]')?.value || '' }));
       // collect dotExtras
       S.dotExtras = []; document.querySelectorAll('.dot-extra-entry').forEach(r => {
         S.dotExtras.push({ effect: r.querySelector('[data-f=effect]')?.value || '', type: r.querySelector('[data-f=type]')?.value || 'neg', dur: r.querySelector('[data-f=dur]')?.value || '', on: r.querySelector('[data-f=on]')?.dataset.on === '1' });
@@ -3841,7 +3861,7 @@
             coringaMax: 0, coringaCur: 0, deathSuc: 0, deathMort: 0,
             degradacao: [false, false, false, false], corpo: 0, mente: 0, alma: 0,
             corpoPicks: [], mentePicks: [], almaPicks: [], periciaTrained: {}, periciaExtra: {},
-            weapons: [], implBli: [], implSup: [], implInf: [], implInt: [],
+            weapons: [], implBli: [], implSup: [], implInf: [], implInt: [], artifacts: [],
             dotSang: { on: false, stacks: 0, dmg: '', dur: '' }, dotQueim: { on: false, stacks: 0, dmg: '', dur: '' },
             dotEnv: { on: false, dmg: '', efeito: '' }, dotExtras: [], statusNeg: {}, statusPos: {},
             titles: [], artifactTitles: [], fullName: '', age: '', gender: '', height: '', weight: '', hair: '',
@@ -3894,6 +3914,7 @@
       updateTitlesUI();
       renderWeapons();
       renderImplants();
+      renderArtifacts();
       renderDotExtras();
       renderInventory();
       renderRelations();
@@ -4534,7 +4555,7 @@
         ${fld('ARQUÉTIPO', ' wk-cac', 'arquetipo', traits('corpo', 'arquetip'), w.arquetipo || '')}
         ${fld('IDENTIDADE TÁTICA', ' wk-dist', 'identidade', traits('distancia', 'identidade'), w.identidade || '')}
         ${fld('PERFIL DE DISPARO', ' wk-dist', 'perfil', traits('distancia', 'perfi'), w.perfil || '')}
-        ${fld('CATEGORIA', '', 'category', ['Normal', 'Verdadeiro', 'Absoluto'], w.category || 'Normal')}
+        ${fld('CATEGORIA DE DANO', '', 'category', ['Normal', 'Verdadeiro', 'Absoluto'], w.category || 'Normal')}
         ${fld('TIPO DE DANO', '', 'type', ['Balístico', 'Energia', 'Explosivo', 'Físico'], w.type || 'Balístico')}
       </div>
       <div class="dur-pen${durPenaltyInfo('weapon', w.durCur, w.durMax).broken ? ' broken' : ''}">${durPenaltyText('weapon', w.durCur, w.durMax)}</div>
@@ -4554,7 +4575,13 @@
     function removeWeapon(i) { S.weapons.splice(i, 1); renderWeapons(); autosave(); }
 
     const IMPL_TYPES = ['bli', 'sup', 'inf', 'int'];
-    const IMPL_CATEGORIAS = ['', 'Lendário', 'Mítico', 'Ancião', 'Divino'];
+    const IMPL_QUALIDADES = ['Horrível', 'Ruim', 'Mediano', 'Ótimo', 'Perfeito'];
+    // Membro/órgão por seção (Doc); Blindagens não têm membro.
+    const IMPL_MEMBROS = { sup: ['Braços', 'Torso', 'Cabeça'], inf: ['Pernas', 'Pés', 'Quadril'], int: ['Ossos', 'Órgãos', 'Músculos'] };
+    // <option>s com 1ª opção vazia mostrando o rótulo (ex.: "Qualidade").
+    function _selOpts(list, cur, label) {
+      return [''].concat(list).map(v => `<option value="${_attr(v)}"${(cur || '') === v ? ' selected' : ''}>${_esc(v || label)}</option>`).join('');
+    }
     function renderImplants() {
       IMPL_TYPES.forEach(t => {
         const wrap = document.getElementById('impl' + t.charAt(0).toUpperCase() + t.slice(1) + 'Wrap');
@@ -4566,7 +4593,8 @@
       <div class="impl-slot impl-${t} dur-host" data-dur="implant">
         <div class="impl-row1">
           <input class="inp impl-name" value="${_attr(im.name || '')}" oninput="autosave()" placeholder="Nome do implante">
-          <select class="inp impl-cat" onchange="autosave()" title="Categoria">${IMPL_CATEGORIAS.map(c => `<option value="${c}"${(im.cat || '') === c ? ' selected' : ''}>${c || 'Categoria'}</option>`).join('')}</select>
+          <select class="inp impl-sel impl-qual" onchange="autosave()" title="Qualidade">${_selOpts(IMPL_QUALIDADES, im.qual, 'Qualidade')}</select>
+          ${IMPL_MEMBROS[t] ? `<select class="inp impl-sel impl-membro" onchange="autosave()" title="Membro">${_selOpts(IMPL_MEMBROS[t], im.membro, 'Membro')}</select>` : ''}
           <span class="impl-lbl" style="margin:0">DUR</span>
           ${durInputs(im)}
           <button class="w-rem" onclick="removeImplant('${t}',${i})">✕</button>
@@ -4579,8 +4607,27 @@
     }
 
     function _implKey(t) { return 'impl' + t.charAt(0).toUpperCase() + t.slice(1); }
-    function addImplant(t) { const key = _implKey(t); S[key] = S[key] || []; S[key].push({ name: '', cat: '', eff: '', durCur: '', durMax: '' }); renderImplants(); autosave(); }
+    function addImplant(t) { const key = _implKey(t); S[key] = S[key] || []; S[key].push({ name: '', qual: '', membro: '', eff: '', durCur: '', durMax: '' }); renderImplants(); autosave(); }
     function removeImplant(t, i) { const key = _implKey(t); S[key].splice(i, 1); renderImplants(); autosave(); }
+
+    // MEUS ARTEFATOS: nome, categoria e "Decifrado?" na 1ª linha; descrição na 2ª. Artefatos não têm durabilidade.
+    const ARTIFACT_CATEGORIAS = ['Divino', 'Ancião', 'Mítico', 'Lendário'];
+    function renderArtifacts() {
+      const wrap = document.getElementById('artifactsWrap'); if (!wrap) return;
+      if (isEditingFocus(wrap)) return;
+      wrap.innerHTML = (S.artifacts || []).map((a, i) => `
+      <div class="impl-slot artifact-entry">
+        <div class="impl-row1">
+          <input class="inp impl-name" data-f="name" value="${_attr(a.name || '')}" oninput="autosave()" placeholder="Nome do artefato">
+          <select class="inp impl-sel" data-f="cat" onchange="autosave()" title="Categoria">${_selOpts(ARTIFACT_CATEGORIAS, a.cat, 'Categoria')}</select>
+          <label class="art-dec"><input type="checkbox" data-f="decifrado"${a.decifrado ? ' checked' : ''} onchange="autosave()"> Decifrado?</label>
+          <button class="w-rem" onclick="removeArtifact(${i})">✕</button>
+        </div>
+        <textarea class="inp" data-f="desc" rows="3" oninput="autosave()" placeholder="Descrição do artefato">${_esc(a.desc || '')}</textarea>
+      </div>`).join('');
+    }
+    function addArtifact() { S.artifacts = S.artifacts || []; S.artifacts.push({ name: '', cat: '', decifrado: false, desc: '' }); renderArtifacts(); autosave(); }
+    function removeArtifact(i) { S.artifacts.splice(i, 1); renderArtifacts(); autosave(); }
 
     function updateImplantDetail() {
       const wrap = document.getElementById('implDetailWrap'); if (!wrap) return;
@@ -4744,7 +4791,8 @@
         + (g.tracos || []).map(tr => sub(tr.titulo) + grid((tr.itens || []).map(x => cell(x.name, _esc(x.desc))))).join('')
       ).join('');
       // Blindagens têm a "Descrição." direto na categoria; as demais, uma por parte do corpo.
-      const implantes = intro(I.intro) + (I.categorias || []).map(c =>
+      const qualidades = (I.qualidades || []).length ? sub('Qualidade dos implantes') + grid(I.qualidades.map(x => cell(x.name, _esc(x.desc)))) : '';
+      const implantes = intro(I.intro) + qualidades + (I.categorias || []).map(c =>
         sub(c.nome + (c.desc ? ' — ' + c.desc : ''))
         + grid((c.uso ? [cell(c.nome, _esc(c.uso))] : []).concat((c.partes || []).map(p => cell(p.nome, _esc(p.desc || '')))))
       ).join('');
