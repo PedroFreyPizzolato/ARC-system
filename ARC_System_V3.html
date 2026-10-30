@@ -1435,11 +1435,42 @@
     /* ── WEAPONS ── */
     .weapon-row {
       display: grid;
-      grid-template-columns: 1fr 80px 56px 110px 100px 42px 42px 30px;
+      grid-template-columns: 1fr 80px 56px 46px 46px 30px;
       gap: 8px;
       align-items: center;
-      padding: 7px 0;
-      border-bottom: 1px solid rgba(var(--acc-rgb), .05)
+      padding: 7px 0
+    }
+
+    /* Cada arma ocupa 2 linhas: .weapon-row (nome, dano, crit, durabilidade) e .weapon-row2 (o resto) */
+    .weapon-entry {
+      border-bottom: 1px solid rgba(var(--acc-rgb), .08);
+      padding-bottom: 7px
+    }
+
+    .weapon-row2 {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px
+    }
+
+    .w-fld {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 120px;
+      min-width: 0
+    }
+
+    .w-fld>span {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: var(--fs-xs);
+      color: var(--txt-d);
+      letter-spacing: 1px
+    }
+
+    /* Arquétipo só no corpo a corpo; Identidade/Perfil só à distância */
+    .weapon-entry:not([data-kind="Corpo a corpo"]) .wk-cac,
+    .weapon-entry:not([data-kind="À distância"]) .wk-dist {
+      display: none
     }
 
     .weapon-row.hdr {
@@ -1470,10 +1501,25 @@
       color: var(--txt)
     }
 
-    /* Implantes: DUR/MÁX ficam numa linha flex (não numa coluna de grid), então
-       w-inp:width:100% os deixaria disputando o espaço com a descrição da penalidade. */
-    .col3>input[data-f="durCur"],
-    .col3>input[data-f="durMax"] {
+    /* Implantes: 1ª linha nome + categoria + durabilidade (flex); DUR/MÁX com largura fixa
+       para não disputarem espaço com o nome. */
+    .impl-row1 {
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .impl-row1>.impl-name {
+      flex: 1;
+      min-width: 0
+    }
+
+    .impl-row1>.impl-cat {
+      flex: 0 0 120px
+    }
+
+    .impl-row1>input[data-f="durCur"],
+    .impl-row1>input[data-f="durMax"] {
       flex: 0 0 46px;
       width: 46px
     }
@@ -1513,7 +1559,7 @@
     /* ── IMPLANTS ── */
     .impl-slot {
       display: grid;
-      grid-template-columns: 10fr 10fr 1fr;
+      grid-template-columns: 1fr;
       gap: 8px;
       padding: 8px 10px;
       border: 1px solid var(--bd);
@@ -3030,26 +3076,23 @@
     ═══════════════════════════════════════════════════════ -->
     <div id="tab-arsenal" class="tab-content">
       <!-- WEAPONS + IMPLANTS -->
-      <div class="g2" style="gap:14px">
+      <div class="col" style="gap:14px">
         <!-- Weapons -->
         <div class="panel">
-          <div class="panel-title">ARMAS</div>
+          <div class="panel-title">MINHAS ARMAS</div>
           <div class="weapon-row hdr"><span>NOME</span><span>DANO
-              BASE</span><span>CRIT</span><span>CATEGORIA</span><span>TIPO</span><span>DUR</span><span>MÁX</span><span></span>
+              BASE</span><span>CRIT</span><span>DUR</span><span>MÁX</span><span></span>
           </div>
           <div id="weaponsWrap"></div>
           <button class="dashed-btn" onclick="addWeapon()">+ ARMA</button>
-          <div class="sep"></div>
-          <div class="panel-title" style="margin-top:0">ARMADURAS</div>
-          <div class="weapon-row hdr" style="grid-template-columns:1fr 60px 1fr 52px 52px 30px">
-            <span>NOME</span><span>CA
-              (−)</span><span>TIPO</span><span>DUR</span><span>MÁX</span><span></span></div>
-          <div id="armorsWrap"></div>
-          <button class="dashed-btn" onclick="addArmor()">+ ARMADURA</button>
         </div>
         <!-- Implants quick -->
         <div class="panel panel-purple">
           <div class="panel-title">IMPLANTES</div>
+          <div class="lbl mb8" style="color:var(--blue)">BLINDAGENS (Redução de dano)</div>
+          <div id="implBliWrap"></div>
+          <button class="dashed-btn" onclick="addImplant('bli')">+ BLINDAGEM</button>
+          <div class="sep"></div>
           <div class="lbl mb8" style="color:var(--purple-b)">SUPERIORES (Força)</div>
           <div id="implSupWrap"></div>
           <button class="dashed-btn" onclick="addImplant('sup')">+ SUPERIOR</button>
@@ -3536,8 +3579,8 @@
       degradacao: [false, false, false, false],
       corpo: 0, mente: 0, alma: 0, corpoPicks: [], mentePicks: [], almaPicks: [],
       periciaTrained: {}, periciaExtra: {},
-      weapons: [], armors: [],
-      implSup: [], implInf: [], implInt: [],
+      weapons: [],
+      implBli: [], implSup: [], implInf: [], implInt: [],
       dotSang: { on: false, stacks: 0, dmg: '', dur: '' },
       dotQueim: { on: false, stacks: 0, dmg: '', dur: '' },
       dotEnv: { on: false, dmg: '', efeito: '' },
@@ -3612,8 +3655,8 @@
     // INIT & SAVE
     // ═══════════════════════════════════════════════════════════════
     // Torna todo painel colapsável (mesmo padrão da aba Regras): cada .panel-title clicável
-    // colapsa o conteúdo até o próximo .panel-title (ou fim do painel). Alguns painéis (ex:
-    // ARMAS/ARMADURAS) têm 2 títulos no mesmo painel — cada um vira uma seção independente.
+    // colapsa o conteúdo até o próximo .panel-title (ou fim do painel). Painéis com 2 títulos
+    // viram 2 seções independentes.
     function makePanelsCollapsible() {
       document.querySelectorAll('.panel-title').forEach(title => {
         title.classList.add('pt-collapsible');
@@ -3709,15 +3752,13 @@
       });
       // collect weapons
       S.weapons = []; document.querySelectorAll('.weapon-entry').forEach(r => {
-        S.weapons.push({ name: r.querySelector('[data-f=name]')?.value || '', dmg: r.querySelector('[data-f=dmg]')?.value || '', crit: r.querySelector('[data-f=crit]')?.value || '20', category: r.querySelector('[data-f=category]')?.value || '', type: r.querySelector('[data-f=type]')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' });
-      });
-      S.armors = []; document.querySelectorAll('.armor-entry').forEach(r => {
-        S.armors.push({ name: r.querySelector('[data-f=name]')?.value || '', ca: r.querySelector('[data-f=ca]')?.value || '0', type: r.querySelector('[data-f=type]')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' });
+        S.weapons.push({ name: r.querySelector('[data-f=name]')?.value || '', dmg: r.querySelector('[data-f=dmg]')?.value || '', crit: r.querySelector('[data-f=crit]')?.value || '20', kind: r.querySelector('[data-f=kind]')?.value || '', arquetipo: r.querySelector('[data-f=arquetipo]')?.value || '', identidade: r.querySelector('[data-f=identidade]')?.value || '', perfil: r.querySelector('[data-f=perfil]')?.value || '', category: r.querySelector('[data-f=category]')?.value || '', type: r.querySelector('[data-f=type]')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' });
       });
       // collect implants
-      S.implSup = []; document.querySelectorAll('.impl-sup').forEach(r => S.implSup.push({ name: r.querySelector('.impl-name')?.value || '', eff: r.querySelector('.impl-eff')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' }));
-      S.implInf = []; document.querySelectorAll('.impl-inf').forEach(r => S.implInf.push({ name: r.querySelector('.impl-name')?.value || '', eff: r.querySelector('.impl-eff')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' }));
-      S.implInt = []; document.querySelectorAll('.impl-int').forEach(r => S.implInt.push({ name: r.querySelector('.impl-name')?.value || '', eff: r.querySelector('.impl-eff')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' }));
+      S.implBli = []; document.querySelectorAll('.impl-bli').forEach(r => S.implBli.push({ name: r.querySelector('.impl-name')?.value || '', cat: r.querySelector('.impl-cat')?.value || '', eff: r.querySelector('.impl-eff')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' }));
+      S.implSup = []; document.querySelectorAll('.impl-sup').forEach(r => S.implSup.push({ name: r.querySelector('.impl-name')?.value || '', cat: r.querySelector('.impl-cat')?.value || '', eff: r.querySelector('.impl-eff')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' }));
+      S.implInf = []; document.querySelectorAll('.impl-inf').forEach(r => S.implInf.push({ name: r.querySelector('.impl-name')?.value || '', cat: r.querySelector('.impl-cat')?.value || '', eff: r.querySelector('.impl-eff')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' }));
+      S.implInt = []; document.querySelectorAll('.impl-int').forEach(r => S.implInt.push({ name: r.querySelector('.impl-name')?.value || '', cat: r.querySelector('.impl-cat')?.value || '', eff: r.querySelector('.impl-eff')?.value || '', durCur: r.querySelector('[data-f=durCur]')?.value ?? '', durMax: r.querySelector('[data-f=durMax]')?.value ?? '' }));
       // collect dotExtras
       S.dotExtras = []; document.querySelectorAll('.dot-extra-entry').forEach(r => {
         S.dotExtras.push({ effect: r.querySelector('[data-f=effect]')?.value || '', type: r.querySelector('[data-f=type]')?.value || 'neg', dur: r.querySelector('[data-f=dur]')?.value || '', on: r.querySelector('[data-f=on]')?.dataset.on === '1' });
@@ -3800,7 +3841,7 @@
             coringaMax: 0, coringaCur: 0, deathSuc: 0, deathMort: 0,
             degradacao: [false, false, false, false], corpo: 0, mente: 0, alma: 0,
             corpoPicks: [], mentePicks: [], almaPicks: [], periciaTrained: {}, periciaExtra: {},
-            weapons: [], armors: [], implSup: [], implInf: [], implInt: [],
+            weapons: [], implBli: [], implSup: [], implInf: [], implInt: [],
             dotSang: { on: false, stacks: 0, dmg: '', dur: '' }, dotQueim: { on: false, stacks: 0, dmg: '', dur: '' },
             dotEnv: { on: false, dmg: '', efeito: '' }, dotExtras: [], statusNeg: {}, statusPos: {},
             titles: [], artifactTitles: [], fullName: '', age: '', gender: '', height: '', weight: '', hair: '',
@@ -3852,7 +3893,6 @@
       updateAttrSkillDetail();
       updateTitlesUI();
       renderWeapons();
-      renderArmors();
       renderImplants();
       renderDotExtras();
       renderInventory();
@@ -4432,12 +4472,11 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // WEAPONS / ARMORS / IMPLANTS
+    // WEAPONS / IMPLANTS
     // ═══════════════════════════════════════════════════════════════
     // Penalidades acumuladas por durabilidade faltando (seção "Durabilidade de Equipamentos" do Doc).
     const DUR_PENALTY = {
       weapon: m => `-${m * 10}% de dano total e -${m} no acerto`,
-      armor: m => `-${m * 10}% de RD e -${m} na CA`,
       implant: m => `${m * 10}% de chance de falhar ao ativar`,
     };
     const DUR_BROKEN = 'QUEBRADO — inutilizável até ser consertado';
@@ -4474,50 +4513,50 @@
       const wrap = document.getElementById('weaponsWrap'); if (!wrap) return;
       if (isEditingFocus(wrap)) return;
       if (S.weapons.length === 0) { wrap.innerHTML = ''; return; }
+      const opt = (list, cur) => {
+        const vals = list.indexOf(cur) >= 0 || !cur ? list : [cur].concat(list); // mantém valor salvo fora da lista
+        return vals.map(v => `<option value="${_attr(v)}"${v === cur ? ' selected' : ''}>${_esc(v || '—')}</option>`).join('');
+      };
+      const fld = (label, cls, f, list, cur) =>
+        `<label class="w-fld${cls}"><span>${label}</span><select class="w-inp" data-f="${f}" onchange="autosave()">${opt(list, cur)}</select></label>`;
+      const traits = (grupo, titulo) => [''].concat(_arsenalTraits(grupo, titulo));
       wrap.innerHTML = S.weapons.map((w, i) => `
-    <div class="weapon-row weapon-entry dur-host" data-dur="weapon">
-      <input class="w-inp" data-f="name" value="${w.name}" oninput="autosave()" placeholder="Nome">
-      <input class="w-inp" data-f="dmg" value="${w.dmg}" oninput="autosave()" placeholder="1d6">
-      <input class="w-inp" data-f="crit" value="${w.crit || 20}" oninput="autosave()" placeholder="20">
-      <select class="w-inp" data-f="category" onchange="autosave()" style="font-size:18px">
-        <option value="Normal"${(w.category || 'Normal') === 'Normal' ? ' selected' : ''}>Normal</option>
-        <option value="Verdadeiro"${w.category === 'Verdadeiro' ? ' selected' : ''}>Verdadeiro</option>
-        <option value="Absoluto"${w.category === 'Absoluto' ? ' selected' : ''}>Absoluto</option>
-      </select>
-      <select class="w-inp" data-f="type" onchange="autosave()" style="font-size:18px">
-        <option value="Balístico"${(w.type || 'Balístico') === 'Balístico' ? ' selected' : ''}>Balístico</option>
-        <option value="Energia"${w.type === 'Energia' ? ' selected' : ''}>Energia</option>
-        <option value="Explosivo"${w.type === 'Explosivo' ? ' selected' : ''}>Explosivo</option>
-        <option value="Físico"${w.type === 'Físico' ? ' selected' : ''}>Físico</option>
-      </select>
-      ${durInputs(w)}
-      <button class="w-rem" onclick="removeWeapon(${i})">✕</button>
+    <div class="weapon-entry dur-host" data-dur="weapon" data-kind="${_attr(w.kind || '')}">
+      <div class="weapon-row">
+        <input class="w-inp" data-f="name" value="${_attr(w.name)}" oninput="autosave()" placeholder="Nome">
+        <input class="w-inp" data-f="dmg" value="${_attr(w.dmg)}" oninput="autosave()" placeholder="1d6">
+        <input class="w-inp" data-f="crit" value="${_attr(w.crit || 20)}" oninput="autosave()" placeholder="20">
+        ${durInputs(w)}
+        <button class="w-rem" onclick="removeWeapon(${i})">✕</button>
+      </div>
+      <div class="weapon-row2">
+        <label class="w-fld"><span>TIPO</span><select class="w-inp" data-f="kind" onchange="this.closest('.weapon-entry').dataset.kind=this.value;autosave()">${opt(['', 'Corpo a corpo', 'À distância'], w.kind || '')}</select></label>
+        ${fld('ARQUÉTIPO', ' wk-cac', 'arquetipo', traits('corpo', 'arquetip'), w.arquetipo || '')}
+        ${fld('IDENTIDADE TÁTICA', ' wk-dist', 'identidade', traits('distancia', 'identidade'), w.identidade || '')}
+        ${fld('PERFIL DE DISPARO', ' wk-dist', 'perfil', traits('distancia', 'perfi'), w.perfil || '')}
+        ${fld('CATEGORIA', '', 'category', ['Normal', 'Verdadeiro', 'Absoluto'], w.category || 'Normal')}
+        ${fld('TIPO DE DANO', '', 'type', ['Balístico', 'Energia', 'Explosivo', 'Físico'], w.type || 'Balístico')}
+      </div>
       <div class="dur-pen${durPenaltyInfo('weapon', w.durCur, w.durMax).broken ? ' broken' : ''}">${durPenaltyText('weapon', w.durCur, w.durMax)}</div>
     </div>`).join('');
     }
 
-    function addWeapon() { S.weapons.push({ name: '', dmg: '1d6', crit: '20', type: 'Normal', durCur: '', durMax: '' }); renderWeapons(); autosave(); }
+    // Nomes de um traço do catálogo (ex.: Arquétipos do grupo "Corpo a corpo"), sem os "?" ainda não revelados.
+    function _arsenalTraits(grupo, titulo) {
+      const n = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+      const g = ((ARSENAL && ARSENAL.armas && ARSENAL.armas.grupos) || []).find(x => n(x.nome).indexOf(grupo) >= 0);
+      const t = g && (g.tracos || []).find(x => n(x.titulo).indexOf(titulo) === 0);
+      return t ? (t.itens || []).map(x => x.name).filter(x => x && x !== '?') : [];
+    }
+    function _attr(s) { return _esc(s).replace(/"/g, '&quot;'); }
+
+    function addWeapon() { S.weapons.push({ name: '', dmg: '1d6', crit: '20', kind: '', durCur: '', durMax: '' }); renderWeapons(); autosave(); }
     function removeWeapon(i) { S.weapons.splice(i, 1); renderWeapons(); autosave(); }
 
-    function renderArmors() {
-      const wrap = document.getElementById('armorsWrap'); if (!wrap) return;
-      if (isEditingFocus(wrap)) return;
-      if (S.armors.length === 0) { wrap.innerHTML = ''; return; }
-      wrap.innerHTML = S.armors.map((a, i) => `
-    <div class="weapon-row armor-entry dur-host" data-dur="armor" style="grid-template-columns:1fr 60px 1fr 52px 52px 30px">
-      <input class="w-inp" data-f="name" value="${a.name}" oninput="autosave()" placeholder="Nome">
-      <input class="w-inp" data-f="ca" value="${a.ca || 0}" oninput="autosave()" placeholder="0">
-      <input class="w-inp" data-f="type" value="${a.type}" oninput="autosave()" placeholder="Tipo">
-      ${durInputs(a)}
-      <button class="w-rem" onclick="removeArmor(${i})">✕</button>
-      <div class="dur-pen${durPenaltyInfo('armor', a.durCur, a.durMax).broken ? ' broken' : ''}">${durPenaltyText('armor', a.durCur, a.durMax)}</div>
-    </div>`).join('');
-    }
-    function addArmor() { S.armors.push({ name: '', ca: '0', type: '', durCur: '', durMax: '' }); renderArmors(); autosave(); }
-    function removeArmor(i) { S.armors.splice(i, 1); renderArmors(); autosave(); }
-
+    const IMPL_TYPES = ['bli', 'sup', 'inf', 'int'];
+    const IMPL_CATEGORIAS = ['', 'Lendário', 'Mítico', 'Ancião', 'Divino'];
     function renderImplants() {
-      ['sup', 'inf', 'int'].forEach(t => {
+      IMPL_TYPES.forEach(t => {
         const wrap = document.getElementById('impl' + t.charAt(0).toUpperCase() + t.slice(1) + 'Wrap');
         if (!wrap) return;
         // Não reconstrói se um campo dentro deste container estiver em foco
@@ -4525,34 +4564,27 @@
         const arr = S[_implKey(t)] || [];
         wrap.innerHTML = arr.map((im, i) => `
       <div class="impl-slot impl-${t} dur-host" data-dur="implant">
-        <div class="col3">
-          <span class="impl-lbl">NOME</span>
-          <input class="inp impl-name" value="${im.name || ''}" oninput="autosave()" placeholder="Nome do implante">
-        </div>
-        <div class="col3">
-          <span class="impl-lbl">EFEITO</span>
-          <input class="inp impl-eff" value="${im.eff || ''}" oninput="autosave()" placeholder="Descrição do efeito">
-        </div>
-        <div class="col3">
-          <button class="w-rem" onclick="removeImplant('${t}',${i})">✕</button>
-        </div>
-        <div class="col3" style="grid-column:span 2;flex-direction:row;align-items:center;gap:6px">
+        <div class="impl-row1">
+          <input class="inp impl-name" value="${_attr(im.name || '')}" oninput="autosave()" placeholder="Nome do implante">
+          <select class="inp impl-cat" onchange="autosave()" title="Categoria">${IMPL_CATEGORIAS.map(c => `<option value="${c}"${(im.cat || '') === c ? ' selected' : ''}>${c || 'Categoria'}</option>`).join('')}</select>
           <span class="impl-lbl" style="margin:0">DUR</span>
           ${durInputs(im)}
-          <div class="dur-pen${durPenaltyInfo('implant', im.durCur, im.durMax).broken ? ' broken' : ''}" style="flex:1;padding-top:0">${durPenaltyText('implant', im.durCur, im.durMax)}</div>
+          <button class="w-rem" onclick="removeImplant('${t}',${i})">✕</button>
         </div>
+        <textarea class="inp impl-eff" rows="3" oninput="autosave()" placeholder="Descrição completa do implante">${_esc(im.eff || '')}</textarea>
+        <div class="dur-pen${durPenaltyInfo('implant', im.durCur, im.durMax).broken ? ' broken' : ''}">${durPenaltyText('implant', im.durCur, im.durMax)}</div>
       </div>`).join('');
       });
       updateImplantDetail();
     }
 
     function _implKey(t) { return 'impl' + t.charAt(0).toUpperCase() + t.slice(1); }
-    function addImplant(t) { const key = _implKey(t); S[key] = S[key] || []; S[key].push({ name: '', eff: '', durCur: '', durMax: '' }); renderImplants(); autosave(); }
+    function addImplant(t) { const key = _implKey(t); S[key] = S[key] || []; S[key].push({ name: '', cat: '', eff: '', durCur: '', durMax: '' }); renderImplants(); autosave(); }
     function removeImplant(t, i) { const key = _implKey(t); S[key].splice(i, 1); renderImplants(); autosave(); }
 
     function updateImplantDetail() {
       const wrap = document.getElementById('implDetailWrap'); if (!wrap) return;
-      const all = [...S.implSUP || [], ...S.implINF || [], ...S.implINT || [], ...S.implSup || [], ...S.implInf || [], ...S.implInt || []];
+      const all = [...S.implSUP || [], ...S.implINF || [], ...S.implINT || [], ...S.implBli || [], ...S.implSup || [], ...S.implInf || [], ...S.implInt || []];
       const unique = []; const seen = new Set();
       all.forEach(im => { if (im.name && !seen.has(im.name)) { seen.add(im.name); unique.push(im); } });
       if (unique.length === 0) { wrap.innerHTML = '<div class="empty-msg">Adicione implantes na aba Arsenal para detalhar aqui.</div>'; return; }
@@ -4691,7 +4723,8 @@
     }
 
     // ARSENAL (Doc → ARSENAL): catálogo de Armas, Implantes, Itens e Artefatos, no visual da aba Regras.
-    // Placeholders do Doc ("?", "Placeholder") aparecem como estão: são revelados ao longo da campanha.
+    // Só a referência de regras (traços das armas, descrições de implantes/artefatos, itens); placeholders
+    // "?" aparecem como estão, pois são revelados ao longo da campanha.
     // O Firebase descarta listas vazias e null, daí os "|| []".
     function buildArsenal() {
       const wrap = document.getElementById('arsenalWrap'); if (!wrap) return;
@@ -4706,21 +4739,18 @@
         + `<div class="reg-body">${body}</div></div>`;
 
       const A = ARSENAL.armas || {}, I = ARSENAL.implantes || {}, T = ARSENAL.itens || {}, R = ARSENAL.artefatos || {};
-      const armas = intro(A.intro) + (A.grupos || []).map(g =>
-        sub(g.nome.toUpperCase()) + intro(g.intro)
+      const armas = (A.grupos || []).map(g =>
+        sub(g.nome.toUpperCase())
         + (g.tracos || []).map(tr => sub(tr.titulo) + grid((tr.itens || []).map(x => cell(x.name, _esc(x.desc))))).join('')
-        + (g.pesos || []).map(p => sub(p.nome + (p.req ? ' · ' + p.req : ''))
-          + ((p.armas || []).length
-            ? grid(p.armas.map(a => cell(a.nome, (a.campos || []).map(c => `<div><b>${_esc(c.k)}:</b> ${_esc(c.v)}</div>`).join(''))))
-            : '<div class="reg-cell-desc">?</div>')).join('')
       ).join('');
+      // Blindagens têm a "Descrição." direto na categoria; as demais, uma por parte do corpo.
       const implantes = intro(I.intro) + (I.categorias || []).map(c =>
         sub(c.nome + (c.desc ? ' — ' + c.desc : ''))
-        + grid((c.grupos || []).map(g => cell(g.parte || c.nome, (g.itens || []).map(nd).join(''))))
+        + grid((c.uso ? [cell(c.nome, _esc(c.uso))] : []).concat((c.partes || []).map(p => cell(p.nome, _esc(p.desc || '')))))
       ).join('');
       const itens = intro(T.intro) + grid((T.categorias || []).map(c => cell(c.nome, (c.itens || []).map(nd).join(''))));
       const artefatos = intro(R.intro) + grid((R.categorias || []).map(c => cell(c.nome,
-        _esc(c.desc || '') + ((c.itens || []).length ? `<div class="reg-note" style="font-style:normal">${c.itens.map(nd).join('')}</div>` : ''))));
+        _esc(c.desc || '') + (c.uso ? `<div class="reg-note" style="font-style:normal">${_esc(c.uso)}</div>` : ''))));
 
       wrap.innerHTML = section('ARMAS', armas) + section('IMPLANTES', implantes) + section('ITENS', itens) + section('ARTEFATOS', artefatos);
     }
