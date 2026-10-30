@@ -2234,7 +2234,18 @@
     animation:ru-fade .8s ease-out var(--hit) forwards, ru-spin 14s linear var(--hit) infinite }
   .ru-spark { position:absolute; left:50%; top:50%; width:var(--s); height:var(--s); border-radius:50%; opacity:0; background:var(--col);
     box-shadow:0 0 8px rgb(var(--c-rgb)); animation:ru-spark 1.2s cubic-bezier(.16,1,.3,1) var(--hit) forwards }
-  .ru[data-tier="3"] .ru-shake { animation:ru-shake .45s linear var(--hit) }
+  .ru[data-tier="3"] .ru-shake, .ru[data-tier="4"] .ru-shake, .ru[data-tier="5"] .ru-shake { animation:ru-shake .45s linear var(--hit) }
+
+  /* Evolução (nível 4) e Super Evolução (nível 5) de Títulos de Rank S: somam ao S */
+  .ru-rays.rev { background:repeating-conic-gradient(from 7deg, rgba(255,241,201,.2) 0deg 2deg, transparent 2deg 22deg);
+    animation:ru-fade .8s ease-out var(--hit) forwards, ru-spin 20s linear var(--hit) infinite reverse }
+  .ru-stars { font-size:clamp(22px,3vw,36px); letter-spacing:.3em; margin-right:-.3em; color:#ffe6a6; opacity:0;
+    text-shadow:0 0 14px rgba(var(--c-rgb),.95); animation:ru-up .5s cubic-bezier(.16,1,.3,1) calc(var(--hit) + 150ms) both }
+  .ru-pillar { position:absolute; left:50%; top:-10%; bottom:-10%; width:240px; margin-left:-120px; opacity:0; transform:scaleX(0);
+    background:linear-gradient(90deg, transparent, rgba(255,241,201,.25) 38%, rgba(255,255,255,.5) 50%, rgba(255,241,201,.25) 62%, transparent);
+    animation:ru-pillar 1.4s cubic-bezier(.16,1,.3,1) calc(var(--hit) - 200ms) forwards }
+  .ru[data-tier="5"] .ru-letter { text-shadow:0 0 30px rgba(255,241,201,.95), 0 0 100px rgba(var(--c-rgb),.8) }
+  @keyframes ru-pillar { 0% { opacity:0; transform:scaleX(0) } 25% { opacity:1; transform:scaleX(1) } 100% { opacity:.35; transform:scaleX(.55) } }
 
   /* Z : corrupção / glitch */
   .ru-scan { position:absolute; inset:0; opacity:.55; background:repeating-linear-gradient(0deg, rgba(0,0,0,.45) 0 2px, transparent 2px 4px);
@@ -2279,7 +2290,7 @@
   /* movimento reduzido: só o cartão final, sem varrida/flash/tremor */
   .ru[data-reduce] *, .ru[data-reduce] *::before, .ru[data-reduce] *::after { animation:none !important }
   .ru[data-reduce]:not(.ru-out) { animation:ru-fade .3s ease-out both }
-  .ru[data-reduce] .ru-bg, .ru[data-reduce] .ru-kicker, .ru[data-reduce] .ru-letter, .ru[data-reduce] .ru-sub { opacity:1 }
+  .ru[data-reduce] .ru-bg, .ru[data-reduce] .ru-kicker, .ru[data-reduce] .ru-letter, .ru[data-reduce] .ru-sub, .ru[data-reduce] .ru-stars { opacity:1 }
   .ru[data-reduce] .ru-band, .ru[data-reduce] .ru-band::before, .ru[data-reduce] .ru-band::after { transform:none }
 
   @keyframes ru-fall { 0% { opacity:0; transform:translateY(-100%) } 10%, 85% { opacity:var(--o) } 100% { opacity:0; transform:translateY(110vh) } }
@@ -2330,6 +2341,67 @@
     62% { clip-path:inset(-40%); transform:translateX(-6px) }
     74%, 100% { opacity:1; clip-path:inset(-40%); transform:none } }
   @keyframes ru-jitter { 0%, 100% { transform:none; clip-path:inset(-40%) } 31% { transform:translateX(-6px); clip-path:inset(40% 0 35% 0) } 33% { transform:none; clip-path:inset(-40%) } 78% { transform:translateX(4px) } 80% { transform:none } }
+
+    /* ═══════════ EVOLUÇÃO / SUPER EVOLUÇÃO de Título de Rank S ═══════════
+       data-evo="1|2" no <html> (só em Rank S). Somam 4 camadas pequenas:
+       filigrana (cantoneiras), aura (brilho no cabeçalho, brasas), insígnia (✦, fita, coroa), liga (metal, trama). */
+    :root { --evo-1: #f3c76b; --evo-2: #fff1c9; --evo-1-rgb: 243, 199, 107; --evo-2-rgb: 255, 241, 201 }
+
+    /* filigrana */
+    html[data-evo] .panel::before, html[data-evo] .panel::after, html[data-evo] header::before, html[data-evo] header::after {
+      content: ''; position: absolute; width: 10px; height: 10px; pointer-events: none; border: 0 solid rgba(var(--evo-1-rgb), .75) }
+    html[data-evo] .panel::before, html[data-evo] header::before { top: 4px; left: 4px; border-top-width: 1.5px; border-left-width: 1.5px }
+    html[data-evo] .panel::after, html[data-evo] header::after { bottom: 4px; right: 4px; border-bottom-width: 1.5px; border-right-width: 1.5px }
+    html[data-evo="2"] .panel::before, html[data-evo="2"] .panel::after, html[data-evo="2"] header::before, html[data-evo="2"] header::after {
+      width: 18px; height: 18px; border-color: var(--evo-2); filter: drop-shadow(0 0 4px rgba(var(--evo-1-rgb), .8)) }
+    html[data-evo="2"] .panel-title::before { content: '◆'; font-size: .7em; color: var(--evo-1); text-shadow: 0 0 8px rgba(var(--evo-1-rgb), .9) }
+
+    /* aura */
+    .evo-sheen { display: none }
+    html[data-evo] .evo-sheen { display: block; position: absolute; top: 0; bottom: 0; left: 0; width: 30%; pointer-events: none;
+      background: linear-gradient(100deg, transparent, rgba(var(--evo-2-rgb), .16), transparent);
+      transform: translateX(-120%); animation: evo-sheen 7s cubic-bezier(.45, 0, .2, 1) 1s infinite }
+    html[data-evo="2"] .evo-sheen { animation-duration: 5s; background: linear-gradient(100deg, transparent, rgba(var(--evo-2-rgb), .26), transparent) }
+    .evo-embers { position: fixed; inset: 0; pointer-events: none; z-index: 0; display: none }
+    html[data-evo="2"] .evo-embers { display: block }
+    .evo-embers i { position: absolute; bottom: -10px; width: 3px; height: 3px; border-radius: 50%; background: var(--evo-1);
+      box-shadow: 0 0 6px var(--evo-1); opacity: 0; animation: evo-rise var(--d) linear var(--w) infinite }
+    @keyframes evo-sheen { 0% { transform: translateX(-120%) } 30%, 100% { transform: translateX(420%) } }
+    @keyframes evo-rise { 0% { opacity: 0; transform: translate(0, 0) } 15% { opacity: .55 } 100% { opacity: 0; transform: translate(var(--x), -70vh) } }
+
+    /* insígnia */
+    html[data-evo] #hdrMeta::after, html[data-evo] #rankDisplay::after { content: ' ✦'; color: var(--evo-1); text-shadow: 0 0 8px rgba(var(--evo-1-rgb), .8) }
+    html[data-evo="2"] #hdrMeta::after, html[data-evo="2"] #rankDisplay::after { content: ' ✦✦'; color: var(--evo-2) }
+    .title-card.evo-1, .title-card.evo-2 { position: relative; border-color: rgba(var(--evo-1-rgb), .45) }
+    .title-card.evo-1::before, .title-card.evo-2::before { content: 'EVOLUÇÃO'; position: absolute; top: 14px; right: 52px; padding: 3px 10px;
+      font: 700 12px 'Orbitron', monospace; letter-spacing: 2px; color: #1a1205; background: var(--evo-1) }
+    .title-card.evo-2::before { content: 'SUPER EVOLUÇÃO'; background: linear-gradient(90deg, var(--evo-1), var(--evo-2)) }
+    html[data-evo="2"] .hdr-logo { position: relative }
+    html[data-evo="2"] .hdr-logo::before { content: ''; position: absolute; left: 50%; top: -9px; width: 26px; height: 9px; transform: translateX(-50%);
+      background: var(--evo-1); clip-path: polygon(0 100%, 0 20%, 25% 70%, 50% 0, 75% 70%, 100% 20%, 100% 100%) }
+
+    /* liga */
+    html[data-evo] .hdr-logo, html[data-evo] .panel-title, html[data-evo] .tab.active {
+      background: linear-gradient(100deg, var(--blue) 0%, var(--evo-1) 45%, var(--blue) 70%, var(--evo-1) 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none }
+    html[data-evo] .hdr-logo { filter: drop-shadow(0 0 10px rgba(var(--acc-rgb), .45)) }
+    html[data-evo="2"] .hdr-logo { filter: drop-shadow(0 0 14px rgba(var(--evo-1-rgb), .7)) }
+    html[data-evo] .bg-grid {
+      background-image: repeating-linear-gradient(60deg, rgba(var(--evo-1-rgb), .035) 0 1px, transparent 1px 38px),
+        repeating-linear-gradient(-60deg, rgba(var(--evo-1-rgb), .035) 0 1px, transparent 1px 38px);
+      background-size: auto }
+    html[data-evo="2"] .hdr-logo, html[data-evo="2"] .panel-title, html[data-evo="2"] .tab.active {
+      background-image: linear-gradient(100deg, var(--evo-1) 0%, var(--evo-2) 40%, var(--blue) 65%, var(--evo-2) 100%) }
+    html[data-evo="2"] .bg-glow { background: radial-gradient(ellipse 55% 35% at 50% 0%, rgba(var(--evo-1-rgb), .13), transparent 70%) }
+    html[data-evo="2"] header { border-image: linear-gradient(90deg, rgba(var(--evo-1-rgb), .15), var(--evo-2), rgba(var(--evo-1-rgb), .15)) 1 }
+
+    /* seletor escondido (Ctrl+Alt+E) */
+    .evo-tool { display: none }
+    html.evo-tools .evo-tool { display: flex; gap: 8px; align-items: center; margin-top: 8px }
+
+    @media (prefers-reduced-motion: reduce) {
+      html[data-evo] .evo-sheen, .evo-embers { display: none !important }
+    }
   </style>
 </head>
 
@@ -2337,11 +2409,13 @@
   <div class="bg-grid"></div>
   <div class="bg-glow"></div>
   <div class="scanline"></div>
+  <div class="evo-embers" aria-hidden="true"></div>
 
   <div class="wrap">
 
     <!-- HEADER -->
     <header>
+      <div class="evo-sheen" aria-hidden="true"></div>
       <div class="hdr-left">
         <div class="hdr-logo">ARC V3</div>
         <div class="hdr-sep"></div>
@@ -3935,6 +4009,7 @@
       const rd = document.getElementById('rankDisplay');
       if (rd) { rd.textContent = rank; rd.className = 'rank-' + rank; }
       document.documentElement.dataset.rank = rankThemeHold || rank; // durante a animação, a cor antiga fica até o impacto
+      applyEvoTheme();
       renderRankUp();
     }
 
@@ -4824,13 +4899,16 @@
       Z: 'O TÍTULO FOI RENEGADO'
     };
 
+    const RU_ESC = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
     // onImpact(to) é chamado no instante do impacto — é ali que o tema do ARC troca de cor.
-    function playRankUp(from, to, onImpact, forceReduce) {
+    // opts.evo = 1 (Evolução) ou 2 (Super Evolução) de um Título de Rank S; opts.title = nome do Título.
+    function playRankUp(from, to, onImpact, forceReduce, opts = {}) {
       document.querySelector('.ru')?.remove();
-      const z = to === 'Z', tier = z ? 0 : RU_TIER[to] || 1;
+      const z = to === 'Z', evo = opts.evo || 0, tier = z ? 0 : evo ? 3 + evo : RU_TIER[to] || 1;
       const reduce = forceReduce || matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const hit = reduce ? 0 : z ? 1300 : [0, 1300, 1400, 1600][tier];
-      const total = reduce ? 1800 : z ? 4800 : [0, 3300, 3900, 4900][tier];
+      const hit = reduce ? 0 : z ? 1300 : [0, 1300, 1400, 1600, 1750, 1900][tier];
+      const total = reduce ? 1800 : z ? 4800 : [0, 3300, 3900, 4900, 5400, 6000][tier];
       const rnd = (a, b) => a + Math.random() * (b - a);
       const old = from ? `<div class="ru-old">${from}</div>` : '';
       let letter = `<div class="ru-lw">${old}<div class="ru-letter">${to}</div></div>`;
@@ -4867,16 +4945,18 @@
         letter = `<div class="ru-lw">${old}<div class="ru-ghost r">Z</div><div class="ru-ghost c">Z</div><div class="ru-letter">Z</div></div>`;
       } else {
         fx += '<div class="ru-band"></div>';
+        if (tier >= 5) fx += '<div class="ru-pillar"></div>';
+        if (tier >= 4) fx += '<div class="ru-rays rev"></div><div class="ru-ring" style="animation-delay:calc(var(--hit) + 300ms)"></div>';
         if (tier >= 3) {
           fx += '<div class="ru-rays"></div>';
-          for (let i = 0; i < 28; i++) {
+          for (let i = 0; i < [0, 0, 0, 28, 44, 60][tier]; i++) {
             const a = rnd(0, Math.PI * 2), d = rnd(180, 460);
             fx += `<div class="ru-spark" style="--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d}px;--s:${rnd(3, 7)}px;--col:${i % 3 ? 'rgb(var(--c-rgb))' : '#fff'}"></div>`;
           }
         }
         if (tier >= 2) {
           fx += '<div class="ru-ring"></div><div class="ru-ring"></div><div class="ru-chev l"></div><div class="ru-chev r"></div>';
-          for (let i = 0; i < 14; i++)
+          for (let i = 0; i < (tier >= 5 ? 24 : 14); i++)
             fx += `<div class="ru-streak" style="left:${rnd(2, 98)}%;height:${rnd(80, 220)}px;--dur:${Math.round(rnd(700, 1200))}ms;--d:${Math.round(hit + rnd(0, 450))}ms"></div>`;
         }
       }
@@ -4884,9 +4964,11 @@
       el.innerHTML = `<div class="ru-bg"></div>
         <div class="ru-shake">${fx}
           <div class="ru-stage">
-            <div class="ru-kicker">${z ? 'TÍTULO ABDICADO' : 'RANK UP'}</div>
+            <div class="ru-kicker">${z ? 'TÍTULO ABDICADO' : evo === 2 ? 'SUPER EVOLUÇÃO' : evo ? 'EVOLUÇÃO' : 'RANK UP'}</div>
             ${letter}
-            <div class="ru-sub">${z ? `${from ? `${from} ▸ ` : ''}<b>AMALDIÇOADO</b>` : `${from} ▸ <b>${to}</b>`}<br>${RU_SUB[to] || ''}</div>
+            ${evo ? `<div class="ru-stars">${'✦'.repeat(evo)}</div>` : ''}
+            <div class="ru-sub">${evo ? `<b>${RU_ESC(opts.title)}</b><br>${evo === 2 ? 'O TÍTULO ATINGIU SUA FORMA FINAL' : 'O TÍTULO EVOLUIU'}`
+              : z ? `${from ? `${from} ▸ ` : ''}<b>AMALDIÇOADO</b>` : `${from} ▸ <b>${to}</b>`}${evo ? '' : '<br>' + (RU_SUB[to] || '')}</div>
           </div>
         </div>
         ${z ? '' : '<div class="ru-wipe"></div>'}<div class="ru-flash"></div>`;
@@ -4907,7 +4989,6 @@
       el.addEventListener('click', close);
       addEventListener('keydown', onKey);
     }
-
 
     // ── RANK UP ── cópia fiel das funções de tools/rank-up/rankup.js. Mudou uma, mude nas duas.
     const NEXT_RANK = { C: 'B', B: 'A', A: 'S' }; // S e Z não sobem
@@ -4956,6 +5037,33 @@
     let rankUndo = null, rankUndoTimer = null, rankThemeHold = null;
 
     function releaseRankTheme() { rankThemeHold = null; document.documentElement.dataset.rank = S.rank || 'C'; }
+
+    // ── EVOLUÇÃO de Título de Rank S (escondida dos jogadores: seletor por Título em Ctrl+Alt+E) ──
+    // A evolução é do Título. O visual do ARC segue o Título mais evoluído, só em Rank S;
+    // os Títulos de Artefato acompanham. evo vem de JSON importado: sempre 0, 1 ou 2.
+    let evoThemeHold = null;
+    const titleEvo = t => Math.min(2, Math.max(0, parseInt(t && t.evo, 10) || 0));
+    const currentEvo = () => validRank(S.rank) === 'S' ? Math.max(0, ...(S.titles || []).map(titleEvo)) : 0;
+    function applyEvoTheme() {
+      const e = evoThemeHold ?? currentEvo();
+      if (e) document.documentElement.dataset.evo = e; else delete document.documentElement.dataset.evo;
+    }
+    function setTitleEvo(ti, v) {
+      const prev = currentEvo();
+      S.titles[ti].evo = Math.min(2, Math.max(0, parseInt(v, 10) || 0));
+      const next = currentEvo(), up = next > prev; // descer é correção: sem animação
+      if (up) evoThemeHold = prev;
+      autosave(); updateTitlesUI();
+      if (up) playRankUp('S', 'S', () => { evoThemeHold = null; applyEvoTheme(); }, false, { evo: next, title: S.titles[ti].name });
+    }
+    (function () { // brasas da Super Evolução (só aparecem com data-evo="2")
+      const em = document.querySelector('.evo-embers'); if (!em) return;
+      for (let i = 0; i < 12; i++) {
+        const e = document.createElement('i'), left = i % 2 ? 2 + Math.random() * 8 : 90 + Math.random() * 8;
+        e.style.cssText = `left:${left}%;--d:${(6 + Math.random() * 5).toFixed(1)}s;--w:${(-Math.random() * 10).toFixed(1)}s;--x:${((Math.random() - .5) * 60).toFixed(0)}px`;
+        em.appendChild(e);
+      }
+    })();
 
     // Seletor do Mestre: correções são silenciosas; só a ida para Z toca a animação.
     function gmSetRank(v) {
@@ -5035,6 +5143,7 @@
     }
 
     window.addEventListener('keydown', e => {
+      if (e.ctrlKey && e.altKey && e.code === 'KeyE') document.documentElement.classList.toggle('evo-tools');
       if (e.ctrlKey && e.altKey && e.code === 'KeyM') {
         const bar = document.getElementById('gmRankBar');
         bar.style.display = bar.style.display === 'none' ? 'flex' : 'none';
@@ -5124,7 +5233,8 @@
       if (!list.length) { wrap.innerHTML = '<div class="empty-msg">Nenhum título de Artefato Mítico.</div>'; return; }
       for (const t of list)
         for (let k = t.skills.length; k < RANK_SKILL_COUNTS[rank]; k++) t.skills.push({ name: `Skill ${k + 1}`, action: 'Passiva', cost: '', desc: '' });
-      wrap.innerHTML = list.map((t, ti) => `<div class="title-card artifact-card">
+      const ev = currentEvo();
+      wrap.innerHTML = list.map((t, ti) => `<div class="title-card artifact-card${ev ? ' evo-' + ev : ''}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
           <div class="title-rank rank-${rank}">ARTEFATO MÍTICO · RANK ${rank}</div>
@@ -5167,11 +5277,13 @@
       <div class="progress-wrap mt4">
         <div class="progress-bar"><div class="progress-fill gold" style="width:${q.total > 0 ? Math.min(100, ((q.cur || 0) / q.total) * 100) : 0}%"></div></div>
       </div>`).join('');
-        return `<div class="title-card">
+        const ev = t.rank === 'S' ? titleEvo(t) : 0;
+        return `<div class="title-card${ev ? ' evo-' + ev : ''}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
           <div class="title-rank rank-${t.rank}">RANK ${t.rank}</div>
           <div class="title-name">${t.name}</div>
+          ${t.rank === 'S' ? `<div class="evo-tool"><span class="lbl">EVOLUÇÃO (MESTRE)</span><select class="inp" style="width:auto" onchange="setTitleEvo(${ti},this.value)">${['Base', 'Evolução', 'Super Evolução'].map((n, i) => `<option value="${i}"${i === ev ? ' selected' : ''}>${n}</option>`).join('')}</select></div>` : ''}
         </div>
         <button class="w-rem" onclick="S.titles.splice(${ti},1);renderTitles();autosave()" style="font-size:25px">✕</button>
       </div>
