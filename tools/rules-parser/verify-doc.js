@@ -4,7 +4,7 @@
 //
 // Uso: node tools/rules-parser/verify-doc.js <caminho-do-doc-extraido.md>
 const fs = require('fs');
-const { parseClasses, parseSubattrs, parseStatus, parseNatures, parseSystems } = require('./parser');
+const { parseClasses, parseSubattrs, parseStatus, parseNatures, parseSystems, parseItems } = require('./parser');
 
 const path = process.argv[2];
 if (!path) { console.error('uso: node verify-doc.js <arquivo.md>'); process.exit(1); }
@@ -30,7 +30,8 @@ for (const raw of fs.readFileSync(path, 'utf8').split(/\r?\n/)) {
     if (cells.every((c) => /^[:\-\s]*$/.test(c))) continue; // separador do markdown
     paras.push({ heading: 'NORMAL', text: cells.join(' | '), cells });
   }
-  else paras.push({ heading: 'NORMAL', text: clean(line.replace(/^\s*[-*]\s+/, '')) });
+  else if (/^\s*[-*]\s+/.test(line)) paras.push({ heading: 'NORMAL', text: clean(line.replace(/^\s*[-*]\s+/, '')), list: true });
+  else paras.push({ heading: 'NORMAL', text: clean(line) });
 }
 
 const { classes, warnings } = parseClasses(paras);
@@ -79,3 +80,6 @@ if (dur) {
   console.log('  intro:', dur.intro);
   dur.items.forEach((i) => console.log(`  - ${i.name}: ${i.desc}`));
 }
+
+console.log('\nCatálogo (aba Arsenal):');
+console.log(JSON.stringify(parseItems(paras).items, null, 1));

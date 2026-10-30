@@ -148,4 +148,64 @@ const SAMPLE_ACTIONS = [
   N('Não deve aparecer: fora da seção'),
 ];
 
-module.exports = { SAMPLE, SAMPLE_SUBATTR, SAMPLE_STATUS, SAMPLE_NATURES, SAMPLE_SYSTEMS, SAMPLE_ACTIONS };
+// Item de lista do Doc (LIST_ITEM no Apps Script).
+const L = (text) => ({ heading: 'NORMAL', text, list: true });
+
+// Recorte de "# Armas", "# Implantes", "# Itens" e "# Artefatos" (catálogo da aba Arsenal).
+// Placeholders ("? – ?", "Placeholder") são conteúdo a revelar e devem ser mantidos.
+const SAMPLE_ITEMS = [
+  H1('Armas'),
+  N('*Serão preenchidas conforme o passar do RPG'),
+  N('Caso não atenda o requisito de Corpo necessário, seu dano total será reduzido pela metade'),
+  H2('Corpo a corpo'),
+  N('Usam Corpo para atacar'),
+  N('Arquétipos'),
+  N('? – ?'),
+  N('Lança – Seus ataques adjacentes atingem até 3m.'),
+  N('Pesadas (5 de Corpo)'),
+  N('Lança de Pedra'),
+  N('Arquétipo: Lança'),
+  N('Especial: Marcha (Completa) - Avança dando o dano maximizado da arma'),
+  N('Dano / Tipo: 3d8+Cor*2 / Físico'),
+  N('Médias (3 de Corpo)'),
+  N('?'),
+  H2('À distância'),
+  N('Usam Mente para atacar'),
+  N('Identidades táticas'),
+  N('Pistola – Você não sofre penalidades por se mover antes de atirar.'),
+  N('Perfis de disparo'),
+  N('? – ?'),
+  N('Leves'),
+  N('Pistola simples'),
+  N('Identidade: Pistola'),
+  N('Ação: Padrão'),
+  H1('Implantes'),
+  N('*Serão adicionados conforme o passar do RPG'),
+  N('Buffs dependendo da qualidade do implante'),
+  N('Blindagens'),
+  N('Buffs principalmente em redução de dano'),
+  L('Placeholder'),
+  N('Superiores'),
+  N('Buffs principalmente em força'),
+  N('Braços'),
+  L('Sistema ARC: Permite o usuário ver e acessar os próprio dados. Não ocupa nenhum slot.'),
+  N('Torso'),
+  L('Placeholder: Abc'),
+  H1('Itens'),
+  N('*Serão adicionados conforme o passar do RPG'),
+  N('Utilizáveis'),
+  N('Placeholder: a'),
+  N('Outros'),
+  N('Placeholder: a'),
+  H1('Artefatos'),
+  N('São pequenos objetos, separados em categorias, sendo elas: Divino, Ancião, Mítico e Lendário'),
+  H2('Divino'),
+  N('Tem o poder equivalente ao de um Deus'),
+  H2('Mítico'),
+  N('Esses artefatos carregam consigo um título'),
+  N('Máscara do Vazio: Concede o título Vazio'),
+  H1('Fim'),
+  N('Não deve aparecer: fora da seção'),
+];
+
+module.exports = { SAMPLE, SAMPLE_SUBATTR, SAMPLE_STATUS, SAMPLE_NATURES, SAMPLE_SYSTEMS, SAMPLE_ACTIONS, SAMPLE_ITEMS };
