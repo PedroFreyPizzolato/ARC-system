@@ -452,48 +452,34 @@ test('parseSystems divide linhas em "\r" sozinho (quebra suave do Doc)', () => {
 const { parseItems } = require('./parser');
 const { SAMPLE_ITEMS } = require('./fixtures');
 
-test('parseItems: Armas — intro, grupos, traços com placeholders "? – ?"', () => {
+test('parseItems: Armas — só grupos com traços (com "? – ?"); sem intros, pesos nem armas', () => {
   const { armas } = parseItems(SAMPLE_ITEMS).items;
-  assert.equal(armas.intro.length, 2);
-  assert.deepEqual(armas.grupos.map(g => g.nome), ['Corpo a corpo', 'À distância']);
-  const cac = armas.grupos[0];
-  assert.deepEqual(cac.intro, ['Usam Corpo para atacar']);
-  assert.deepEqual(cac.tracos, [{ titulo: 'Arquétipos', itens: [
-    { name: '?', desc: '?' },
-    { name: 'Lança', desc: 'Seus ataques adjacentes atingem até 3m.' },
-  ] }]);
-  assert.deepEqual(armas.grupos[1].tracos.map(t => [t.titulo, t.itens.length]), [['Identidades táticas', 1], ['Perfis de disparo', 1]]);
-});
-
-test('parseItems: Armas — pesos, requisito e armas com campos ("?" = sem armas)', () => {
-  const { armas } = parseItems(SAMPLE_ITEMS).items;
-  const [pes, med] = armas.grupos[0].pesos;
-  assert.equal(pes.nome, 'Pesadas'); assert.equal(pes.req, '5 de Corpo');
-  assert.deepEqual(pes.armas, [{ nome: 'Lança de Pedra', campos: [
-    { k: 'Arquétipo', v: 'Lança' },
-    { k: 'Especial', v: 'Marcha (Completa) - Avança dando o dano maximizado da arma' },
-    { k: 'Dano / Tipo', v: '3d8+Cor*2 / Físico' },
-  ] }]);
-  assert.deepEqual(med, { nome: 'Médias', req: '3 de Corpo', armas: [] });
-  const leves = armas.grupos[1].pesos[0];
-  assert.equal(leves.req, null);
-  assert.deepEqual(leves.armas.map(a => a.nome), ['Pistola simples']);
-});
-
-test('parseItems: Implantes — categorias, descrição, partes do corpo e itens de lista', () => {
-  const { implantes } = parseItems(SAMPLE_ITEMS).items;
-  assert.equal(implantes.intro.length, 2);
-  const [blind, sup] = implantes.categorias;
-  assert.deepEqual(blind, { nome: 'Blindagens', desc: 'Buffs principalmente em redução de dano', grupos: [
-    { parte: null, itens: [{ name: 'Placeholder', desc: '' }] },
+  assert.deepEqual(armas, { grupos: [
+    { nome: 'Corpo a corpo', tracos: [{ titulo: 'Arquétipos', itens: [
+      { name: '?', desc: '?' },
+      { name: 'Lança', desc: 'Seus ataques adjacentes atingem até 3m.' },
+    ] }] },
+    { nome: 'À distância', tracos: [
+      { titulo: 'Identidades táticas', itens: [{ name: 'Pistola', desc: 'Você não sofre penalidades por se mover antes de atirar.' }] },
+      { titulo: 'Perfis de disparo', itens: [{ name: '?', desc: '?' }] },
+    ] },
   ] });
-  assert.equal(sup.desc, 'Buffs principalmente em força');
-  assert.deepEqual(sup.grupos.map(g => g.parte), ['Braços', 'Torso']);
-  assert.deepEqual(sup.grupos[0].itens[0], { name: 'Sistema ARC', desc: 'Permite o usuário ver e acessar os próprio dados. Não ocupa nenhum slot.' });
-  assert.deepEqual(sup.grupos[1].itens[0], { name: 'Placeholder', desc: 'Abc' });
 });
 
-test('parseItems: Itens — categorias com placeholders', () => {
+test('parseItems: Implantes — categoria, "Descrição." da categoria e das partes; sem os implantes', () => {
+  const { implantes } = parseItems(SAMPLE_ITEMS).items;
+  assert.deepEqual(implantes.intro, ['Buffs dependendo da qualidade do implante']);
+  assert.deepEqual(implantes.categorias, [
+    { nome: 'Blindagens', desc: 'Buffs principalmente em redução de dano', uso: 'Descrição.', partes: [] },
+    { nome: 'Superiores', desc: 'Buffs principalmente em força', uso: null, partes: [
+      { nome: 'Braços', desc: 'Descrição.' },
+      { nome: 'Torso', desc: 'Descrição do torso, em duas linhas.' },
+      { nome: 'Cabeça', desc: null },
+    ] },
+  ]);
+});
+
+test('parseItems: Itens — como estão no Doc (com placeholders)', () => {
   const { itens } = parseItems(SAMPLE_ITEMS).items;
   assert.deepEqual(itens.intro, ['*Serão adicionados conforme o passar do RPG']);
   assert.deepEqual(itens.categorias, [
@@ -502,12 +488,12 @@ test('parseItems: Itens — categorias com placeholders', () => {
   ]);
 });
 
-test('parseItems: Artefatos — intro com ":" fica na intro; categoria = H2, 1ª linha = desc', () => {
+test('parseItems: Artefatos — desc + "Descrição." por categoria; nada abaixo (artefatos listados)', () => {
   const { artefatos } = parseItems(SAMPLE_ITEMS).items;
   assert.equal(artefatos.intro.length, 1);
   assert.deepEqual(artefatos.categorias, [
-    { nome: 'Divino', desc: 'Tem o poder equivalente ao de um Deus', itens: [] },
-    { nome: 'Mítico', desc: 'Esses artefatos carregam consigo um título', itens: [{ name: 'Máscara do Vazio', desc: 'Concede o título Vazio' }] },
+    { nome: 'Divino', desc: 'Tem o poder equivalente ao de um Deus', uso: 'Descrição.' },
+    { nome: 'Mítico', desc: 'Esses artefatos carregam consigo um título', uso: 'Descrição.' },
   ]);
 });
 

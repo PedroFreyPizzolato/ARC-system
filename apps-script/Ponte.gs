@@ -434,56 +434,48 @@ function parseActions(paragraphs) {
   return { actions: actions, warnings: warnings };
 }
 // Seções "# Armas", "# Implantes", "# Itens" e "# Artefatos" → catálogo da aba Arsenal do ARC.
-// Placeholders do Doc ("? – ?", "Placeholder") entram como estão: são revelados ao longo da campanha.
-// Campos de arma são lista [{k,v}] (não objeto): "Dano / Tipo" tem "/", proibido em chave do Firebase.
+// Sincroniza só a referência de regras; armas prontas, implantes e artefatos listados ficam no Doc
+// (são revelados ao longo da campanha). Placeholders "? – ?" dos traços e dos Itens entram como estão.
 const ITEM_SECTIONS = { armas: 'armas', implantes: 'implantes', itens: 'itens', artefatos: 'artefatos' };
 const WEIGHT_RE = /^(pesadas|m[ée]dias|leves)\s*(?:\(([^)]*)\))?$/i;
 const TRAIT_RE = /^(.{1,40}?)\s+[–—-]\s+(.+)$/;
-const FIELD_RE = /^([^:]{1,30}):\s*(.*)$/;
 const IMPL_CATS = ['blindagens', 'superiores', 'inferiores', 'internos'];
+const IMPL_PARTS = ['bracos', 'torso', 'cabeca', 'pernas', 'pes', 'quadril', 'ossos', 'orgaos', 'musculos'];
 
 function _nameDesc(t) {
   const m = t.match(SYS_ITEM_RE);
   return m ? { name: m[1].trim(), desc: m[2].trim() } : { name: t, desc: '' };
 }
+function _append(obj, k, t) { obj[k] = obj[k] ? obj[k] + ' ' + t : t; }
 
-// Armas: H2 = grupo (Corpo a corpo / À distância). Dentro do grupo: linhas soltas = intro;
-// rótulo seguido de "Nome – desc" = lista de traços (Arquétipos, Identidades, Perfis);
-// "Pesadas (5 de Corpo)" abre um peso; nele, linha sem ":" = arma nova, "Campo: valor" = campo, "?" = vazio.
+// Armas: H2 = grupo (Corpo a corpo / À distância); rótulo seguido de "Nome – desc" = lista de traços
+// (Arquétipos, Identidades, Perfis). A partir de "Pesadas/Médias/Leves" (armas prontas) o resto do grupo é ignorado.
 function _parseArmas(lines, A) {
-  let g = null, trait = null, peso = null, arma = null;
+  let g = null, trait = null, skip = false;
   lines.forEach(function (ln, i) {
     let m;
-    if (ln.h === 'HEADING2') { g = { nome: ln.t, intro: [], tracos: [], pesos: [] }; A.grupos.push(g); trait = peso = arma = null; return; }
-    if (!g) { A.intro.push(ln.t); return; }
-    if ((m = ln.t.match(WEIGHT_RE))) { peso = { nome: m[1], req: m[2] ? m[2].trim() : null, armas: [] }; g.pesos.push(peso); arma = null; return; }
-    if (peso) {
-      if (ln.t === '?') return;
-      if (arma && (m = ln.t.match(FIELD_RE))) { arma.campos.push({ k: m[1].trim(), v: m[2].trim() }); return; }
-      arma = { nome: ln.t, campos: [] }; peso.armas.push(arma);
-      return;
-    }
+    if (ln.h === 'HEADING2') { g = { nome: ln.t, tracos: [] }; A.grupos.push(g); trait = null; skip = false; return; }
+    if (!g || skip) return;
+    if (WEIGHT_RE.test(ln.t)) { skip = true; return; }
     if (trait && (m = ln.t.match(TRAIT_RE))) { trait.itens.push({ name: m[1].trim(), desc: m[2].trim() }); return; }
     const next = lines[i + 1];
-    if (next && next.h !== 'HEADING2' && TRAIT_RE.test(next.t)) { trait = { titulo: ln.t, itens: [] }; g.tracos.push(trait); return; }
-    g.intro.push(ln.t);
+    if (next && next.h !== 'HEADING2' && TRAIT_RE.test(next.t)) { trait = { titulo: ln.t, itens: [] }; g.tracos.push(trait); }
   });
 }
 
-// Implantes: categoria conhecida (Blindagens/Superiores/Inferiores/Internos), 1ª linha depois = desc;
-// linha solta = parte do corpo; item de lista = implante ("Nome: desc" ou só o nome).
+// Implantes: categoria conhecida (Blindagens/Superiores/...), 1ª linha depois = desc; parte do corpo conhecida
+// (Braços, Torso, ...). Linhas soltas = "Descrição." da parte (ou da categoria, se ainda não há parte).
+// Itens de lista (os implantes em si) não são sincronizados.
 function _parseImplantes(lines, I) {
-  let cat = null, grp = null, wantDesc = false;
+  let cat = null, parte = null, wantDesc = false;
   lines.forEach(function (ln) {
-    if (IMPL_CATS.indexOf(_norm(ln.t)) >= 0) { cat = { nome: ln.t, desc: null, grupos: [] }; I.categorias.push(cat); grp = null; wantDesc = true; return; }
+    if (ln.list) return;
+    const n = _norm(ln.t);
+    if (IMPL_CATS.indexOf(n) >= 0) { cat = { nome: ln.t, desc: null, uso: null, partes: [] }; I.categorias.push(cat); parte = null; wantDesc = true; return; }
     if (!cat) { I.intro.push(ln.t); return; }
-    if (ln.list) {
-      if (!grp) { grp = { parte: null, itens: [] }; cat.grupos.push(grp); }
-      grp.itens.push(_nameDesc(ln.t)); wantDesc = false;
-      return;
-    }
     if (wantDesc) { cat.desc = ln.t; wantDesc = false; return; }
-    grp = { parte: ln.t, itens: [] }; cat.grupos.push(grp);
+    if (IMPL_PARTS.indexOf(n) >= 0) { parte = { nome: ln.t, desc: null }; cat.partes.push(parte); return; }
+    if (parte) _append(parte, 'desc', ln.t); else _append(cat, 'uso', ln.t);
   });
 }
 
@@ -497,15 +489,17 @@ function _parseItensCat(lines, T) {
   });
 }
 
-// Artefatos: H2 = categoria (Divino/Ancião/...), 1ª linha = desc, "Nome: desc" = artefato.
+// Artefatos: H2 = categoria (Divino/Ancião/...), 1ª linha = desc, linhas seguintes = "Descrição." (como usar).
+// O 1º artefato listado ("Nome: desc") encerra a categoria: ele e o que vem abaixo não são sincronizados.
 function _parseArtefatos(lines, R) {
-  let cat = null;
+  let cat = null, done = false;
   lines.forEach(function (ln) {
-    if (ln.h === 'HEADING2') { cat = { nome: ln.t, desc: null, itens: [] }; R.categorias.push(cat); return; }
+    if (ln.h === 'HEADING2') { cat = { nome: ln.t, desc: null, uso: null }; R.categorias.push(cat); done = false; return; }
     if (!cat) { R.intro.push(ln.t); return; }
+    if (done) return;
     if (cat.desc == null) { cat.desc = ln.t; return; }
-    if (SYS_ITEM_RE.test(ln.t)) cat.itens.push(_nameDesc(ln.t));
-    else cat.desc += ' ' + ln.t;
+    if (SYS_ITEM_RE.test(ln.t)) { done = true; return; }
+    _append(cat, 'uso', ln.t);
   });
 }
 
@@ -519,11 +513,12 @@ function parseItems(paragraphs) {
     if (!sec) continue;
     full.split(LINE_SPLIT).forEach(function (raw) {
       const t = raw.trim();
-      if (t) lines[sec].push({ h: heading, t: t, list: !!p.list });
+      // "*Serão adicionados conforme o passar do RPG" fala dos itens listados; só faz sentido nos Itens.
+      if (t && !(sec !== 'itens' && t.charAt(0) === '*')) lines[sec].push({ h: heading, t: t, list: !!p.list });
     });
   }
   const items = {
-    armas: { intro: [], grupos: [] },
+    armas: { grupos: [] },
     implantes: { intro: [], categorias: [] },
     itens: { intro: [], categorias: [] },
     artefatos: { intro: [], categorias: [] },
@@ -691,27 +686,21 @@ function _envItems(items) {
   }
   function nd(x) { return x.name + (x.desc ? ': ' + x.desc : ''); }
   const A = items.armas || {}, I = items.implantes || {}, T = items.itens || {}, R = items.artefatos || {};
-  (A.intro || []).forEach(function (t) { add('Armas', '(intro)', t); });
   (A.grupos || []).forEach(function (g) {
-    (g.intro || []).forEach(function (t) { add('Armas', g.nome + ' › (intro)', t); });
     (g.tracos || []).forEach(function (tr) { (tr.itens || []).forEach(function (x) { add('Armas', g.nome + ' › ' + tr.titulo, nd(x)); }); });
-    (g.pesos || []).forEach(function (p) {
-      (p.armas || []).forEach(function (a) {
-        add('Armas', g.nome + ' › ' + p.nome + ' › ' + a.nome, (a.campos || []).map(function (c) { return c.k + ': ' + c.v; }).join(' | '));
-      });
-    });
   });
   (I.intro || []).forEach(function (t) { add('Implantes', '(intro)', t); });
   (I.categorias || []).forEach(function (c) {
     if (c.desc) add('Implantes', c.nome + ' › (desc)', c.desc);
-    (c.grupos || []).forEach(function (g) { (g.itens || []).forEach(function (x) { add('Implantes', c.nome + (g.parte ? ' › ' + g.parte : ''), nd(x)); }); });
+    if (c.uso) add('Implantes', c.nome + ' › (descrição)', c.uso);
+    (c.partes || []).forEach(function (p) { add('Implantes', c.nome + ' › ' + p.nome, p.desc); });
   });
   (T.intro || []).forEach(function (t) { add('Itens', '(intro)', t); });
   (T.categorias || []).forEach(function (c) { (c.itens || []).forEach(function (x) { add('Itens', c.nome, nd(x)); }); });
   (R.intro || []).forEach(function (t) { add('Artefatos', '(intro)', t); });
   (R.categorias || []).forEach(function (c) {
     if (c.desc) add('Artefatos', c.nome + ' › (desc)', c.desc);
-    (c.itens || []).forEach(function (x) { add('Artefatos', c.nome, nd(x)); });
+    if (c.uso) add('Artefatos', c.nome + ' › (descrição)', c.uso);
   });
   return o;
 }

@@ -152,7 +152,9 @@ const SAMPLE_ACTIONS = [
 const L = (text) => ({ heading: 'NORMAL', text, list: true });
 
 // Recorte de "# Armas", "# Implantes", "# Itens" e "# Artefatos" (catálogo da aba Arsenal).
-// Placeholders ("? – ?", "Placeholder") são conteúdo a revelar e devem ser mantidos.
+// Sincroniza: traços das Armas (com "? – ?"), descrições dos Implantes por categoria/parte,
+// Itens como estão e descrição + "Descrição." de cada categoria de Artefato.
+// Fica de fora: armas prontas, implantes (itens de lista) e artefatos listados.
 const SAMPLE_ITEMS = [
   H1('Armas'),
   N('*Serão preenchidas conforme o passar do RPG'),
@@ -184,13 +186,18 @@ const SAMPLE_ITEMS = [
   N('Buffs dependendo da qualidade do implante'),
   N('Blindagens'),
   N('Buffs principalmente em redução de dano'),
+  N('Descrição.'),
   L('Placeholder'),
   N('Superiores'),
   N('Buffs principalmente em força'),
   N('Braços'),
+  N('Descrição.'),
   L('Sistema ARC: Permite o usuário ver e acessar os próprio dados. Não ocupa nenhum slot.'),
   N('Torso'),
+  N('Descrição do torso,'),
+  N('em duas linhas.'),
   L('Placeholder: Abc'),
+  N('Cabeça'),
   H1('Itens'),
   N('*Serão adicionados conforme o passar do RPG'),
   N('Utilizáveis'),
@@ -198,12 +205,16 @@ const SAMPLE_ITEMS = [
   N('Outros'),
   N('Placeholder: a'),
   H1('Artefatos'),
+  N('*Serão adicionados conforme o passar do RPG'),
   N('São pequenos objetos, separados em categorias, sendo elas: Divino, Ancião, Mítico e Lendário'),
   H2('Divino'),
   N('Tem o poder equivalente ao de um Deus'),
+  N('Descrição.'),
   H2('Mítico'),
   N('Esses artefatos carregam consigo um título'),
+  N('Descrição.'),
   N('Máscara do Vazio: Concede o título Vazio'),
+  N('Linha solta depois do artefato'),
   H1('Fim'),
   N('Não deve aparecer: fora da seção'),
 ];
