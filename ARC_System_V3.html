@@ -703,11 +703,17 @@
       color: var(--txt);
       font-family: 'Orbitron', monospace;
       font-size: 21px;
-      width: 58px;
+      min-width: 58px;
       text-align: center;
       outline: none;
       padding: 2px 4px
     }
+
+    /* Campos numéricos que crescem com o conteúdo (sem setas, que comem espaço e cortam os dígitos) */
+    .bar-inp, .quest-cur, .quest-tot, #falaMax, #coringaMax { field-sizing: content; -moz-appearance: textfield; appearance: textfield }
+    .bar-inp::-webkit-inner-spin-button, .quest-cur::-webkit-inner-spin-button, .quest-tot::-webkit-inner-spin-button,
+    #falaMax::-webkit-inner-spin-button, #coringaMax::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0 }
+    @supports not (field-sizing: content) { .bar-inp { width: 96px } }
 
     .bar-sep {
       color: var(--txt-d);
@@ -1726,7 +1732,7 @@
       border: 1px solid var(--bd);
       color: var(--txt);
       font-size: var(--fs-sm);
-      width: 50px;
+      min-width: 50px;
       text-align: center;
       padding: 3px;
       outline: none
@@ -2526,7 +2532,7 @@
                     <input class="bar-inp" type="number" id="hpMax" oninput="updateBar('hp');autosave()">
                     <span class="bar-sep">+</span>
                     <input class="bar-inp" type="number" id="hpTemp" placeholder="0" oninput="autosave()"
-                      title="Temporário" style="width:44px;border-color:rgba(16,185,129,.4);color:var(--green)">
+                      title="Temporário" style="min-width:44px;border-color:rgba(16,185,129,.4);color:var(--green)">
                   </div>
                 </div>
                 <div class="bar-track">
@@ -2542,7 +2548,7 @@
                     <input class="bar-inp" type="number" id="staMax" oninput="updateBar('sta');autosave()">
                     <span class="bar-sep">+</span>
                     <input class="bar-inp" type="number" id="staTemp" placeholder="0" oninput="autosave()"
-                      title="Temporário" style="width:44px;border-color:rgba(59,130,246,.4);color:#3b82f6">
+                      title="Temporário" style="min-width:44px;border-color:rgba(59,130,246,.4);color:#3b82f6">
                   </div>
                 </div>
                 <div class="bar-track">
@@ -2596,17 +2602,17 @@
                 <div class="info-row">
                   <span class="info-key">Blindagem (−)</span>
                   <input class="bar-inp" type="number" id="caArmadura" value="0" oninput="calcCA();autosave()"
-                    style="width:50px;border-color:rgba(239,68,68,.4);color:var(--red)">
+                    style="min-width:50px;border-color:rgba(239,68,68,.4);color:var(--red)">
                 </div>
                 <div class="info-row">
                   <span class="info-key">Implantes</span>
                   <input class="bar-inp" type="number" id="caImplantes" value="0" oninput="calcCA();autosave()"
-                    style="width:50px;border-color:rgba(168,85,247,.4);color:var(--purple-b)">
+                    style="min-width:50px;border-color:rgba(168,85,247,.4);color:var(--purple-b)">
                 </div>
                 <div class="info-row">
                   <span class="info-key">Outros</span>
                   <input class="bar-inp" type="number" id="caOutros" value="0" oninput="calcCA();autosave()"
-                    style="width:50px">
+                    style="min-width:50px">
                 </div>
               </div>
             </div>
@@ -2712,7 +2718,7 @@
                   <span class="c-val" id="falaVal">1</span>
                   <span style="font-family:'Share Tech Mono',monospace;font-size:17px;color:var(--txt-d)">/</span>
                   <input type="number" id="falaMax" value="1" min="0" oninput="autosave()"
-                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:20px;text-align:center;outline:none">
+                    style="min-width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:20px;text-align:center;outline:none">
                   <button class="c-btn btn-sm" onclick="resetFala()" title="Resetar">↺</button>
                 </div>
               </div>
@@ -2723,7 +2729,7 @@
                   <span class="c-val" id="coringaVal" style="color:var(--purple-b)">0</span>
                   <span style="font-family:'Share Tech Mono',monospace;font-size:17px;color:var(--txt-d)">/</span>
                   <input type="number" id="coringaMax" value="0" min="0" oninput="autosave()"
-                    style="width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:20px;text-align:center;outline:none">
+                    style="min-width:40px;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:20px;text-align:center;outline:none">
                   <button class="c-btn btn-sm" onclick="resetCoringa()" title="Resetar">↺</button>
                 </div>
               </div>
@@ -5051,9 +5057,23 @@
       const e = evoThemeHold ?? currentEvo();
       if (e) document.documentElement.dataset.evo = e; else delete document.documentElement.dataset.evo;
     }
-    function setTitleEvo(ti, v) {
+    // Skills por forma do Título de Rank S: Base 5, Evolução 4, Super Evolução 2.
+    const EVO_SKILLS = [5, 4, 2];
+    async function setTitleEvo(ti, v) {
+      const t = S.titles[ti], from = titleEvo(t), to = Math.min(2, Math.max(0, parseInt(v, 10) || 0));
+      if (to === from) return;
+      // Evoluir transforma o Título em outro: guardamos o nome de cada forma e só pedimos o de uma forma ainda sem nome.
+      const names = t.evoNames ||= {};
+      let name = names[to];
+      if (!name) {
+        name = await arcDialog({
+          tag: '[ EVOLUÇÃO ]', title: to === 2 ? 'Super Evolução' : to === 1 ? 'Evolução' : 'Forma base',
+          sub: `"${t.name}" se torna outro Título.`, input: { label: 'NOME DO NOVO TÍTULO', placeholder: 'Ex.: O Imortal Ascendido' }, ok: 'CONFIRMAR'
+        });
+        if (!name) { updateTitlesUI(); return; } // cancelou: o seletor volta à forma atual
+      }
       const prev = currentEvo();
-      S.titles[ti].evo = Math.min(2, Math.max(0, parseInt(v, 10) || 0));
+      names[from] = t.name; t.name = name; t.evo = to;
       const next = currentEvo(), up = next > prev; // descer é correção: sem animação
       if (up) evoThemeHold = prev;
       autosave(); updateTitlesUI();
@@ -5272,7 +5292,11 @@
       const wrap = document.getElementById('titlesWrap'); if (!wrap) return;
       if ((S.titles || []).length === 0) { wrap.innerHTML = '<div class="empty-msg">Nenhum título. Clique em "+ Adicionar Título".</div>'; return; }
       wrap.innerHTML = S.titles.map((t, ti) => {
-        const skills = titleSkillsHtml('titles', ti, t.skills);
+        const ev = isS ? titleEvo(t) : 0;
+        // skills além do limite da forma ficam guardadas (voltar à forma anterior não perde nada)
+        const nSk = isS ? EVO_SKILLS[ev] : t.skills.length;
+        for (let k = t.skills.length; k < nSk; k++) t.skills.push({ name: `Skill ${k + 1}`, action: 'Passiva', cost: '', desc: '' });
+        const skills = titleSkillsHtml('titles', ti, t.skills.slice(0, nSk));
         const quests = (t.quests || []).map((q, qi) => `
       <div class="quest-row">
         <input style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--txt-d);font-size:var(--fs-sm);outline:none;padding:2px" value="${q.desc || ''}" placeholder="Descrição da missão..." oninput="S.titles[${ti}].quests[${qi}].desc=this.value;autosave()">
@@ -5286,7 +5310,6 @@
       <div class="progress-wrap mt4">
         <div class="progress-bar"><div class="progress-fill gold" style="width:${q.total > 0 ? Math.min(100, ((q.cur || 0) / q.total) * 100) : 0}%"></div></div>
       </div>`).join('');
-        const ev = isS ? titleEvo(t) : 0;
         return `<div class="title-card${ev ? ' evo-' + ev : ''}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
